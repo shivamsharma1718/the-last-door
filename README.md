@@ -7,7 +7,7 @@ A browser-based first-person psychological horror game built with **React**, **T
 ## Current Implemented Features
 
 * **3D Horror Environment**: Enclosed atmospheric corridor featuring textured dark floors, four walls, ceiling, baseboards, and subtle fog fading into darkness.
-* **The Last Door**: Detailed far-end doorway with timber frame, recessed door panels, and a vintage tarnished brass lever handle.
+* **The Last Door**: Detailed far-end doorway with timber frame, recessed door panels, vintage tarnished brass lever handle, keyhole, and smooth hinge opening mechanics.
 * **Atmospheric Lighting**: Suspended ceiling light fixture (mounting plate, electrical cable, metal shade, emissive bulb) with soft point-light shadow casting and cold door rim lighting.
 * **First-Person Camera**: Eye-level perspective (`1.65m`) facing directly towards the door.
 * **Pointer-Lock Mouse Controls**: Click-to-lock mouse look controls providing 360° first-person inspection.
@@ -20,7 +20,12 @@ A browser-based first-person psychological horror game built with **React**, **T
   * Normalized diagonal movement preventing diagonal speed boosts
   * Frame-rate independent delta calculations
 * **Collision Boundaries**: Zero-overhead room boundary clamping with player collision radius (`0.35m`) preventing the player from passing through walls or the far door.
-* **Minimal Atmospheric HUD**: Non-intrusive center crosshair and control prompt overlay.
+* **First-Person Door Interaction**:
+  * Distance proximity calculation detecting when the player is within 2.6 meters of the door.
+  * Contextual interaction prompt (`Press E to open`) displayed in the central HUD.
+  * `E` keydown trigger smoothly opening the door on its left-edge hinge pivot via `useFrame` interpolation.
+  * Automatic prompt dismissal once the door is opened.
+* **Minimal Atmospheric HUD**: Non-intrusive center crosshair, contextual interaction prompts, and control guidance.
 
 ---
 
@@ -71,7 +76,7 @@ git checkout -b feature/your-feature-name
 Stage files and commit them with a descriptive message:
 ```cmd
 git add .
-git commit -m "feat: implement first-person player movement and collision boundaries"
+git commit -m "feat: implement first-person door interaction and proximity prompt"
 ```
 
 ### 7. Push Branch to GitHub
@@ -84,15 +89,12 @@ git push -u origin feature/your-feature-name
 
 ## Future Roadmap
 
-- [x] First-person camera look (PointerLock)
-- [x] First-person WASD & Sprint movement with collision bounds
-- [ ] Door interaction
-- [ ] Interaction prompts & reticle state transitions
-- [ ] Sound effects & psychological ambient audio
-- [ ] Flashlight / light switch mechanics
-- [ ] Inventory system & key collection
+- [x] First-person movement
+- [x] Door interaction
+- [ ] Sound effects
+- [ ] Inventory system
 - [ ] Puzzle mechanics
 - [ ] Save and load system
 - [ ] Enemy or threat system
-- [ ] Chapter progression & scene transitions
-- [ ] Production deployment & web optimization
+- [ ] Chapter progression
+- [ ] Deployment

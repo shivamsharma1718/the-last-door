@@ -8,6 +8,7 @@ interface PlayerControlsProps {
   roomWidth?: number
   roomDepth?: number
   playerRadius?: number
+  onPositionChange?: (pos: { x: number; z: number }) => void
 }
 
 interface KeyState {
@@ -23,6 +24,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   roomWidth = 4.8,
   roomDepth = 14,
   playerRadius = 0.35,
+  onPositionChange,
 }) => {
   const { camera } = useThree()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,11 +54,20 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   useEffect(() => {
     camera.position.set(0, 1.65, 5.2)
     camera.lookAt(new THREE.Vector3(0, 1.4, -6.95))
-  }, [camera])
+    onPositionChange?.({ x: 0, z: 5.2 })
+  }, [camera, onPositionChange])
 
   // Register and clean up keyboard event listeners
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing inside input / textarea
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return
+      }
+
       switch (e.code) {
         case 'KeyW':
         case 'ArrowUp':
@@ -162,13 +173,16 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
       const minZ = -roomDepth / 2 + playerRadius + 0.15 // Offset to prevent passing through door
       const maxZ = roomDepth / 2 - playerRadius
 
-      // 7. Clamp position within boundaries and lock eye level height
+      // 7. Clamp position within boundaries
       camera.position.x = Math.max(minX, Math.min(maxX, nextX))
       camera.position.z = Math.max(minZ, Math.min(maxZ, nextZ))
     }
 
     // Ensure camera height stays fixed at eye level
     camera.position.y = 1.65
+
+    // Expose horizontal position to Scene for interaction checks
+    onPositionChange?.({ x: camera.position.x, z: camera.position.z })
   })
 
   return <PointerLockControls ref={controlsRef} selector={selector} />

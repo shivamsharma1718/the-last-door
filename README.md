@@ -1,75 +1,98 @@
-# React + TypeScript + Vite
+# The Last Door
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A browser-based first-person psychological horror game built with **React**, **TypeScript**, **Three.js**, and **React Three Fiber**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Current Implemented Features
 
-## React Compiler
+* **3D Horror Environment**: Enclosed atmospheric corridor featuring textured dark floors, four walls, ceiling, baseboards, and subtle fog fading into darkness.
+* **The Last Door**: Detailed far-end doorway with timber frame, recessed door panels, and a vintage tarnished brass lever handle.
+* **Atmospheric Lighting**: Suspended ceiling light fixture (mounting plate, electrical cable, metal shade, emissive bulb) with soft point-light shadow casting and cold door rim lighting.
+* **First-Person Camera**: Eye-level perspective (`1.65m`) facing directly towards the door.
+* **Pointer-Lock Mouse Controls**: Click-to-lock mouse look controls providing 360° first-person inspection.
+* **First-Person Movement**:
+  * `W` / `Arrow Up`: Move forward
+  * `S` / `Arrow Down`: Move backward
+  * `A` / `Arrow Left`: Strafe left
+  * `D` / `Arrow Right`: Strafe right
+  * `Shift`: Sprint (increases movement speed from 2.6 m/s to 4.8 m/s)
+  * Normalized diagonal movement preventing diagonal speed boosts
+  * Frame-rate independent delta calculations
+* **Collision Boundaries**: Zero-overhead room boundary clamping with player collision radius (`0.35m`) preventing the player from passing through walls or the far door.
+* **Minimal Atmospheric HUD**: Non-intrusive center crosshair and control prompt overlay.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Development Instructions
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+### 1. Project Setup
+Open Windows Command Prompt (`cmd.exe`), navigate to the project directory, and install dependencies:
+```cmd
+cd d:\the-last-door\the-last-door
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+### 2. Start Development Server
+Run the local Vite dev server with Hot Module Replacement (HMR):
+```cmd
+npm run dev
 ```
+Open your browser and navigate to the displayed local address (typically `http://localhost:5173`).
+
+### 3. Build the Project
+Compile TypeScript and generate the production bundle:
+```cmd
+npm run build
+```
+
+To preview the production build locally:
+```cmd
+npm run preview
+```
+
+---
+
+## Git Workflow (Windows Command Prompt)
+
+### 4. Check Git Status
+Check the status of modified and untracked files:
+```cmd
+git status
+```
+
+### 5. Create and Switch to a Feature Branch
+Create and switch to a new branch for your feature:
+```cmd
+git checkout -b feature/your-feature-name
+```
+
+### 6. Commit Changes
+Stage files and commit them with a descriptive message:
+```cmd
+git add .
+git commit -m "feat: implement first-person player movement and collision boundaries"
+```
+
+### 7. Push Branch to GitHub
+Push your feature branch to the remote repository:
+```cmd
+git push -u origin feature/your-feature-name
+```
+
+---
+
+## Future Roadmap
+
+- [x] First-person camera look (PointerLock)
+- [x] First-person WASD & Sprint movement with collision bounds
+- [ ] Door interaction
+- [ ] Interaction prompts & reticle state transitions
+- [ ] Sound effects & psychological ambient audio
+- [ ] Flashlight / light switch mechanics
+- [ ] Inventory system & key collection
+- [ ] Puzzle mechanics
+- [ ] Save and load system
+- [ ] Enemy or threat system
+- [ ] Chapter progression & scene transitions
+- [ ] Production deployment & web optimization

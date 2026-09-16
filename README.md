@@ -25,7 +25,13 @@ A browser-based first-person psychological horror game built with **React**, **T
   * Contextual interaction prompt (`Press E to open`) displayed in the central HUD.
   * `E` keydown trigger smoothly opening the door on its left-edge hinge pivot via `useFrame` interpolation.
   * Automatic prompt dismissal once the door is opened.
-* **Minimal Atmospheric HUD**: Non-intrusive center crosshair, contextual interaction prompts, and control guidance.
+* **Game 01 — Red Light, Black Silence**:
+  * Seamless cinematic story introduction overlay with BEGIN trigger upon opening the first door.
+  * Large dedicated survival arena (10m x 46m) with industrial surveillance beacon at the far end.
+  * Alternating Green Light (safe movement) and Red Light (stop movement) phase loops with dynamic stage lighting.
+  * Movement detection during Red Light with instant gameplay freeze, phase timer cancellation, and horror glitch distortion flash.
+  * Full-screen failure overlay ("YOU MOVED. THE ROOM REMEMBERED.") with in-place **RESTART GAME** reset without page reload.
+  * In-game HUD featuring phase status badges, warning counters, objective tracker, and distance to exit indicator.
 
 ---
 
@@ -76,7 +82,7 @@ git checkout -b feature/your-feature-name
 Stage files and commit them with a descriptive message:
 ```cmd
 git add .
-git commit -m "feat: implement first-person door interaction and proximity prompt"
+git commit -m "feat: implement Game 01 Part 2 failure and restart system"
 ```
 
 ### 7. Push Branch to GitHub
@@ -91,10 +97,12 @@ git push -u origin feature/your-feature-name
 
 - [x] First-person movement
 - [x] Door interaction
-- [ ] Sound effects
+- [x] Game 01 — Red Light, Black Silence (Arena, Phases, Movement Detection)
+- [x] Game 01 — Failure state & in-place restart flow
+- [ ] Game 01 — Victory and Chapter 2 Progression
+- [ ] Sound effects & psychological ambient audio
 - [ ] Inventory system
 - [ ] Puzzle mechanics
 - [ ] Save and load system
 - [ ] Enemy or threat system
-- [ ] Chapter progression
 - [ ] Deployment

@@ -37,6 +37,16 @@
   transition: opacity 0.5s ease;
 }
 
+/* Automatically hide root hallway title when Game 01 HUD, Intro, Failure, Victory, or Next-Trial screen is active */
+body:has(#game01-hud-dom) .hud-overlay .game-title,
+body:has(#game-intro-overlay-dom) .hud-overlay .game-title,
+body:has(#game01-failure-dom) .hud-overlay .game-title,
+body:has(#game01-victory-dom) .hud-overlay .game-title,
+body:has(#game01-next-trial-dom) .hud-overlay .game-title,
+body:has(#game01-hud-dom) .hud-overlay .instructions {
+  display: none !important;
+}
+
 .crosshair {
   width: 4px;
   height: 4px;
@@ -114,4 +124,609 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(4px);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* ========================================================= */
+/* GAME 01 INTRO SCREEN (CINEMATIC OVERLAY)                 */
+/* ========================================================= */
+.game-intro-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(12, 15, 22, 0.96) 0%, rgba(4, 5, 8, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.8s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game-intro-card {
+  max-width: 580px;
+  width: 90%;
+  background: rgba(14, 18, 26, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(255, 50, 50, 0.08);
+  border-radius: 12px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  backdrop-filter: blur(16px);
+}
+
+.game-intro-tag {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  color: #ff4757;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.game-intro-title {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #f1f2f6;
+  text-transform: uppercase;
+  margin: 0.5rem 0 1.5rem;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+}
+
+.game-intro-divider {
+  width: 60px;
+  height: 2px;
+  background: #ff4757;
+  margin: 0 auto 1.8rem;
+  opacity: 0.7;
+}
+
+.game-intro-lore {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #ced6e0;
+  margin-bottom: 2.5rem;
+  font-style: italic;
+}
+
+.game-intro-lore p {
+  margin: 0.4rem 0;
+}
+
+.game-intro-warning {
+  color: #ff6b81 !important;
+  font-weight: 600;
+  margin-top: 0.8rem !important;
+}
+
+.game-intro-button {
+  background: linear-gradient(135deg, #ff4757, #c0392b);
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 0.9rem 3rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+  transition: all 0.25s ease;
+}
+
+.game-intro-button:hover {
+  background: linear-gradient(135deg, #ff6b81, #d63031);
+  box-shadow: 0 8px 26px rgba(255, 71, 87, 0.6);
+  transform: translateY(-2px);
+}
+
+.game-intro-button:active {
+  transform: translateY(1px);
+}
+
+/* ========================================================= */
+/* GAME 01 FAILURE EFFECTS & OVERLAY                        */
+/* ========================================================= */
+.failure-distortion-flash {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 10, 30, 0.45) 0%, rgba(15, 0, 5, 0.95) 100%);
+  z-index: 999999;
+  pointer-events: none;
+  animation: failureGlitchFlash 1.5s ease-out forwards;
+}
+
+@keyframes failureGlitchFlash {
+  0% { opacity: 0; transform: scale(1); filter: contrast(150%) hue-rotate(0deg); }
+  15% { opacity: 1; transform: scale(1.04) translate(-6px, 4px); filter: contrast(300%) saturate(250%); }
+  30% { opacity: 0.65; transform: scale(0.97) translate(5px, -3px); filter: contrast(200%) brightness(80%); }
+  50% { opacity: 0.95; transform: scale(1.03) translate(-4px, 2px); filter: contrast(350%) brightness(130%); }
+  70% { opacity: 0.8; transform: scale(0.99) translate(3px, -1px); filter: contrast(250%) brightness(70%); }
+  85% { opacity: 1; transform: scale(1.02) translate(-2px, 2px); filter: contrast(400%) saturate(300%); }
+  100% { opacity: 0.95; transform: scale(1); filter: contrast(200%); }
+}
+
+.game-failure-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(16, 6, 8, 0.96) 0%, rgba(5, 2, 4, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: failureOverlayFadeIn 0.6s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game-failure-card {
+  max-width: 600px;
+  width: 90%;
+  background: rgba(20, 8, 12, 0.9);
+  border: 1.5px solid rgba(255, 50, 70, 0.35);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.95),
+    0 0 50px rgba(255, 20, 40, 0.25);
+  border-radius: 12px;
+  padding: 3.5rem 2.5rem;
+  text-align: center;
+  backdrop-filter: blur(18px);
+}
+
+.failure-tag {
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  color: #ff3838;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  text-shadow: 0 0 10px rgba(255, 56, 56, 0.6);
+}
+
+.failure-title {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #fff5f5;
+  text-transform: uppercase;
+  margin: 0.6rem 0 1.5rem;
+  line-height: 1.35;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+}
+
+.failure-divider {
+  width: 70px;
+  height: 2px;
+  background: #ff3838;
+  margin: 0 auto 1.8rem;
+  box-shadow: 0 0 10px #ff3838;
+}
+
+.failure-lore {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #e4d0d0;
+  margin-bottom: 2.8rem;
+  font-style: italic;
+}
+
+.failure-lore p {
+  margin: 0.3rem 0;
+}
+
+.failure-restart-button {
+  background: linear-gradient(135deg, #e71a2a, #8f0d18);
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 1rem 3.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 25px rgba(231, 26, 42, 0.5);
+  transition: all 0.25s ease;
+}
+
+.failure-restart-button:hover {
+  background: linear-gradient(135deg, #ff2a3a, #b0101e);
+  box-shadow: 0 8px 32px rgba(255, 42, 58, 0.75);
+  transform: translateY(-2px);
+}
+
+.failure-restart-button:active {
+  transform: translateY(1px);
+}
+
+@keyframes failureOverlayFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ========================================================= */
+/* GAME 01 HUD (RED LIGHT, BLACK SILENCE)                   */
+/* ========================================================= */
+.game01-hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2.2rem 2.5rem;
+  z-index: 100000;
+}
+
+.game01-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.2rem;
+}
+
+.game01-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: #e2e8f0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+  background: rgba(10, 14, 22, 0.7);
+  padding: 0.35rem 1.2rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+}
+
+.game01-phase-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.55rem 1.6rem;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+  transition: all 0.3s ease;
+}
+
+.phase-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.green-phase {
+  color: #00ff77;
+  background: rgba(8, 30, 16, 0.85);
+  border: 1.5px solid rgba(0, 255, 119, 0.6);
+  box-shadow: 0 0 20px rgba(0, 255, 119, 0.25);
+}
+
+.green-phase .phase-dot {
+  background-color: #00ff77;
+  box-shadow: 0 0 8px #00ff77;
+}
+
+.red-phase {
+  color: #ff3344;
+  background: rgba(36, 8, 12, 0.9);
+  border: 1.5px solid rgba(255, 51, 68, 0.8);
+  box-shadow: 0 0 25px rgba(255, 51, 68, 0.4);
+  animation: redPhasePulse 1.2s infinite ease-in-out;
+}
+
+.red-phase .phase-dot {
+  background-color: #ff3344;
+  box-shadow: 0 0 10px #ff3344;
+}
+
+@keyframes redPhasePulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 51, 68, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(255, 51, 68, 0.7);
+  }
+}
+
+/* Movement warning alert */
+.movement-warning-alert {
+  position: fixed;
+  top: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(220, 20, 40, 0.92);
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 40px rgba(255, 0, 0, 0.85);
+  animation: warningFlash 0.3s infinite alternate;
+  z-index: 100002;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+@keyframes warningFlash {
+  from { opacity: 0.85; transform: translateX(-50%) scale(0.98); }
+  to { opacity: 1; transform: translateX(-50%) scale(1.02); }
+}
+
+/* Bottom Game 01 Info Bar */
+.game01-bottom-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 90%;
+  max-width: 900px;
+  background: rgba(10, 14, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem 1.75rem;
+  backdrop-filter: blur(10px);
+}
+
+.game01-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: rgba(190, 200, 215, 0.6);
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #f1f2f6;
+}
+
+.stat-value.has-warnings {
+  color: #ff4757;
+  text-shadow: 0 0 8px rgba(255, 71, 87, 0.6);
+}
+
+.game01-objective {
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: rgba(230, 235, 245, 0.85);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ========================================================= */
+/* GAME 01 VICTORY CINEMATIC & OVERLAYS                     */
+/* ========================================================= */
+.victory-fade-cinematic {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(6, 20, 14, 0.4) 0%, rgba(2, 6, 4, 0.98) 100%);
+  z-index: 999999;
+  pointer-events: none;
+  animation: victoryCinematicFade 1s ease-out forwards;
+}
+
+@keyframes victoryCinematicFade {
+  0% { opacity: 0; filter: brightness(100%); }
+  50% { opacity: 0.8; filter: brightness(60%) contrast(140%); }
+  100% { opacity: 1; filter: brightness(30%); }
+}
+
+.game-victory-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(8, 24, 18, 0.96) 0%, rgba(3, 8, 6, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: victoryOverlayFadeIn 0.7s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game-victory-card {
+  max-width: 600px;
+  width: 90%;
+  background: rgba(10, 26, 18, 0.9);
+  border: 1.5px solid rgba(0, 255, 136, 0.35);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.95),
+    0 0 50px rgba(0, 255, 136, 0.15);
+  border-radius: 12px;
+  padding: 3.5rem 2.5rem;
+  text-align: center;
+  backdrop-filter: blur(18px);
+}
+
+.victory-tag {
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  color: #00ff88;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.victory-title {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #f0fff4;
+  text-transform: uppercase;
+  margin: 0.6rem 0 1.5rem;
+  line-height: 1.35;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+}
+
+.victory-divider {
+  width: 70px;
+  height: 2px;
+  background: #00ff88;
+  margin: 0 auto 1.8rem;
+  box-shadow: 0 0 10px #00ff88;
+}
+
+.victory-lore {
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: #d1fae5;
+  margin-bottom: 2.8rem;
+}
+
+.victory-lore p {
+  margin: 0.4rem 0;
+}
+
+.victory-subtext {
+  color: #a7f3d0 !important;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+.victory-continue-button {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 1rem 3.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 25px rgba(5, 150, 105, 0.45);
+  transition: all 0.25s ease;
+}
+
+.victory-continue-button:hover {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.65);
+  transform: translateY(-2px);
+}
+
+.victory-continue-button:active {
+  transform: translateY(1px);
+}
+
+@keyframes victoryOverlayFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ========================================================= */
+/* NEXT TRIAL PLACEHOLDER SCREEN                            */
+/* ========================================================= */
+.game-next-trial-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(14, 18, 28, 0.98) 0%, rgba(4, 5, 8, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.8s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game-next-trial-card {
+  max-width: 580px;
+  width: 90%;
+  background: rgba(14, 18, 26, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(80, 120, 255, 0.1);
+  border-radius: 12px;
+  padding: 3.5rem 2.5rem;
+  text-align: center;
+  backdrop-filter: blur(16px);
+}
+
+.next-trial-tag {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  color: #70a1ff;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.next-trial-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #f1f2f6;
+  text-transform: uppercase;
+  margin: 0.5rem 0 1.5rem;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.9);
+}
+
+.next-trial-divider {
+  width: 60px;
+  height: 2px;
+  background: #70a1ff;
+  margin: 0 auto 1.8rem;
+  opacity: 0.7;
+}
+
+.next-trial-lore {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #ced6e0;
+  margin-bottom: 2.5rem;
+  font-style: italic;
+}
+
+.next-trial-button {
+  background: linear-gradient(135deg, #3742fa, #2f3542);
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 0.9rem 2.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(55, 66, 250, 0.35);
+  transition: all 0.25s ease;
+}
+
+.next-trial-button:hover {
+  background: linear-gradient(135deg, #5352ed, #3742fa);
+  box-shadow: 0 8px 26px rgba(83, 82, 237, 0.55);
+  transform: translateY(-2px);
+}
+
+/* Exit Prompt in HUD */
+.game01-exit-prompt {
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #00ff88;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+  animation: promptPulse 1.8s infinite ease-in-out;
 }

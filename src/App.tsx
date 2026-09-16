@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber'
-import { Scene } from './components/canvas/Scene'
+import { Scene } from './scenes/Scene'
 import './App.css'
 
 function App() {

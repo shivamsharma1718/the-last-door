@@ -8,7 +8,12 @@ interface PlayerControlsProps {
   roomWidth?: number
   roomDepth?: number
   playerRadius?: number
+  initialPosition?: [number, number, number]
+  initialLookAt?: [number, number, number]
+  enabled?: boolean
+  resetTrigger?: number
   onPositionChange?: (pos: { x: number; z: number }) => void
+  onMovingChange?: (isMoving: boolean) => void
 }
 
 interface KeyState {
@@ -24,7 +29,12 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   roomWidth = 4.8,
   roomDepth = 14,
   playerRadius = 0.35,
+  initialPosition = [0, 1.65, 5.2],
+  initialLookAt = [0, 1.4, -6.95],
+  enabled = true,
+  resetTrigger = 0,
   onPositionChange,
+  onMovingChange,
 }) => {
   const { camera } = useThree()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,12 +60,27 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
     []
   )
 
-  // Initial camera placement facing down the hall towards the door
+  const wasMovingRef = useRef<boolean>(false)
+  const isInitializedRef = useRef<boolean>(false)
+  const prevResetTriggerRef = useRef<number>(resetTrigger)
+
+  // Explicitly release pointer lock when controls are disabled
   useEffect(() => {
-    camera.position.set(0, 1.65, 5.2)
-    camera.lookAt(new THREE.Vector3(0, 1.4, -6.95))
-    onPositionChange?.({ x: 0, z: 5.2 })
-  }, [camera, onPositionChange])
+    if (!enabled && typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+  }, [enabled])
+
+  // Camera placement on initial mount or when resetTrigger changes
+  useEffect(() => {
+    if (!isInitializedRef.current || prevResetTriggerRef.current !== resetTrigger) {
+      isInitializedRef.current = true
+      prevResetTriggerRef.current = resetTrigger
+      camera.position.set(initialPosition[0], initialPosition[1], initialPosition[2])
+      camera.lookAt(new THREE.Vector3(initialLookAt[0], initialLookAt[1], initialLookAt[2]))
+      onPositionChange?.({ x: initialPosition[0], z: initialPosition[2] })
+    }
+  }, [camera, initialPosition, initialLookAt, resetTrigger, onPositionChange])
 
   // Register and clean up keyboard event listeners
   useEffect(() => {
@@ -128,8 +153,21 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
 
   // Movement loop
   useFrame((_, delta) => {
+    // If controls are disabled (e.g. game failure state or menu modal), freeze movement
+    if (!enabled) {
+      if (wasMovingRef.current) {
+        wasMovingRef.current = false
+        onMovingChange?.(false)
+      }
+      return
+    }
+
     // Only allow movement if pointer lock is active (if controls ref is available)
     if (controlsRef.current && !controlsRef.current.isLocked) {
+      if (wasMovingRef.current) {
+        wasMovingRef.current = false
+        onMovingChange?.(false)
+      }
       return
     }
 
@@ -156,8 +194,16 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
     if (keys.current.right) vectors.move.add(vectors.side)
     if (keys.current.left) vectors.move.sub(vectors.side)
 
+    const isCurrentlyMoving = vectors.move.lengthSq() > 0
+
+    // Report movement state change
+    if (isCurrentlyMoving !== wasMovingRef.current) {
+      wasMovingRef.current = isCurrentlyMoving
+      onMovingChange?.(isCurrentlyMoving)
+    }
+
     // 4. Normalize movement vector to avoid faster diagonal movement
-    if (vectors.move.lengthSq() > 0) {
+    if (isCurrentlyMoving) {
       vectors.move.normalize()
 
       // 5. Calculate proposed displacement
@@ -170,7 +216,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
       // 6. Collision boundaries (AABB room bounds with player radius and door margin)
       const minX = -roomWidth / 2 + playerRadius
       const maxX = roomWidth / 2 - playerRadius
-      const minZ = -roomDepth / 2 + playerRadius + 0.15 // Offset to prevent passing through door
+      const minZ = -roomDepth / 2 + playerRadius + 0.15 // Offset to prevent passing through far boundary
       const maxZ = roomDepth / 2 - playerRadius
 
       // 7. Clamp position within boundaries
@@ -179,9 +225,9 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
     }
 
     // Ensure camera height stays fixed at eye level
-    camera.position.y = 1.65
+    camera.position.y = initialPosition[1] || 1.65
 
-    // Expose horizontal position to Scene for interaction checks
+    // Expose horizontal position to Scene / Game for distance checks
     onPositionChange?.({ x: camera.position.x, z: camera.position.z })
   })
 

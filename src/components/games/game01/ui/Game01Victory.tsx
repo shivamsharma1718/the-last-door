@@ -31,10 +31,10 @@ export const Game01Victory: React.FC<Game01VictoryProps> = ({ onContinue }) => {
 }
 
 export interface Game01NextTrialProps {
-  onReplay: () => void
+  onContinue: () => void
 }
 
-export const Game01NextTrial: React.FC<Game01NextTrialProps> = ({ onReplay }) => {
+export const Game01NextTrial: React.FC<Game01NextTrialProps> = ({ onContinue }) => {
   return (
     <div className="game-next-trial-overlay" id="game01-next-trial-dom">
       <div className="game-next-trial-card">
@@ -46,11 +46,11 @@ export const Game01NextTrial: React.FC<Game01NextTrialProps> = ({ onReplay }) =>
         </div>
         <button
           type="button"
-          id="replay-game01-btn"
+          id="continue-next-trial-btn"
           className="next-trial-button"
-          onClick={onReplay}
+          onClick={onContinue}
         >
-          REPLAY GAME 01
+          CONTINUE
         </button>
       </div>
     </div>

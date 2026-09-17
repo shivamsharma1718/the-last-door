@@ -37,13 +37,31 @@
   transition: opacity 0.5s ease;
 }
 
-/* Automatically hide root hallway title when Game 01 HUD, Intro, Failure, Victory, or Next-Trial screen is active */
+/* Automatically hide root hallway title when Game 01 / Game 02 HUD, Intro, Failure, Victory, or Next-Trial screen is active */
 body:has(#game01-hud-dom) .hud-overlay .game-title,
 body:has(#game-intro-overlay-dom) .hud-overlay .game-title,
 body:has(#game01-failure-dom) .hud-overlay .game-title,
 body:has(#game01-victory-dom) .hud-overlay .game-title,
 body:has(#game01-next-trial-dom) .hud-overlay .game-title,
-body:has(#game01-hud-dom) .hud-overlay .instructions {
+body:has(#game02-intro-overlay-dom) .hud-overlay .game-title,
+body:has(#game02-hud-dom) .hud-overlay .game-title,
+body:has(#game02-examination-dom) .hud-overlay .game-title,
+body:has(#game02-memory-transition-dom) .hud-overlay .game-title,
+body:has(#game02-confirmation-dom) .hud-overlay .game-title,
+body:has(#game02-victory-cinematic-dom) .hud-overlay .game-title,
+body:has(#game02-victory-dom) .hud-overlay .game-title,
+body:has(#game02-death-cinematic-dom) .hud-overlay .game-title,
+body:has(#game02-failure-dom) .hud-overlay .game-title,
+body:has(#game01-hud-dom) .hud-overlay .instructions,
+body:has(#game02-intro-overlay-dom) .hud-overlay .instructions,
+body:has(#game02-hud-dom) .hud-overlay .instructions,
+body:has(#game02-examination-dom) .hud-overlay .instructions,
+body:has(#game02-memory-transition-dom) .hud-overlay .instructions,
+body:has(#game02-confirmation-dom) .hud-overlay .instructions,
+body:has(#game02-victory-cinematic-dom) .hud-overlay .instructions,
+body:has(#game02-victory-dom) .hud-overlay .instructions,
+body:has(#game02-death-cinematic-dom) .hud-overlay .instructions,
+body:has(#game02-failure-dom) .hud-overlay .instructions {
   display: none !important;
 }
 
@@ -729,4 +747,673 @@ body:has(#game01-hud-dom) .hud-overlay .instructions {
   color: #00ff88;
   text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
   animation: promptPulse 1.8s infinite ease-in-out;
+}
+
+/* ========================================================= */
+/* GAME 02 HUD & PROXIMITY INTERACTION PROMPT                */
+/* ========================================================= */
+.game02-hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2.5rem 2rem 3rem;
+}
+
+.game02-hud-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.game02-hud-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(220, 230, 245, 0.7);
+  text-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
+}
+
+.game02-hud-counter {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(180, 200, 230, 0.6);
+}
+
+.game02-counter-highlight {
+  color: #70d6ff;
+  font-weight: 800;
+  text-shadow: 0 0 8px rgba(112, 214, 255, 0.5);
+}
+
+.game02-interaction-prompt {
+  position: fixed;
+  bottom: 5.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(10, 14, 22, 0.92);
+  border: 1px solid rgba(112, 214, 255, 0.4);
+  padding: 0.7rem 1.6rem;
+  border-radius: 8px;
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.95),
+    0 0 20px rgba(112, 214, 255, 0.18);
+  backdrop-filter: blur(10px);
+  z-index: 999999;
+  pointer-events: none;
+  animation: promptPulse 2.2s infinite ease-in-out;
+}
+
+.game02-prompt-identity {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  color: #70d6ff;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(112, 214, 255, 0.6);
+}
+
+.game02-prompt-action {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #f1f5f9;
+}
+
+/* ========================================================= */
+/* GAME 02 EXAMINATION OVERLAY MODAL                         */
+/* ========================================================= */
+.game02-examination-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(10, 14, 24, 0.94) 0%, rgba(3, 4, 8, 0.98) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.4s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game02-examination-card {
+  max-width: 640px;
+  width: 90%;
+  background: rgba(14, 18, 30, 0.92);
+  border: 1.5px solid rgba(112, 214, 255, 0.28);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.95),
+    0 0 45px rgba(112, 214, 255, 0.12);
+  border-radius: 12px;
+  padding: 3rem 2.5rem 2.5rem;
+  text-align: center;
+  backdrop-filter: blur(18px);
+}
+
+.game02-exam-tag {
+  display: inline-block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  color: #70d6ff;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  text-shadow: 0 0 10px rgba(112, 214, 255, 0.5);
+}
+
+.game02-exam-identity-name {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: #f8fafc;
+  text-transform: uppercase;
+  margin: 0.4rem 0 1.2rem;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+}
+
+.game02-exam-divider {
+  width: 64px;
+  height: 2px;
+  background: #70d6ff;
+  margin: 0 auto 1.8rem;
+  opacity: 0.6;
+}
+
+.game02-exam-clues-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  text-align: left;
+  margin-bottom: 2.4rem;
+}
+
+.game02-exam-clue-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background: rgba(8, 11, 18, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid rgba(112, 214, 255, 0.6);
+  border-radius: 6px;
+  padding: 0.9rem 1.1rem;
+}
+
+.game02-exam-clue-bullet {
+  color: #70d6ff;
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.game02-exam-clue-text {
+  font-size: 0.96rem;
+  line-height: 1.65;
+  color: #cbd5e1;
+  font-style: italic;
+  margin: 0;
+}
+
+.game02-exam-close-button {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: #e2e8f0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 0.85rem 3rem;
+  border: 1px solid rgba(112, 214, 255, 0.35);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  transition: all 0.25s ease;
+}
+
+.game02-exam-close-button:hover {
+  background: linear-gradient(135deg, #334155, #1e293b);
+  border-color: rgba(112, 214, 255, 0.7);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(112, 214, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.game02-exam-close-button:active {
+  transform: translateY(1px);
+}
+
+.game02-exam-flavor {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  font-style: italic;
+  margin: -0.6rem 0 1.2rem;
+}
+
+.game02-exam-section-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 0.85rem;
+  text-align: left;
+}
+
+.game02-exam-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.game02-exam-keyhint {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.game02-decision-hint {
+  color: #f1f5f9;
+  letter-spacing: 0.28em;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  animation: promptPulse 2.4s infinite ease-in-out;
+}
+
+/* ========================================================= */
+/* GAME 02 5/5 PSYCHOLOGICAL MEMORY TRANSITION               */
+/* ========================================================= */
+.game02-memory-transition-overlay {
+  position: fixed;
+  inset: 0;
+  background: #040508;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: memoryTransitionDarken 1.8s ease-out forwards;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game02-transition-card {
+  max-width: 700px;
+  width: 90%;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.game02-transition-text {
+  font-size: 1.85rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  color: #e2e8f0;
+  font-style: italic;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.35);
+  margin: 0;
+}
+
+.game02-transition-highlight {
+  font-size: 2.3rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  color: #70d6ff;
+  text-transform: uppercase;
+  text-shadow: 0 0 25px rgba(112, 214, 255, 0.65);
+}
+
+.game02-fade-in {
+  animation: memoryTextFade 2.6s ease-in-out;
+}
+
+@keyframes memoryTransitionDarken {
+  0% { opacity: 0; background: rgba(4, 5, 8, 0.2); }
+  30% { opacity: 1; background: rgba(4, 5, 8, 0.98); }
+  100% { opacity: 1; background: #040508; }
+}
+
+@keyframes memoryTextFade {
+  0% { opacity: 0; transform: translateY(8px); }
+  25% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+
+/* ========================================================= */
+/* GAME 02 IDENTITY CONFIRMATION OVERLAY                     */
+/* ========================================================= */
+.game02-confirmation-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(10, 14, 24, 0.95) 0%, rgba(3, 4, 8, 0.98) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.35s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game02-confirmation-card {
+  max-width: 540px;
+  width: 90%;
+  background: rgba(14, 18, 30, 0.94);
+  border: 1.5px solid rgba(112, 214, 255, 0.35);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.95),
+    0 0 45px rgba(112, 214, 255, 0.15);
+  border-radius: 12px;
+  padding: 3rem 2.5rem 2.8rem;
+  text-align: center;
+  backdrop-filter: blur(18px);
+}
+
+.game02-confirmation-tag {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  color: #70d6ff;
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+  text-shadow: 0 0 10px rgba(112, 214, 255, 0.5);
+}
+
+.game02-confirmation-name {
+  font-size: 1.95rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #f8fafc;
+  margin: 0.2rem 0 1rem;
+}
+
+.game02-confirmation-divider {
+  width: 50px;
+  height: 2px;
+  background: #70d6ff;
+  margin: 0 auto 1.6rem;
+  opacity: 0.6;
+}
+
+.game02-confirmation-prompt {
+  font-size: 1.15rem;
+  color: #cbd5e1;
+  font-style: italic;
+  margin-bottom: 2.4rem;
+}
+
+.game02-confirmation-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+}
+
+.game02-confirm-button {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 0.85rem 2.6rem;
+  border: 1px solid rgba(112, 214, 255, 0.4);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(42, 82, 152, 0.4);
+  transition: all 0.25s ease;
+}
+
+.game02-confirm-button:hover {
+  background: linear-gradient(135deg, #2a5298, #3a7bd5);
+  box-shadow: 0 8px 25px rgba(0, 210, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.game02-confirm-button:active {
+  transform: translateY(1px);
+}
+
+.game02-cancel-button {
+  background: rgba(30, 41, 59, 0.8);
+  color: #94a3b8;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 0.85rem 2.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.game02-cancel-button:hover {
+  background: rgba(51, 65, 85, 0.9);
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+/* ========================================================= */
+/* GAME 02 VICTORY CINEMATIC & VICTORY SCREEN                */
+/* ========================================================= */
+.game02-victory-cinematic-overlay {
+  position: fixed;
+  inset: 0;
+  background: #030407;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game02-victory-reveal-name {
+  font-size: 3rem;
+  font-weight: 900;
+  letter-spacing: 0.45em;
+  color: #70d6ff;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 30px rgba(112, 214, 255, 0.8),
+    0 0 60px rgba(112, 214, 255, 0.4);
+}
+
+.game02-victory-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(6, 16, 26, 0.96) 0%, rgba(2, 6, 12, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.8s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game02-victory-card {
+  max-width: 620px;
+  width: 90%;
+  background: rgba(10, 20, 32, 0.92);
+  border: 1.5px solid rgba(112, 214, 255, 0.35);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.95),
+    0 0 50px rgba(112, 214, 255, 0.15);
+  border-radius: 12px;
+  padding: 3.5rem 2.8rem;
+  text-align: center;
+  backdrop-filter: blur(18px);
+}
+
+.game02-victory-tag {
+  display: inline-block;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  color: #70d6ff;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  text-shadow: 0 0 10px rgba(112, 214, 255, 0.6);
+}
+
+.game02-victory-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #f0fdf4;
+  text-transform: uppercase;
+  margin: 0.5rem 0 1.5rem;
+  line-height: 1.3;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+}
+
+.game02-victory-divider {
+  width: 60px;
+  height: 2px;
+  background: #70d6ff;
+  margin: 0 auto 1.8rem;
+  opacity: 0.7;
+}
+
+.game02-victory-lore {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #cbd5e1;
+  margin-bottom: 2.6rem;
+}
+
+.game02-victory-quote {
+  font-style: italic;
+  margin: 0.3rem 0;
+}
+
+.game02-victory-subtext {
+  color: #70d6ff !important;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+.game02-victory-button {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 1rem 3.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 25px rgba(2, 132, 199, 0.45);
+  transition: all 0.25s ease;
+}
+
+.game02-victory-button:hover {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  box-shadow: 0 8px 32px rgba(14, 165, 233, 0.65);
+  transform: translateY(-2px);
+}
+
+.game02-victory-button:active {
+  transform: translateY(1px);
+}
+
+/* ========================================================= */
+/* GAME 02 DEATH CINEMATIC & FAILURE SCREEN                  */
+/* ========================================================= */
+.game02-death-cinematic-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game02-death-glitch-pulse {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 30, 60, 0.35) 0%, rgba(20, 0, 5, 0.95) 100%);
+  pointer-events: none;
+  animation: failureGlitchFlash 1.6s ease-out forwards;
+}
+
+.game02-failure-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(22, 6, 10, 0.97) 0%, rgba(5, 2, 4, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.6s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game02-failure-card {
+  max-width: 620px;
+  width: 90%;
+  background: rgba(22, 8, 14, 0.92);
+  border: 1.5px solid rgba(255, 50, 70, 0.35);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.95),
+    0 0 50px rgba(255, 20, 40, 0.25);
+  border-radius: 12px;
+  padding: 3.5rem 2.8rem;
+  text-align: center;
+  backdrop-filter: blur(18px);
+}
+
+.game02-failure-tag {
+  display: inline-block;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  color: #ff3838;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  text-shadow: 0 0 10px rgba(255, 56, 56, 0.6);
+}
+
+.game02-failure-title {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #fff5f5;
+  text-transform: uppercase;
+  margin: 0.5rem 0 1.5rem;
+  line-height: 1.35;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+}
+
+.game02-failure-divider {
+  width: 60px;
+  height: 2px;
+  background: #ff3838;
+  margin: 0 auto 1.8rem;
+  opacity: 0.7;
+}
+
+.game02-failure-lore {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #cbd5e1;
+  margin-bottom: 2.6rem;
+}
+
+.game02-failure-quote {
+  font-style: italic;
+  margin: 0.3rem 0;
+}
+
+.game02-failure-subtext {
+  color: #ff6b81 !important;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+.game02-failure-button {
+  background: linear-gradient(135deg, #c0392b, #8b0000);
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 1rem 3.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 25px rgba(192, 57, 43, 0.45);
+  transition: all 0.25s ease;
+}
+
+.game02-failure-button:hover {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  box-shadow: 0 8px 32px rgba(231, 76, 60, 0.65);
+  transform: translateY(-2px);
+}
+
+.game02-failure-button:active {
+  transform: translateY(1px);
 }

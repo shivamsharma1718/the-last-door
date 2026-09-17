@@ -22,7 +22,7 @@ import {
   isAtExit,
 } from './redLightLogic'
 
-export const RedLightGame: React.FC<RedLightGameProps> = () => {
+export const RedLightGame: React.FC<RedLightGameProps> = ({ onComplete }) => {
   // Game loop & victory/failure states
   const [status, setStatus] = useState<GameStatus>('playing')
   const [phase, setPhase] = useState<LightPhase>('GREEN')
@@ -413,18 +413,20 @@ export const RedLightGame: React.FC<RedLightGameProps> = () => {
             <div class="next-trial-lore">
               <p>The door ahead slowly unlocks in the darkness...</p>
             </div>
-            <button type="button" id="replay-game01-btn" class="next-trial-button">
-              REPLAY GAME 01
+            <button type="button" id="continue-next-trial-btn" class="next-trial-button">
+              CONTINUE
             </button>
           </div>
         `
         document.body.appendChild(nextTrialEl)
 
-        const replayBtn = document.getElementById('replay-game01-btn')
-        if (replayBtn) {
-          replayBtn.onclick = (e) => {
+        const continueNextBtn = document.getElementById('continue-next-trial-btn')
+        if (continueNextBtn) {
+          continueNextBtn.onclick = (e) => {
             e.stopPropagation()
-            handleRestart()
+            if (onComplete) {
+              onComplete()
+            }
           }
         }
       }
@@ -436,7 +438,7 @@ export const RedLightGame: React.FC<RedLightGameProps> = () => {
       const el = document.getElementById('game01-next-trial-dom')
       if (el) el.remove()
     }
-  }, [status, handleRestart])
+  }, [status, onComplete])
 
   return (
     <>

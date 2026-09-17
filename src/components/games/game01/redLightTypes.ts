@@ -9,6 +9,7 @@ export type GameStatus =
 export type LightPhase = 'GREEN' | 'RED'
 
 export interface RedLightGameProps {
+  onComplete?: () => void
   onBackToHallway?: () => void
 }
 

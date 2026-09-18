@@ -1,2 +1,11 @@
-// Game 03 placeholder
-export {}
+export { ThreeDoorsGame } from './ThreeDoorsGame'
+export { ThreeDoorsArena } from './ThreeDoorsArena'
+export { Game03Intro } from './ui/Game03Intro'
+export { Game03HUD } from './ui/Game03HUD'
+export { Game03Examination } from './ui/Game03Examination'
+export { Game03DoorExamination } from './ui/Game03DoorExamination'
+export { Game03DoorConfirmation } from './ui/Game03DoorConfirmation'
+export { Game03Victory, Game03VictoryCinematic } from './ui/Game03Victory'
+export { Game03Failure, Game03DeathCinematic } from './ui/Game03Failure'
+export * from './threeDoorsTypes'
+export * from './threeDoorsLogic'

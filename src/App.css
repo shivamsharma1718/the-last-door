@@ -52,6 +52,15 @@ body:has(#game02-victory-cinematic-dom) .hud-overlay .game-title,
 body:has(#game02-victory-dom) .hud-overlay .game-title,
 body:has(#game02-death-cinematic-dom) .hud-overlay .game-title,
 body:has(#game02-failure-dom) .hud-overlay .game-title,
+body:has(#game03-intro-overlay-dom) .hud-overlay .game-title,
+body:has(#game03-hud-dom) .hud-overlay .game-title,
+body:has(#game03-examination-dom) .hud-overlay .game-title,
+body:has(#game03-door-exam-dom) .hud-overlay .game-title,
+body:has(#game03-door-confirmation-dom) .hud-overlay .game-title,
+body:has(#game03-victory-cinematic-dom) .hud-overlay .game-title,
+body:has(#game03-victory-dom) .hud-overlay .game-title,
+body:has(#game03-death-cinematic-dom) .hud-overlay .game-title,
+body:has(#game03-failure-dom) .hud-overlay .game-title,
 body:has(#game01-hud-dom) .hud-overlay .instructions,
 body:has(#game02-intro-overlay-dom) .hud-overlay .instructions,
 body:has(#game02-hud-dom) .hud-overlay .instructions,
@@ -61,7 +70,16 @@ body:has(#game02-confirmation-dom) .hud-overlay .instructions,
 body:has(#game02-victory-cinematic-dom) .hud-overlay .instructions,
 body:has(#game02-victory-dom) .hud-overlay .instructions,
 body:has(#game02-death-cinematic-dom) .hud-overlay .instructions,
-body:has(#game02-failure-dom) .hud-overlay .instructions {
+body:has(#game02-failure-dom) .hud-overlay .instructions,
+body:has(#game03-intro-overlay-dom) .hud-overlay .instructions,
+body:has(#game03-hud-dom) .hud-overlay .instructions,
+body:has(#game03-examination-dom) .hud-overlay .instructions,
+body:has(#game03-door-exam-dom) .hud-overlay .instructions,
+body:has(#game03-door-confirmation-dom) .hud-overlay .instructions,
+body:has(#game03-victory-cinematic-dom) .hud-overlay .instructions,
+body:has(#game03-victory-dom) .hud-overlay .instructions,
+body:has(#game03-death-cinematic-dom) .hud-overlay .instructions,
+body:has(#game03-failure-dom) .hud-overlay .instructions {
   display: none !important;
 }
 
@@ -1415,5 +1433,804 @@ body:has(#game02-failure-dom) .hud-overlay .instructions {
 }
 
 .game02-failure-button:active {
+  transform: translateY(1px);
+}
+
+/* ========================================================= */
+/* GAME 03 INTRO & HUD STYLES                                */
+/* ========================================================= */
+.game03-intro-line-1 {
+  font-size: 1.1rem;
+  color: #e2e8f0;
+  margin: 0.3rem 0;
+}
+
+.game03-intro-line-2 {
+  font-size: 1.1rem;
+  color: #cbd5e1;
+  margin: 0.3rem 0;
+}
+
+.game03-intro-line-3 {
+  color: #e0a96d !important;
+  font-weight: 600;
+  margin-top: 1rem !important;
+}
+
+.game03-hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2.5rem 2rem 3rem;
+}
+
+.game03-hud-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.game03-hud-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(224, 169, 109, 0.9);
+  text-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
+}
+
+.game03-hud-objective {
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: #94a3b8;
+  font-style: italic;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.9);
+}
+
+.game03-hud-counter {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(203, 213, 225, 0.8);
+  margin-top: 0.2rem;
+}
+
+.game03-counter-highlight {
+  color: #e0a96d;
+  font-weight: 800;
+  text-shadow: 0 0 8px rgba(224, 169, 109, 0.5);
+}
+
+/* ========================================================= */
+/* GAME 03 PROXIMITY INTERACTION PROMPT                      */
+/* ========================================================= */
+.game03-interaction-prompt {
+  position: fixed;
+  bottom: 5.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(14, 12, 10, 0.94);
+  border: 1px solid rgba(224, 169, 109, 0.45);
+  padding: 0.7rem 1.6rem;
+  border-radius: 8px;
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.95),
+    0 0 20px rgba(224, 169, 109, 0.18);
+  backdrop-filter: blur(10px);
+  z-index: 999999;
+  pointer-events: none;
+  animation: promptPulse 2.2s infinite ease-in-out;
+}
+
+.game03-prompt-target {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  color: #e0a96d;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(224, 169, 109, 0.6);
+}
+
+.game03-prompt-action {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #f1f5f9;
+}
+
+/* ========================================================= */
+/* GAME 03 EXAMINATION OVERLAY MODAL                         */
+/* ========================================================= */
+.game03-examination-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(16, 12, 8, 0.95) 0%, rgba(4, 3, 2, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.4s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game03-examination-card {
+  max-width: 620px;
+  width: 90%;
+  background: rgba(18, 14, 10, 0.94);
+  border: 1.5px solid rgba(224, 169, 109, 0.35);
+  border-top: 3px solid #e0a96d;
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.95),
+    0 0 45px rgba(224, 169, 109, 0.12);
+  border-radius: 12px;
+  padding: 3rem 2.5rem 2.6rem;
+  text-align: center;
+  backdrop-filter: blur(18px);
+}
+
+.game03-exam-meta-bar {
+  margin-bottom: 0.6rem;
+}
+
+.game03-exam-tag {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  color: #e0a96d;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(224, 169, 109, 0.5);
+}
+
+.game03-exam-title {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #f8fafc;
+  text-transform: uppercase;
+  margin: 0.3rem 0 1.2rem;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+}
+
+.game03-exam-divider {
+  width: 60px;
+  height: 2px;
+  background: #e0a96d;
+  margin: 0 auto 1.8rem;
+  opacity: 0.6;
+}
+
+.game03-exam-clues-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: left;
+  margin-bottom: 2.4rem;
+}
+
+.game03-exam-clue-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background: rgba(10, 8, 6, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #e0a96d;
+  border-radius: 6px;
+  padding: 0.9rem 1.1rem;
+}
+
+.game03-exam-clue-bullet {
+  color: #e0a96d;
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.game03-exam-clue-text {
+  font-size: 0.96rem;
+  line-height: 1.65;
+  color: #cbd5e1;
+  font-style: italic;
+  margin: 0;
+}
+
+.game03-exam-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.game03-exam-close-button {
+  background: linear-gradient(135deg, #2c2218, #18120b);
+  color: #e2e8f0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 0.85rem 3rem;
+  border: 1px solid rgba(224, 169, 109, 0.35);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  transition: all 0.25s ease;
+}
+
+.game03-exam-close-button:hover {
+  background: linear-gradient(135deg, #443424, #2c2218);
+  border-color: rgba(224, 169, 109, 0.7);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(224, 169, 109, 0.25);
+  transform: translateY(-2px);
+}
+
+.game03-exam-close-button:active {
+  transform: translateY(1px);
+}
+
+.game03-exam-keyhint {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  color: #8c7b6b;
+  text-transform: uppercase;
+}
+
+.game03-waiting-hint {
+  color: #e0a96d;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  animation: promptPulse 2.4s infinite ease-in-out;
+}
+
+/* ========================================================= */
+/* GAME 03 DOOR EXAMINATION MODAL                            */
+/* ========================================================= */
+.game03-door-exam-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(16, 12, 8, 0.96) 0%, rgba(4, 3, 2, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.4s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game03-door-exam-card {
+  max-width: 640px;
+  width: 90%;
+  background: rgba(20, 16, 12, 0.94);
+  border: 1.5px solid rgba(224, 169, 109, 0.35);
+  border-top: 3px solid #e0a96d;
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.95),
+    0 0 45px rgba(224, 169, 109, 0.12);
+  border-radius: 12px;
+  padding: 3rem 2.5rem 2.6rem;
+  text-align: center;
+  backdrop-filter: blur(18px);
+}
+
+.game03-door-exam-number {
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.35em;
+  color: #e0a96d;
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+}
+
+.game03-door-exam-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #f8fafc;
+  text-transform: uppercase;
+  margin: 0.2rem 0 1.2rem;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+}
+
+.game03-door-exam-divider {
+  width: 60px;
+  height: 2px;
+  background: #e0a96d;
+  margin: 0 auto 1.8rem;
+  opacity: 0.6;
+}
+
+.game03-door-exam-statement-box {
+  background: rgba(10, 8, 6, 0.7);
+  border: 1px solid rgba(224, 169, 109, 0.25);
+  border-radius: 8px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.6rem;
+}
+
+.game03-door-statement-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: #8c7b6b;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.game03-door-exam-statement {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: #f1f5f9;
+  font-style: italic;
+  margin: 0;
+}
+
+.game03-door-locked-notice {
+  background: rgba(40, 10, 10, 0.4);
+  border: 1px solid rgba(255, 100, 100, 0.2);
+  border-radius: 6px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.game03-door-locked-text {
+  font-size: 0.88rem;
+  color: #fca5a5;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  margin: 0;
+}
+
+.game03-door-unlocked-notice {
+  background: rgba(224, 169, 109, 0.1);
+  border: 1px solid rgba(224, 169, 109, 0.3);
+  border-radius: 6px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.game03-door-unlocked-text {
+  font-size: 0.88rem;
+  color: #e0a96d;
+  letter-spacing: 0.1em;
+  font-style: italic;
+  margin: 0;
+}
+
+.game03-door-exam-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.game03-choose-door-button {
+  background: linear-gradient(135deg, #8b5a2b, #5c3818);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 0.85rem 2.6rem;
+  border: 1px solid rgba(224, 169, 109, 0.5);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(139, 90, 43, 0.45);
+  transition: all 0.25s ease;
+}
+
+.game03-choose-door-button:hover {
+  background: linear-gradient(135deg, #a66e38, #8b5a2b);
+  box-shadow: 0 8px 25px rgba(224, 169, 109, 0.45);
+  transform: translateY(-2px);
+}
+
+.game03-door-close-button {
+  background: rgba(30, 24, 18, 0.8);
+  color: #cbd5e1;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 0.85rem 2.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.game03-door-close-button:hover {
+  background: rgba(44, 34, 24, 0.9);
+  color: #ffffff;
+  border-color: rgba(224, 169, 109, 0.5);
+  transform: translateY(-2px);
+}
+
+/* ========================================================= */
+/* GAME 03 DOOR CHOICE CONFIRMATION MODAL                    */
+/* ========================================================= */
+.game03-door-confirmation-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(16, 12, 8, 0.96) 0%, rgba(3, 2, 2, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.35s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game03-door-confirmation-card {
+  max-width: 560px;
+  width: 90%;
+  background: rgba(20, 16, 12, 0.94);
+  border: 1.5px solid rgba(224, 169, 109, 0.35);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.95),
+    0 0 45px rgba(224, 169, 109, 0.15);
+  border-radius: 12px;
+  padding: 3rem 2.5rem 2.8rem;
+  text-align: center;
+  backdrop-filter: blur(18px);
+}
+
+.game03-door-confirmation-tag {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  color: #e0a96d;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.game03-door-confirmation-number {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.game03-door-confirmation-name {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #f8fafc;
+  text-transform: uppercase;
+  margin: 0.2rem 0 1rem;
+}
+
+.game03-door-confirmation-divider {
+  width: 50px;
+  height: 2px;
+  background: #e0a96d;
+  margin: 0 auto 1.6rem;
+  opacity: 0.6;
+}
+
+.game03-door-confirmation-prompt {
+  font-size: 1.15rem;
+  color: #cbd5e1;
+  font-style: italic;
+  margin-bottom: 2.4rem;
+}
+
+.game03-door-confirmation-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+}
+
+.game03-confirm-choice-button {
+  background: linear-gradient(135deg, #8b5a2b, #5c3818);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 0.85rem 2.6rem;
+  border: 1px solid rgba(224, 169, 109, 0.5);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(139, 90, 43, 0.45);
+  transition: all 0.25s ease;
+}
+
+.game03-confirm-choice-button:hover {
+  background: linear-gradient(135deg, #a66e38, #8b5a2b);
+  box-shadow: 0 8px 25px rgba(224, 169, 109, 0.45);
+  transform: translateY(-2px);
+}
+
+.game03-cancel-choice-button {
+  background: rgba(30, 24, 18, 0.8);
+  color: #94a3b8;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 0.85rem 2.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.game03-cancel-choice-button:hover {
+  background: rgba(44, 34, 24, 0.9);
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+/* ========================================================= */
+/* GAME 03 VICTORY CINEMATIC & SCREEN                        */
+/* ========================================================= */
+.game03-victory-cinematic-overlay {
+  position: fixed;
+  inset: 0;
+  background: #030202;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game03-victory-reveal-highlight {
+  font-size: 2.3rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  color: #e0a96d;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 30px rgba(224, 169, 109, 0.8),
+    0 0 60px rgba(224, 169, 109, 0.4);
+}
+
+.game03-victory-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(24, 16, 10, 0.96) 0%, rgba(4, 3, 2, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.8s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game03-victory-card {
+  max-width: 620px;
+  width: 90%;
+  background: rgba(24, 18, 12, 0.92);
+  border: 1.5px solid rgba(224, 169, 109, 0.35);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.95),
+    0 0 50px rgba(224, 169, 109, 0.18);
+  border-radius: 12px;
+  padding: 3.5rem 2.8rem;
+  text-align: center;
+  backdrop-filter: blur(18px);
+}
+
+.game03-victory-tag {
+  display: inline-block;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  color: #e0a96d;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  text-shadow: 0 0 10px rgba(224, 169, 109, 0.6);
+}
+
+.game03-victory-title {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #fdfaf6;
+  text-transform: uppercase;
+  margin: 0.5rem 0 1.5rem;
+  line-height: 1.3;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+}
+
+.game03-victory-divider {
+  width: 60px;
+  height: 2px;
+  background: #e0a96d;
+  margin: 0 auto 1.8rem;
+  opacity: 0.7;
+}
+
+.game03-victory-lore {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #cbd5e1;
+  margin-bottom: 2.6rem;
+}
+
+.game03-victory-quote {
+  font-style: italic;
+  margin: 0.3rem 0;
+}
+
+.game03-victory-subtext {
+  color: #e0a96d !important;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+.game03-victory-button {
+  background: linear-gradient(135deg, #8b5a2b, #5c3818);
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 1rem 3.5rem;
+  border: 1px solid rgba(224, 169, 109, 0.5);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 25px rgba(139, 90, 43, 0.45);
+  transition: all 0.25s ease;
+}
+
+.game03-victory-button:hover {
+  background: linear-gradient(135deg, #a66e38, #8b5a2b);
+  box-shadow: 0 8px 32px rgba(224, 169, 109, 0.6);
+  transform: translateY(-2px);
+}
+
+.game03-victory-button:active {
+  transform: translateY(1px);
+}
+
+/* ========================================================= */
+/* GAME 03 DEATH CINEMATIC & FAILURE SCREEN                  */
+/* ========================================================= */
+.game03-death-cinematic-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game03-death-glitch-pulse {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(220, 38, 38, 0.4) 0%, rgba(15, 3, 3, 0.98) 100%);
+  pointer-events: none;
+  animation: failureGlitchFlash 1.6s ease-out forwards;
+}
+
+.game03-failure-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(26, 8, 8, 0.97) 0%, rgba(4, 2, 2, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.6s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game03-failure-card {
+  max-width: 620px;
+  width: 90%;
+  background: rgba(26, 10, 10, 0.94);
+  border: 1.5px solid rgba(220, 38, 38, 0.4);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.95),
+    0 0 50px rgba(220, 38, 38, 0.25);
+  border-radius: 12px;
+  padding: 3.5rem 2.8rem;
+  text-align: center;
+  backdrop-filter: blur(18px);
+}
+
+.game03-failure-tag {
+  display: inline-block;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  color: #ef4444;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+}
+
+.game03-failure-title {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #fff5f5;
+  text-transform: uppercase;
+  margin: 0.5rem 0 1.5rem;
+  line-height: 1.35;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+}
+
+.game03-failure-divider {
+  width: 60px;
+  height: 2px;
+  background: #ef4444;
+  margin: 0 auto 1.8rem;
+  opacity: 0.7;
+}
+
+.game03-failure-lore {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #cbd5e1;
+  margin-bottom: 2.6rem;
+}
+
+.game03-failure-quote {
+  font-style: italic;
+  margin: 0.3rem 0;
+  color: #fca5a5;
+}
+
+.game03-failure-subtext {
+  color: #94a3b8 !important;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+.game03-failure-button {
+  background: linear-gradient(135deg, #b91c1c, #7f1d1d);
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 1rem 3.5rem;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 25px rgba(185, 28, 28, 0.45);
+  transition: all 0.25s ease;
+}
+
+.game03-failure-button:hover {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  box-shadow: 0 8px 32px rgba(220, 38, 38, 0.6);
+  transform: translateY(-2px);
+}
+
+.game03-failure-button:active {
   transform: translateY(1px);
 }

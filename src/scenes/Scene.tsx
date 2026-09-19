@@ -7,6 +7,7 @@ import { PlayerControls } from '../components/canvas/PlayerControls'
 import { RedLightGame } from '../components/games/game01/RedLightGame'
 import { RoomOfNamesGame } from '../components/games/game02/RoomOfNamesGame'
 import { ThreeDoorsGame } from '../components/games/game03/ThreeDoorsGame'
+import { TheWatcherGame } from '../components/games/game04/TheWatcherGame'
 
 export interface SceneProps {
   isDoorOpen?: boolean
@@ -14,7 +15,7 @@ export interface SceneProps {
   onDoorOpen?: () => void
 }
 
-export type GameStage = 'hallway' | 'intro' | 'game01' | 'game02' | 'game03'
+export type GameStage = 'hallway' | 'intro' | 'game01' | 'game02' | 'game03' | 'game04' | 'game05'
 
 export const Scene: React.FC<SceneProps> = ({
   isDoorOpen: propIsDoorOpen,
@@ -180,7 +181,21 @@ export const Scene: React.FC<SceneProps> = ({
 
   // If in Game 03 arena
   if (stage === 'game03') {
-    return <ThreeDoorsGame onComplete={() => setStage('hallway')} />
+    return <ThreeDoorsGame onComplete={() => setStage('game04')} />
+  }
+
+  // If in Game 04 arena
+  if (stage === 'game04') {
+    return <TheWatcherGame onComplete={() => setStage('game05')} />
+  }
+
+  // If in Game 05 arena
+  if (stage === 'game05') {
+    return (
+      <group>
+        <color attach="background" args={['#050508']} />
+      </group>
+    )
   }
 
   return (

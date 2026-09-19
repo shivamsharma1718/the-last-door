@@ -1,2 +1,9 @@
-// Game 04 placeholder
-export {}
+export { TheWatcherGame } from './TheWatcherGame'
+export { TheWatcherArena } from './TheWatcherArena'
+export { Game04Intro } from './ui/Game04Intro'
+export { Game04HUD } from './ui/Game04HUD'
+export { Game04Examination } from './ui/Game04Examination'
+export { Game04Victory, Game04VictoryCinematic } from './ui/Game04Victory'
+export { Game04Failure } from './ui/Game04Failure'
+export * from './theWatcherTypes'
+export * from './theWatcherLogic'

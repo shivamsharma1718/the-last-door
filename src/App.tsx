@@ -1,5 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { Scene } from './scenes/Scene'
+import { TheWatcherUI } from './components/games/game04'
 import './App.css'
 
 function App() {
@@ -22,6 +23,9 @@ function App() {
           <Scene />
         </Canvas>
       </div>
+
+      {/* Game 04 DOM UI Layer (Outside Canvas) */}
+      <TheWatcherUI />
 
       {/* Atmospheric UI Overlay */}
       <div className="hud-overlay">

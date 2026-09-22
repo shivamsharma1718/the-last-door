@@ -18,7 +18,7 @@ const WATCHER_ENTITY: WatcherModel = {
   id: 'the_watcher_prime',
   label: 'THE WATCHER',
   position: WATCHER_POSITION,
-  detectionRange: 14.0,
+  detectionRange: 8.5,
   alertState: false,
 }
 
@@ -150,7 +150,7 @@ export function isLookingAtWatcher(
   playerPosition: [number, number, number],
   playerLookDirection: [number, number, number],
   watcherPosition: [number, number, number] = WATCHER_POSITION,
-  angleThresholdCos: number = 0.707
+  angleThresholdCos: number = 0.88
 ): boolean {
   const toWx = watcherPosition[0] - playerPosition[0]
   const toWy = watcherPosition[1] - playerPosition[1]

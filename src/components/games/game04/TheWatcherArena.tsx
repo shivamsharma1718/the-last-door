@@ -97,7 +97,7 @@ const TornPhotographMesh: React.FC<{
         </mesh>
 
         {/* Focused Dim Spotlight on Photo */}
-        <pointLight position={[0, 0.6, 0.4]} color="#ffe4c4" intensity={1.8} distance={3.5} decay={2} />
+        <pointLight position={[0, 0.6, 0.4]} color="#ffe4c4" intensity={3.2} distance={5.5} decay={2} />
       </group>
     </ArtifactStand>
   )
@@ -152,7 +152,7 @@ const WarningNoteMesh: React.FC<{
         </mesh>
 
         {/* Soft Focused Warm Light */}
-        <pointLight position={[0, 0.6, 0.35]} color="#fef08a" intensity={1.5} distance={3.2} decay={2} />
+        <pointLight position={[0, 0.6, 0.35]} color="#fef08a" intensity={3.0} distance={5.2} decay={2} />
       </group>
     </ArtifactStand>
   )
@@ -218,7 +218,7 @@ const SecurityMonitorMesh: React.FC<{
         </mesh>
 
         {/* Cold Phosphor Monitor Glow */}
-        <pointLight position={[0, 0.32, 0.4]} color="#2dd4bf" intensity={1.6} distance={3.8} decay={2} />
+        <pointLight position={[0, 0.32, 0.4]} color="#2dd4bf" intensity={3.2} distance={5.5} decay={2} />
       </group>
     </ArtifactStand>
   )
@@ -276,7 +276,7 @@ const ObservationWindowMesh: React.FC<{
         </mesh>
 
         {/* Cold Ambient Window Glow */}
-        <pointLight position={[0, 0.45, 0.35]} color="#38bdf8" intensity={1.5} distance={3.5} decay={2} />
+        <pointLight position={[0, 0.45, 0.35]} color="#38bdf8" intensity={3.2} distance={5.5} decay={2} />
       </group>
     </ArtifactStand>
   )
@@ -579,28 +579,32 @@ export const TheWatcherArena: React.FC<TheWatcherArenaProps> = ({
   const isBlackout = revealPhase === 2
   const isSilence = revealPhase === 1
 
-  const ambientIntensity = isBlackout ? 0.04 : isSilence ? 0.2 : isAlert ? 0.15 : 0.45
-  const overheadIntensity = isBlackout ? 0.1 : isSilence ? 0.7 : isAlert ? 0.4 : 1.8
+  const ambientIntensity = isBlackout ? 0.05 : isSilence ? 0.35 : isAlert ? 0.25 : 0.85
+  const overheadIntensity = isBlackout ? 0.15 : isSilence ? 1.0 : isAlert ? 0.6 : 3.6
 
   return (
     <>
       {/* 1. Psychological Horror Atmosphere & Distance Fog */}
-      <color attach="background" args={['#05070b']} />
-      <fog attach="fog" args={['#05070b', 3, isBlackout ? 8 : 18]} />
+      <color attach="background" args={['#080c14']} />
+      <fog attach="fog" args={['#080c14', 6, isBlackout ? 10 : 28]} />
 
       {/* 2. Controlled Atmospheric Lighting */}
-      <ambientLight color="#0c121d" intensity={ambientIntensity} />
-      <directionalLight position={[0, 3.8, 2]} color="#1e293b" intensity={isBlackout ? 0.05 : isAlert ? 0.1 : 0.35} />
+      <ambientLight color="#1e2638" intensity={ambientIntensity} />
+      <directionalLight position={[0, 4.0, 0]} color="#475569" intensity={isBlackout ? 0.05 : isAlert ? 0.15 : 0.65} />
 
-      {/* Overhead Dim Cold Downlights */}
-      <pointLight position={[0, 3.8, 4.0]} color="#334155" intensity={overheadIntensity} distance={8.0} decay={2} />
-      <pointLight position={[0, 3.8, -1.0]} color="#1e293b" intensity={overheadIntensity * 0.8} distance={8.0} decay={2} />
+      {/* Distributed Overhead Downlights Across the Full Chamber */}
+      {/* South Chamber Downlight (Illuminates Player Spawn & South Entrance) */}
+      <pointLight position={[0, 3.8, 5.0]} color="#94a3b8" intensity={overheadIntensity * 1.2} distance={14.0} decay={2} />
+      {/* Central Chamber Downlight */}
+      <pointLight position={[0, 3.8, 0.0]} color="#cbd5e1" intensity={overheadIntensity * 1.4} distance={16.0} decay={2} />
+      {/* North Chamber Downlight (Near Observation Area) */}
+      <pointLight position={[0, 3.8, -4.5]} color="#64748b" intensity={overheadIntensity * 1.1} distance={14.0} decay={2} />
 
       {/* 3. Fully Enclosed Room Chamber */}
       {/* Floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[ROOM04_WIDTH, ROOM04_DEPTH]} />
-        <meshStandardMaterial color="#0d1118" roughness={0.88} metalness={0.2} />
+        <meshStandardMaterial color="#141824" roughness={0.82} metalness={0.25} />
       </mesh>
 
       {/* Floor Grid Seams & Directional Guidance Lines */}
@@ -608,81 +612,123 @@ export const TheWatcherArena: React.FC<TheWatcherArenaProps> = ({
         <mesh key={`grid-x-${i}`} position={[gx, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[0.03, ROOM04_DEPTH]} />
           <meshBasicMaterial
-            color={isExitUnlocked && gx === 0 ? '#38bdf8' : '#1e293b'}
+            color={isExitUnlocked && gx === 0 ? '#38bdf8' : '#334155'}
             transparent
-            opacity={isExitUnlocked && gx === 0 ? 0.65 : 0.35}
+            opacity={isExitUnlocked && gx === 0 ? 0.8 : 0.45}
           />
         </mesh>
       ))}
       {[-7, -4, -1, 2, 5, 8].map((gz, i) => (
         <mesh key={`grid-z-${i}`} position={[0, 0.005, gz]} rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[ROOM04_WIDTH, 0.03]} />
-          <meshBasicMaterial color="#1e293b" transparent opacity={0.35} />
+          <meshBasicMaterial color="#334155" transparent opacity={0.45} />
         </mesh>
       ))}
+
+      {/* Spawn Threshold Ring on Floor */}
+      <mesh position={[0, 0.01, 6.5]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.7, 0.82, 32]} />
+        <meshBasicMaterial color="#38bdf8" transparent opacity={0.35} />
+      </mesh>
 
       {/* Floor Center Pathway Strip leading toward Exit */}
       <mesh position={[0, 0.008, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[1.2, ROOM04_DEPTH - 2]} />
         <meshStandardMaterial
-          color="#121722"
+          color="#1a2232"
           roughness={0.7}
           metalness={0.4}
           emissive={isExitUnlocked ? '#0284c7' : '#000000'}
-          emissiveIntensity={isExitUnlocked ? 0.15 : 0}
+          emissiveIntensity={isExitUnlocked ? 0.25 : 0}
         />
       </mesh>
 
       {/* Ceiling */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, ROOM04_HEIGHT, 0]} receiveShadow>
         <planeGeometry args={[ROOM04_WIDTH, ROOM04_DEPTH]} />
-        <meshStandardMaterial color="#090c12" roughness={0.95} metalness={0.1} />
+        <meshStandardMaterial color="#0f141e" roughness={0.92} metalness={0.15} />
       </mesh>
 
       {/* Ceiling Ventilation / Conduit Trays */}
       <mesh position={[0, ROOM04_HEIGHT - 0.1, 0]}>
         <boxGeometry args={[1.2, 0.15, ROOM04_DEPTH - 2]} />
-        <meshStandardMaterial color="#161b24" roughness={0.7} metalness={0.4} />
+        <meshStandardMaterial color="#1e2638" roughness={0.7} metalness={0.4} />
       </mesh>
       <mesh position={[-4.5, ROOM04_HEIGHT - 0.1, 0]}>
         <boxGeometry args={[0.6, 0.12, ROOM04_DEPTH - 2]} />
-        <meshStandardMaterial color="#121620" roughness={0.7} metalness={0.4} />
+        <meshStandardMaterial color="#192030" roughness={0.7} metalness={0.4} />
       </mesh>
       <mesh position={[4.5, ROOM04_HEIGHT - 0.1, 0]}>
         <boxGeometry args={[0.6, 0.12, ROOM04_DEPTH - 2]} />
-        <meshStandardMaterial color="#121620" roughness={0.7} metalness={0.4} />
+        <meshStandardMaterial color="#192030" roughness={0.7} metalness={0.4} />
       </mesh>
 
       {/* North Wall (Far Wall with Exit & Observation Gallery) */}
       <mesh position={[0, halfHeight, -halfDepth]} receiveShadow>
         <planeGeometry args={[ROOM04_WIDTH, ROOM04_HEIGHT]} />
-        <meshStandardMaterial color="#10141d" roughness={0.88} metalness={0.15} />
+        <meshStandardMaterial color="#161c28" roughness={0.85} metalness={0.2} />
       </mesh>
 
-      {/* South Wall (Player Spawn End) */}
+      {/* South Wall (Player Spawn End with Sealed Entrance Gate) */}
       <mesh position={[0, halfHeight, halfDepth]} rotation={[0, Math.PI, 0]} receiveShadow>
         <planeGeometry args={[ROOM04_WIDTH, ROOM04_HEIGHT]} />
-        <meshStandardMaterial color="#10141d" roughness={0.88} metalness={0.15} />
+        <meshStandardMaterial color="#161c28" roughness={0.85} metalness={0.2} />
       </mesh>
+
+      {/* South Entrance Gate Architecture (Where the player came from) */}
+      <group position={[0, 0, halfDepth - 0.1]}>
+        {/* Gate Pillars */}
+        <mesh position={[-1.3, 1.6, 0]} receiveShadow castShadow>
+          <boxGeometry args={[0.35, 3.2, 0.3]} />
+          <meshStandardMaterial color="#1a2232" roughness={0.8} metalness={0.4} />
+        </mesh>
+        <mesh position={[1.3, 1.6, 0]} receiveShadow castShadow>
+          <boxGeometry args={[0.35, 3.2, 0.3]} />
+          <meshStandardMaterial color="#1a2232" roughness={0.8} metalness={0.4} />
+        </mesh>
+        <mesh position={[0, 3.2, 0]} receiveShadow castShadow>
+          <boxGeometry args={[2.95, 0.35, 0.35]} />
+          <meshStandardMaterial color="#1f283c" roughness={0.75} metalness={0.45} />
+        </mesh>
+        {/* Sealed Steel Airlock Doors */}
+        <mesh position={[-0.52, 1.5, 0]} receiveShadow castShadow>
+          <boxGeometry args={[1.05, 2.9, 0.12]} />
+          <meshStandardMaterial color="#121824" roughness={0.7} metalness={0.6} />
+        </mesh>
+        <mesh position={[0.52, 1.5, 0]} receiveShadow castShadow>
+          <boxGeometry args={[1.05, 2.9, 0.12]} />
+          <meshStandardMaterial color="#121824" roughness={0.7} metalness={0.6} />
+        </mesh>
+        {/* Security Sconce Light above South Gate */}
+        <pointLight position={[0, 3.1, -0.3]} color="#38bdf8" intensity={2.8} distance={8.0} decay={2} />
+      </group>
 
       {/* East Wall with Structural Panels */}
       <mesh position={[halfWidth, halfHeight, 0]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[ROOM04_DEPTH, ROOM04_HEIGHT]} />
-        <meshStandardMaterial color="#10141d" roughness={0.88} metalness={0.15} />
+        <meshStandardMaterial color="#161c28" roughness={0.85} metalness={0.2} />
       </mesh>
 
       {/* West Wall with Structural Panels */}
       <mesh position={[-halfWidth, halfHeight, 0]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[ROOM04_DEPTH, ROOM04_HEIGHT]} />
-        <meshStandardMaterial color="#10141d" roughness={0.88} metalness={0.15} />
+        <meshStandardMaterial color="#161c28" roughness={0.85} metalness={0.2} />
       </mesh>
 
-      {/* Structural Wall Rib Columns */}
+      {/* Structural Wall Rib Columns on North and South Walls */}
       {[-6, -2, 2, 6].map((wx, i) => (
         <group key={`rib-north-${i}`} position={[wx, halfHeight, -halfDepth + 0.15]}>
           <mesh receiveShadow castShadow>
             <boxGeometry args={[0.4, ROOM04_HEIGHT, 0.3]} />
-            <meshStandardMaterial color="#161c28" roughness={0.8} metalness={0.3} />
+            <meshStandardMaterial color="#1e2638" roughness={0.8} metalness={0.3} />
+          </mesh>
+        </group>
+      ))}
+      {[-6, -2, 2, 6].map((wx, i) => (
+        <group key={`rib-south-${i}`} position={[wx, halfHeight, halfDepth - 0.15]}>
+          <mesh receiveShadow castShadow>
+            <boxGeometry args={[0.4, ROOM04_HEIGHT, 0.3]} />
+            <meshStandardMaterial color="#1e2638" roughness={0.8} metalness={0.3} />
           </mesh>
         </group>
       ))}
@@ -690,19 +736,19 @@ export const TheWatcherArena: React.FC<TheWatcherArenaProps> = ({
       {/* Base Skirting Trims */}
       <mesh position={[0, 0.15, -halfDepth + 0.05]}>
         <boxGeometry args={[ROOM04_WIDTH, 0.3, 0.08]} />
-        <meshStandardMaterial color="#0b0d13" roughness={0.7} />
+        <meshStandardMaterial color="#0e121a" roughness={0.7} />
       </mesh>
       <mesh position={[0, 0.15, halfDepth - 0.05]}>
         <boxGeometry args={[ROOM04_WIDTH, 0.3, 0.08]} />
-        <meshStandardMaterial color="#0b0d13" roughness={0.7} />
+        <meshStandardMaterial color="#0e121a" roughness={0.7} />
       </mesh>
       <mesh position={[halfWidth - 0.05, 0.15, 0]} rotation={[0, Math.PI / 2, 0]}>
         <boxGeometry args={[ROOM04_DEPTH, 0.3, 0.08]} />
-        <meshStandardMaterial color="#0b0d13" roughness={0.7} />
+        <meshStandardMaterial color="#0e121a" roughness={0.7} />
       </mesh>
       <mesh position={[-halfWidth + 0.05, 0.15, 0]} rotation={[0, Math.PI / 2, 0]}>
         <boxGeometry args={[ROOM04_DEPTH, 0.3, 0.08]} />
-        <meshStandardMaterial color="#0b0d13" roughness={0.7} />
+        <meshStandardMaterial color="#0e121a" roughness={0.7} />
       </mesh>
 
       {/* 4. Investigation Objects (Physical Artifacts) */}

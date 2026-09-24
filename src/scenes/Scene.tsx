@@ -8,6 +8,7 @@ import { RedLightGame } from '../components/games/game01/RedLightGame'
 import { RoomOfNamesGame } from '../components/games/game02/RoomOfNamesGame'
 import { ThreeDoorsGame } from '../components/games/game03/ThreeDoorsGame'
 import { TheWatcherGame } from '../components/games/game04/TheWatcherGame'
+import { TheDrowningHallGame } from '../components/games/game05/TheDrowningHallGame'
 
 export interface SceneProps {
   isDoorOpen?: boolean
@@ -191,11 +192,7 @@ export const Scene: React.FC<SceneProps> = ({
 
   // If in Game 05 arena
   if (stage === 'game05') {
-    return (
-      <group>
-        <color attach="background" args={['#050508']} />
-      </group>
-    )
+    return <TheDrowningHallGame onComplete={() => setStage('game05')} />
   }
 
   return (

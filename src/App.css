@@ -68,6 +68,7 @@ body:has(#game04-alert-overlay-dom) .hud-overlay .game-title,
 body:has(#game04-failure-dom) .hud-overlay .game-title,
 body:has(#game04-victory-cinematic-dom) .hud-overlay .game-title,
 body:has(#game04-victory-dom) .hud-overlay .game-title,
+body:has(#game05-intro-overlay-dom) .hud-overlay .game-title,
 body:has(#game01-hud-dom) .hud-overlay .instructions,
 body:has(#game02-intro-overlay-dom) .hud-overlay .instructions,
 body:has(#game02-hud-dom) .hud-overlay .instructions,
@@ -93,7 +94,8 @@ body:has(#game04-examination-dom) .hud-overlay .instructions,
 body:has(#game04-alert-overlay-dom) .hud-overlay .instructions,
 body:has(#game04-failure-dom) .hud-overlay .instructions,
 body:has(#game04-victory-cinematic-dom) .hud-overlay .instructions,
-body:has(#game04-victory-dom) .hud-overlay .instructions {
+body:has(#game04-victory-dom) .hud-overlay .instructions,
+body:has(#game05-intro-overlay-dom) .hud-overlay .instructions {
   display: none !important;
 }
 

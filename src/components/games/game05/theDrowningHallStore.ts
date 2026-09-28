@@ -1,15 +1,21 @@
 import { useSyncExternalStore } from 'react'
-import type { Game05Status } from './drowningHallTypes'
+import type { Game05Status, DrowningHallObject } from './drowningHallTypes'
 
 export interface DrowningHallState {
   isActive: boolean
   status: Game05Status
+  activeItem: DrowningHallObject | null
+  nearestItem: DrowningHallObject | null
+  examinedIds: Set<string>
   resetCounter: number
 }
 
 const initialState: DrowningHallState = {
   isActive: false,
   status: 'intro',
+  activeItem: null,
+  nearestItem: null,
+  examinedIds: new Set(),
   resetCounter: 0,
 }
 
@@ -39,6 +45,33 @@ export const drowningHallStore = {
   },
   setStatus: (status: Game05Status) => {
     currentState = { ...currentState, status }
+    emitChange()
+  },
+  setNearestItem: (nearestItem: DrowningHallObject | null) => {
+    if (currentState.nearestItem?.id !== nearestItem?.id) {
+      currentState = { ...currentState, nearestItem }
+      emitChange()
+    }
+  },
+  openExamination: (item: DrowningHallObject) => {
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+    const nextExamined = new Set(currentState.examinedIds).add(item.id as string)
+    currentState = {
+      ...currentState,
+      activeItem: item,
+      examinedIds: nextExamined,
+      status: 'examining',
+    }
+    emitChange()
+  },
+  closeExamination: () => {
+    currentState = {
+      ...currentState,
+      activeItem: null,
+      status: 'exploring',
+    }
     emitChange()
   },
   beginExploration: () => {

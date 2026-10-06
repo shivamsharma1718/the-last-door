@@ -71,6 +71,7 @@ body:has(#game04-victory-dom) .hud-overlay .game-title,
 body:has(#game05-intro-overlay-dom) .hud-overlay .game-title,
 body:has(#game05-hud-dom) .hud-overlay .game-title,
 body:has(#game05-examination-dom) .hud-overlay .game-title,
+body:has(#game05-failure-dom) .hud-overlay .game-title,
 body:has(#game01-hud-dom) .hud-overlay .instructions,
 body:has(#game02-intro-overlay-dom) .hud-overlay .instructions,
 body:has(#game02-hud-dom) .hud-overlay .instructions,
@@ -99,7 +100,8 @@ body:has(#game04-victory-cinematic-dom) .hud-overlay .instructions,
 body:has(#game04-victory-dom) .hud-overlay .instructions,
 body:has(#game05-intro-overlay-dom) .hud-overlay .instructions,
 body:has(#game05-hud-dom) .hud-overlay .instructions,
-body:has(#game05-examination-dom) .hud-overlay .instructions {
+body:has(#game05-examination-dom) .hud-overlay .instructions,
+body:has(#game05-failure-dom) .hud-overlay .instructions {
   display: none !important;
 }
 
@@ -3009,5 +3011,322 @@ body:has(#game05-examination-dom) .hud-overlay .instructions {
   color: #64748b;
   text-transform: uppercase;
 }
+
+/* Water Level Warning / Critical / Drained Subtitle States */
+.game05-hud-warning {
+  color: #f59e0b !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.6) !important;
+}
+
+.game05-hud-critical {
+  color: #ef4444 !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 14px rgba(239, 68, 68, 0.8) !important;
+  animation: promptPulse 1.2s infinite ease-in-out;
+}
+
+.game05-hud-drained {
+  color: #38bdf8 !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.75) !important;
+}
+
+/* Water Progress Panel */
+.game05-water-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+  background: rgba(8, 14, 22, 0.88);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 8px;
+  padding: 0.65rem 1.4rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.game05-water-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.game05-water-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.game05-water-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #38bdf8;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+}
+
+.game05-water-warning-val {
+  color: #f59e0b;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+}
+
+.game05-water-critical-val {
+  color: #ef4444;
+  text-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+}
+
+.game05-water-stabilized {
+  color: #4ade80;
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.6);
+}
+
+.game05-water-bar-track {
+  width: 220px;
+  height: 6px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.game05-water-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0284c7, #38bdf8);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+  transition: width 0.15s ease-out;
+}
+
+.game05-bar-warning {
+  background: linear-gradient(90deg, #d97706, #f59e0b);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
+}
+
+.game05-bar-critical {
+  background: linear-gradient(90deg, #dc2626, #ef4444);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.9);
+}
+
+.game05-bar-stabilized {
+  background: linear-gradient(90deg, #059669, #10b981);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.75);
+}
+
+/* Valve Tracker HUD */
+.game05-valve-sequence-hud {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.2rem;
+}
+
+.game05-valve-tracker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.game05-valve-next-hint {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #cbd5e1;
+  text-transform: uppercase;
+}
+
+.game05-valve-highlight {
+  color: #38bdf8;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+}
+
+.game05-valve-steps {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.game05-step-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #64748b;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  transition: all 0.25s ease;
+}
+
+.game05-step-active {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.4);
+  background: rgba(6, 78, 59, 0.6);
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.3);
+}
+
+.game05-step-arrow {
+  color: #475569;
+  font-size: 0.7rem;
+}
+
+.game05-sequence-complete-text {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: #4ade80;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.6);
+}
+
+/* Sequence Error Banner */
+.game05-sequence-error-banner {
+  position: fixed;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(30, 10, 14, 0.95);
+  border: 1.5px solid rgba(239, 68, 68, 0.6);
+  border-top: 3px solid #ef4444;
+  box-shadow:
+    0 10px 35px rgba(0, 0, 0, 0.95),
+    0 0 25px rgba(239, 68, 68, 0.35);
+  border-radius: 8px;
+  padding: 0.8rem 1.8rem;
+  backdrop-filter: blur(12px);
+  z-index: 100002;
+  animation: warningFlash 0.3s alternate 2 ease-out;
+  pointer-events: none;
+}
+
+.game05-error-tag {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  color: #ef4444;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.game05-error-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #f1f5f9;
+}
+
+/* ========================================================= */
+/* GAME 05 FAILURE OVERLAY                                   */
+/* ========================================================= */
+.game05-failure-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(16, 6, 10, 0.96) 0%, rgba(4, 2, 6, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.8s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game05-failure-card {
+  max-width: 580px;
+  width: 90%;
+  background: rgba(18, 12, 16, 0.88);
+  border: 1.5px solid rgba(239, 68, 68, 0.35);
+  border-top: 3px solid #ef4444;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(239, 68, 68, 0.15);
+  border-radius: 12px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  backdrop-filter: blur(16px);
+}
+
+.game05-failure-tag {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  color: #ef4444;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.game05-failure-title {
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #f8fafc;
+  text-transform: uppercase;
+  margin: 0.5rem 0 1.5rem;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+}
+
+.game05-failure-divider {
+  width: 60px;
+  height: 2px;
+  background: #ef4444;
+  margin: 0 auto 1.8rem;
+  opacity: 0.7;
+}
+
+.game05-failure-lore {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #cbd5e1;
+  margin-bottom: 2.5rem;
+}
+
+.game05-failure-quote {
+  color: #fca5a5 !important;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.6rem !important;
+}
+
+.game05-failure-subtext {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  font-style: italic;
+  margin: 0;
+}
+
+.game05-failure-button {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 0.9rem 2.8rem;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  transition: all 0.25s ease;
+}
+
+.game05-failure-button:hover {
+  background: linear-gradient(135deg, #f87171, #dc2626);
+  box-shadow: 0 8px 26px rgba(239, 68, 68, 0.6);
+  transform: translateY(-2px);
+}
+
+.game05-failure-button:active {
+  transform: translateY(1px);
+}
+
 
 

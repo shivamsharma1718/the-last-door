@@ -1,6 +1,10 @@
 import React from 'react'
 import { Text } from '@react-three/drei'
-import type { DrowningHallObject, ValveModel } from './drowningHallTypes'
+import type {
+  DrowningHallObject,
+  ValveModel,
+  ValveId,
+} from './drowningHallTypes'
 import {
   ROOM05_WIDTH,
   ROOM05_HEIGHT,
@@ -8,7 +12,12 @@ import {
   EXIT_POSITION,
   INITIAL_WATER_LEVEL,
 } from './drowningHallTypes'
-import { getDrowningHallObjects, getValves } from './drowningHallLogic'
+import {
+  getDrowningHallObjects,
+  getValves,
+  isWaterWarning,
+  isWaterCritical,
+} from './drowningHallLogic'
 
 /**
  * 1. Base Stand for Investigation Artifacts
@@ -316,7 +325,10 @@ const FloodMarkerMesh: React.FC<{ item: DrowningHallObject }> = ({ item }) => {
 /**
  * 6. Physical Industrial Valve Assembly
  */
-const ValveAssemblyMesh: React.FC<{ valve: ValveModel }> = ({ valve }) => {
+const ValveAssemblyMesh: React.FC<{
+  valve: ValveModel
+  isActivated?: boolean
+}> = ({ valve, isActivated = false }) => {
   const [vx, vy, vz] = valve.position
   const isLeftWall = vx < 0
 
@@ -326,13 +338,13 @@ const ValveAssemblyMesh: React.FC<{ valve: ValveModel }> = ({ valve }) => {
       <Text
         position={[0, 0.65, 0]}
         fontSize={0.16}
-        color="#f8fafc"
+        color={isActivated ? '#4ade80' : '#f8fafc'}
         anchorX="center"
         anchorY="middle"
         fontWeight="bold"
         letterSpacing={0.2}
       >
-        {valve.label}
+        {isActivated ? `${valve.label} [OPEN]` : valve.label}
       </Text>
 
       {/* Heavy Wall Flange Mount */}
@@ -361,12 +373,19 @@ const ValveAssemblyMesh: React.FC<{ valve: ValveModel }> = ({ valve }) => {
         <meshStandardMaterial color="#1f2937" roughness={0.5} metalness={0.85} />
       </mesh>
 
-      {/* Circular Red Industrial Handwheel */}
-      <group position={[isLeftWall ? 0.28 : -0.28, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+      {/* Circular Industrial Handwheel (Red when closed, Emerald when activated) */}
+      <group
+        position={[isLeftWall ? 0.28 : -0.28, 0, 0]}
+        rotation={[0, Math.PI / 2, isActivated ? Math.PI / 4 : 0]}
+      >
         {/* Outer Wheel Rim */}
         <mesh castShadow>
           <torusGeometry args={[0.26, 0.035, 16, 24]} />
-          <meshStandardMaterial color="#dc2626" roughness={0.4} metalness={0.6} />
+          <meshStandardMaterial
+            color={isActivated ? '#10b981' : '#dc2626'}
+            roughness={0.4}
+            metalness={0.6}
+          />
         </mesh>
         {/* Center Hub */}
         <mesh rotation={[Math.PI / 2, 0, 0]}>
@@ -377,7 +396,11 @@ const ValveAssemblyMesh: React.FC<{ valve: ValveModel }> = ({ valve }) => {
         {[0, Math.PI / 3, (2 * Math.PI) / 3].map((angle, i) => (
           <mesh key={`spoke-${i}`} rotation={[0, 0, angle]}>
             <boxGeometry args={[0.5, 0.03, 0.02]} />
-            <meshStandardMaterial color="#dc2626" roughness={0.4} metalness={0.6} />
+            <meshStandardMaterial
+              color={isActivated ? '#10b981' : '#dc2626'}
+              roughness={0.4}
+              metalness={0.6}
+            />
           </mesh>
         ))}
       </group>
@@ -391,7 +414,7 @@ const ValveAssemblyMesh: React.FC<{ valve: ValveModel }> = ({ valve }) => {
         <Text
           position={[0, 0, 0.015]}
           fontSize={0.065}
-          color="#38bdf8"
+          color={isActivated ? '#4ade80' : '#38bdf8'}
           anchorX="center"
           anchorY="middle"
           fontWeight="bold"
@@ -402,7 +425,13 @@ const ValveAssemblyMesh: React.FC<{ valve: ValveModel }> = ({ valve }) => {
       </group>
 
       {/* Localized Valve Light */}
-      <pointLight position={[0, 0.2, 0.35]} color="#f87171" intensity={2.6} distance={4.5} decay={2} />
+      <pointLight
+        position={[0, 0.2, 0.35]}
+        color={isActivated ? '#22c55e' : '#f87171'}
+        intensity={isActivated ? 3.2 : 2.6}
+        distance={4.5}
+        decay={2}
+      />
     </group>
   )
 }
@@ -498,7 +527,7 @@ const ExitDoorModel: React.FC = () => {
 
 /**
  * 8. Contaminated Industrial Water Surface Plane
- * Ready for programmatic waterLevel parameter (0 to 100).
+ * Programmatic waterLevel parameter (0 to 100).
  */
 const WaterSurface: React.FC<{ waterLevel?: number }> = ({
   waterLevel = INITIAL_WATER_LEVEL,
@@ -613,18 +642,23 @@ const IndustrialInfrastructure: React.FC = () => {
 
 export interface TheDrowningHallArenaProps {
   waterLevel?: number
+  activatedValves?: ValveId[]
 }
 
 /**
  * Top-Level 3D Arena Component for Game 05: THE DROWNING HALL.
  * Enclosed water-control facility environment with concrete surfaces,
- * industrial piping, 4 investigation targets, 3 valves, emergency exit, and water surface.
+ * industrial piping, 4 investigation targets, 3 valves, emergency exit, and dynamic water surface.
  */
 export const TheDrowningHallArena: React.FC<TheDrowningHallArenaProps> = ({
   waterLevel = INITIAL_WATER_LEVEL,
+  activatedValves = [],
 }) => {
   const items = getDrowningHallObjects()
   const valves = getValves()
+
+  const isWarning = isWaterWarning(waterLevel)
+  const isCritical = isWaterCritical(waterLevel)
 
   const halfWidth = ROOM05_WIDTH / 2
   const halfHeight = ROOM05_HEIGHT / 2
@@ -636,15 +670,42 @@ export const TheDrowningHallArena: React.FC<TheDrowningHallArenaProps> = ({
       <color attach="background" args={['#060a10']} />
       <fog attach="fog" args={['#060a10', 8, 30]} />
 
-      {/* 2. Controlled Industrial Lighting */}
-      <ambientLight color="#1e2838" intensity={0.75} />
+      {/* 2. Controlled Industrial Lighting reacting to water state */}
+      <ambientLight
+        color={isCritical ? '#2a1618' : isWarning ? '#26221c' : '#1e2838'}
+        intensity={isCritical ? 0.5 : isWarning ? 0.65 : 0.75}
+      />
       <directionalLight position={[0, 4.2, 0]} color="#475569" intensity={0.6} />
 
       {/* Distributed Overhead Industrial Cage Downlights */}
-      <pointLight position={[0, 4.2, 7.0]} color="#f8fafc" intensity={4.5} distance={14.0} decay={2} />
-      <pointLight position={[0, 4.2, 2.0]} color="#e2e8f0" intensity={4.5} distance={14.0} decay={2} />
-      <pointLight position={[0, 4.2, -3.0]} color="#cbd5e1" intensity={4.5} distance={14.0} decay={2} />
-      <pointLight position={[0, 4.2, -8.0]} color="#94a3b8" intensity={4.5} distance={14.0} decay={2} />
+      <pointLight
+        position={[0, 4.2, 7.0]}
+        color={isCritical ? '#fca5a5' : isWarning ? '#fde68a' : '#f8fafc'}
+        intensity={isCritical ? 3.6 : 4.5}
+        distance={14.0}
+        decay={2}
+      />
+      <pointLight
+        position={[0, 4.2, 2.0]}
+        color={isCritical ? '#fca5a5' : isWarning ? '#fde68a' : '#e2e8f0'}
+        intensity={isCritical ? 3.6 : 4.5}
+        distance={14.0}
+        decay={2}
+      />
+      <pointLight
+        position={[0, 4.2, -3.0]}
+        color={isCritical ? '#fca5a5' : isWarning ? '#fde68a' : '#cbd5e1'}
+        intensity={isCritical ? 3.6 : 4.5}
+        distance={14.0}
+        decay={2}
+      />
+      <pointLight
+        position={[0, 4.2, -8.0]}
+        color={isCritical ? '#fca5a5' : isWarning ? '#fde68a' : '#94a3b8'}
+        intensity={isCritical ? 3.6 : 4.5}
+        distance={14.0}
+        decay={2}
+      />
 
       {/* 3. Fully Enclosed Industrial Chamber */}
       {/* Concrete Floor */}
@@ -760,7 +821,11 @@ export const TheDrowningHallArena: React.FC<TheDrowningHallArenaProps> = ({
 
       {/* 7. Three Physical Industrial Valves */}
       {valves.map((valve) => (
-        <ValveAssemblyMesh key={valve.id} valve={valve} />
+        <ValveAssemblyMesh
+          key={valve.id}
+          valve={valve}
+          isActivated={activatedValves.includes(valve.id)}
+        />
       ))}
 
       {/* 8. Locked Industrial Emergency Exit Blast Door */}

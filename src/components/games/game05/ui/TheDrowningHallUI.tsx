@@ -6,6 +6,7 @@ import {
 import { Game05Intro } from './Game05Intro'
 import { Game05HUD } from './Game05HUD'
 import { Game05Examination } from './Game05Examination'
+import { Game05Failure } from './Game05Failure'
 
 export const TheDrowningHallUI: React.FC = () => {
   const state = useDrowningHallStore()
@@ -14,17 +15,29 @@ export const TheDrowningHallUI: React.FC = () => {
     return null
   }
 
+  const isExploringOrExamining =
+    state.status === 'exploring' ||
+    state.status === 'water_warning' ||
+    state.status === 'water_critical' ||
+    state.status === 'examining'
+
   return (
     <>
       {state.status === 'intro' && (
         <Game05Intro onBegin={drowningHallStore.beginExploration} />
       )}
 
-      {(state.status === 'exploring' || state.status === 'examining') && (
+      {isExploringOrExamining && (
         <Game05HUD
           objectsFound={state.examinedIds.size}
           totalObjects={4}
-          nearestItem={state.status === 'exploring' ? state.nearestItem : null}
+          waterLevel={state.waterLevel}
+          waterActive={state.waterActive}
+          activatedValves={state.activatedValves}
+          isDrainageComplete={state.isDrainageComplete}
+          sequenceError={state.sequenceError}
+          nearestItem={state.status !== 'examining' ? state.nearestItem : null}
+          nearestValve={state.status !== 'examining' ? state.nearestValve : null}
         />
       )}
 
@@ -33,6 +46,10 @@ export const TheDrowningHallUI: React.FC = () => {
           item={state.activeItem}
           onClose={drowningHallStore.closeExamination}
         />
+      )}
+
+      {(state.status === 'failing' || state.status === 'failed') && (
+        <Game05Failure onRestart={drowningHallStore.restart} />
       )}
     </>
   )

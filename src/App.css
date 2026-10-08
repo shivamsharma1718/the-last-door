@@ -72,6 +72,8 @@ body:has(#game05-intro-overlay-dom) .hud-overlay .game-title,
 body:has(#game05-hud-dom) .hud-overlay .game-title,
 body:has(#game05-examination-dom) .hud-overlay .game-title,
 body:has(#game05-failure-dom) .hud-overlay .game-title,
+body:has(#game05-victory-cinematic-dom) .hud-overlay .game-title,
+body:has(#game05-victory-dom) .hud-overlay .game-title,
 body:has(#game01-hud-dom) .hud-overlay .instructions,
 body:has(#game02-intro-overlay-dom) .hud-overlay .instructions,
 body:has(#game02-hud-dom) .hud-overlay .instructions,
@@ -101,7 +103,9 @@ body:has(#game04-victory-dom) .hud-overlay .instructions,
 body:has(#game05-intro-overlay-dom) .hud-overlay .instructions,
 body:has(#game05-hud-dom) .hud-overlay .instructions,
 body:has(#game05-examination-dom) .hud-overlay .instructions,
-body:has(#game05-failure-dom) .hud-overlay .instructions {
+body:has(#game05-failure-dom) .hud-overlay .instructions,
+body:has(#game05-victory-cinematic-dom) .hud-overlay .instructions,
+body:has(#game05-victory-dom) .hud-overlay .instructions {
   display: none !important;
 }
 
@@ -3327,6 +3331,145 @@ body:has(#game05-failure-dom) .hud-overlay .instructions {
 .game05-failure-button:active {
   transform: translateY(1px);
 }
+
+/* ========================================================= */
+/* GAME 05: THE DROWNING HALL — VICTORY CINEMATIC & SCREEN   */
+/* ========================================================= */
+.game05-victory-cinematic-overlay {
+  position: fixed;
+  inset: 0;
+  background: #020408;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  pointer-events: auto;
+  cursor: default;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.game05-transition-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  max-width: 650px;
+}
+
+.game05-transition-text {
+  font-size: 1.25rem;
+  line-height: 1.8;
+  margin: 0;
+  text-shadow: 0 0 15px rgba(0, 0, 0, 0.9);
+}
+
+.game05-fade-in {
+  animation: fadeIn 1s ease-out;
+}
+
+.game05-victory-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(8, 20, 32, 0.96) 0%, rgba(2, 5, 10, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.8s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game05-victory-card {
+  max-width: 580px;
+  width: 90%;
+  background: rgba(10, 22, 35, 0.88);
+  border: 1.5px solid rgba(56, 189, 248, 0.35);
+  border-top: 3px solid #38bdf8;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(56, 189, 248, 0.15);
+  border-radius: 12px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  backdrop-filter: blur(16px);
+}
+
+.game05-victory-tag {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  color: #38bdf8;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+.game05-victory-title {
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #f8fafc;
+  text-transform: uppercase;
+  margin: 0.5rem 0 1.5rem;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+}
+
+.game05-victory-divider {
+  width: 60px;
+  height: 2px;
+  background: #38bdf8;
+  margin: 0 auto 1.8rem;
+  opacity: 0.7;
+}
+
+.game05-victory-lore {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #cbd5e1;
+  margin-bottom: 2.5rem;
+}
+
+.game05-victory-quote {
+  color: #7dd3fc !important;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.6rem !important;
+}
+
+.game05-victory-subtext {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  font-style: italic;
+  margin: 0;
+}
+
+.game05-victory-button {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 0.9rem 2.8rem;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+  transition: all 0.25s ease;
+}
+
+.game05-victory-button:hover {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  box-shadow: 0 8px 26px rgba(56, 189, 248, 0.6);
+  transform: translateY(-2px);
+}
+
+.game05-victory-button:active {
+  transform: translateY(1px);
+}
+
 
 
 

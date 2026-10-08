@@ -21,6 +21,7 @@ export interface DrowningHallState {
   activeItem: DrowningHallObject | null
   nearestItem: DrowningHallObject | null
   nearestValve: ValveModel | null
+  isNearExit: boolean
   examinedIds: Set<string>
   waterLevel: number
   waterActive: boolean
@@ -36,6 +37,7 @@ const initialState: DrowningHallState = {
   activeItem: null,
   nearestItem: null,
   nearestValve: null,
+  isNearExit: false,
   examinedIds: new Set(),
   waterLevel: 0,
   waterActive: false,
@@ -86,6 +88,12 @@ export const drowningHallStore = {
       emitChange()
     }
   },
+  setIsNearExit: (isNearExit: boolean) => {
+    if (currentState.isNearExit !== isNearExit) {
+      currentState = { ...currentState, isNearExit }
+      emitChange()
+    }
+  },
   openExamination: (item: DrowningHallObject) => {
     if (typeof document !== 'undefined' && document.pointerLockElement) {
       document.exitPointerLock()
@@ -124,7 +132,9 @@ export const drowningHallStore = {
       currentState.isDrainageComplete ||
       currentState.status === 'failing' ||
       currentState.status === 'failed' ||
-      currentState.status === 'intro'
+      currentState.status === 'intro' ||
+      currentState.status === 'victory_cinematic' ||
+      currentState.status === 'victory'
     ) {
       return
     }
@@ -221,6 +231,35 @@ export const drowningHallStore = {
     }
     emitChange()
   },
+  triggerExitSuccess: () => {
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+    currentState = {
+      ...currentState,
+      waterActive: false,
+      status: 'victory_cinematic',
+    }
+    emitChange()
+  },
+  triggerVictory: () => {
+    currentState = {
+      ...currentState,
+      status: 'victory',
+    }
+    emitChange()
+  },
+  continueNextTrial: () => {
+    currentState = {
+      ...currentState,
+      status: 'next_trial',
+      isActive: false,
+    }
+    emitChange()
+    if (onCompleteCallback) {
+      onCompleteCallback()
+    }
+  },
   triggerFailing: () => {
     if (typeof document !== 'undefined' && document.pointerLockElement) {
       document.exitPointerLock()
@@ -246,17 +285,6 @@ export const drowningHallStore = {
       resetCounter: currentState.resetCounter + 1,
     }
     emitChange()
-  },
-  completeTrial: () => {
-    currentState = {
-      ...currentState,
-      status: 'next_trial',
-      isActive: false,
-    }
-    emitChange()
-    if (onCompleteCallback) {
-      onCompleteCallback()
-    }
   },
 }
 

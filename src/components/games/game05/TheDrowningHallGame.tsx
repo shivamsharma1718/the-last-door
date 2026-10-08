@@ -14,6 +14,7 @@ import {
 import {
   getNearestDrowningHallObject,
   getNearestValve,
+  isAtExit,
 } from './drowningHallLogic'
 import {
   useDrowningHallStore,
@@ -23,7 +24,7 @@ import {
 /**
  * 3D coordinator for Game 05: THE DROWNING HALL.
  * Renders Three.js arena and first-person player controls inside R3F Canvas.
- * Synchronizes gameplay state, water progression, and valve interactions with drowningHallStore.
+ * Synchronizes gameplay state, water progression, valve interactions, and exit escape with drowningHallStore.
  */
 export const TheDrowningHallGame: React.FC<TheDrowningHallProps> = ({
   onComplete,
@@ -32,6 +33,7 @@ export const TheDrowningHallGame: React.FC<TheDrowningHallProps> = ({
     status,
     nearestItem,
     nearestValve,
+    isNearExit,
     waterLevel,
     activatedValves,
     isDrainageComplete,
@@ -46,6 +48,9 @@ export const TheDrowningHallGame: React.FC<TheDrowningHallProps> = ({
 
   const nearestValveRef = useRef(nearestValve)
   nearestValveRef.current = nearestValve
+
+  const isNearExitRef = useRef(isNearExit)
+  isNearExitRef.current = isNearExit
 
   const isDrainageCompleteRef = useRef(isDrainageComplete)
   isDrainageCompleteRef.current = isDrainageComplete
@@ -91,10 +96,17 @@ export const TheDrowningHallGame: React.FC<TheDrowningHallProps> = ({
       if (nearestValveRef.current !== null) {
         drowningHallStore.setNearestValve(null)
       }
+      if (isNearExitRef.current) {
+        drowningHallStore.setIsNearExit(false)
+      }
       return
     }
 
-    // 2. Proximity Detection for Investigation Objects & Valves
+    // 2. Proximity Detection for Room Exit
+    const nearExit = isAtExit(camera.position.z, 2.2)
+    drowningHallStore.setIsNearExit(nearExit)
+
+    // 3. Proximity Detection for Investigation Objects & Valves
     const nearestObj = getNearestDrowningHallObject(
       camera.position.x,
       camera.position.z,
@@ -155,7 +167,13 @@ export const TheDrowningHallGame: React.FC<TheDrowningHallProps> = ({
 
       if (e.code === 'KeyE') {
         if (isExplorationActive) {
-          if (nearestValveRef.current && !isDrainageCompleteRef.current) {
+          if (isNearExitRef.current) {
+            if (isDrainageCompleteRef.current) {
+              e.preventDefault()
+              e.stopPropagation()
+              drowningHallStore.triggerExitSuccess()
+            }
+          } else if (nearestValveRef.current && !isDrainageCompleteRef.current) {
             e.preventDefault()
             e.stopPropagation()
             drowningHallStore.interactValve(nearestValveRef.current.id)
@@ -189,7 +207,7 @@ export const TheDrowningHallGame: React.FC<TheDrowningHallProps> = ({
 
   return (
     <>
-      {/* 3D Arena environment with rising water and valve feedback */}
+      {/* 3D Arena environment with rising water, valves, and exit blast door */}
       <TheDrowningHallArena
         waterLevel={waterLevel}
         activatedValves={activatedValves}

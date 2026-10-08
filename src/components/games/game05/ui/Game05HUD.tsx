@@ -17,6 +17,7 @@ export interface Game05HUDProps {
   waterActive?: boolean
   activatedValves?: ValveId[]
   isDrainageComplete?: boolean
+  isNearExit?: boolean
   sequenceError?: string | null
   nearestItem?: DrowningHallObject | null
   nearestValve?: ValveModel | null
@@ -34,6 +35,7 @@ export const Game05HUD: React.FC<Game05HUDProps> = ({
   waterLevel = 0,
   activatedValves = [],
   isDrainageComplete = false,
+  isNearExit = false,
   sequenceError = null,
   nearestItem = null,
   nearestValve = null,
@@ -51,7 +53,7 @@ export const Game05HUD: React.FC<Game05HUDProps> = ({
 
         {isDrainageComplete ? (
           <span className="game05-hud-subtitle game05-hud-drained">
-            DRAINAGE SYSTEM ACTIVE • WATER LEVEL STABILIZED
+            DRAINAGE SYSTEM ACTIVE • WATER LEVEL STABILIZED • EXIT UNLOCKED
           </span>
         ) : isCritical ? (
           <span className="game05-hud-subtitle game05-hud-critical">
@@ -115,7 +117,7 @@ export const Game05HUD: React.FC<Game05HUDProps> = ({
             <div className="game05-valve-sequence-hud">
               {isDrainageComplete ? (
                 <span className="game05-sequence-complete-text">
-                  SEQUENCE COMPLETE • EMERGENCY DRAIN OPEN
+                  SEQUENCE COMPLETE • EMERGENCY DRAIN OPEN • REACH THE EXIT
                 </span>
               ) : (
                 <div className="game05-valve-tracker">
@@ -171,8 +173,26 @@ export const Game05HUD: React.FC<Game05HUDProps> = ({
         </div>
       )}
 
-      {/* Dynamic Proximity Prompt */}
-      {nearestValve && !isDrainageComplete && (
+      {/* Dynamic Proximity Prompts: Exit > Valve > Investigation */}
+      {isNearExit && (
+        isDrainageComplete ? (
+          <div className="game05-interaction-prompt" id="game05-exit-prompt-dom">
+            <div className="game05-prompt-target" style={{ color: '#38bdf8' }}>[EXIT UNLOCKED]</div>
+            <div className="game05-prompt-action">
+              <span className="key-badge">E</span> ESCAPE
+            </div>
+          </div>
+        ) : (
+          <div className="game05-interaction-prompt game05-prompt-locked" id="game05-exit-prompt-dom">
+            <div className="game05-prompt-target" style={{ color: '#ef4444' }}>[EXIT SEALED]</div>
+            <div className="game05-prompt-action" style={{ color: '#94a3b8', fontSize: '0.85rem' }}>
+              ACTIVATE DRAINAGE SYSTEM
+            </div>
+          </div>
+        )
+      )}
+
+      {!isNearExit && nearestValve && !isDrainageComplete && (
         <div className="game05-interaction-prompt" id="game05-valve-prompt-dom">
           <div className="game05-prompt-target">[{nearestValve.label}]</div>
           <div className="game05-prompt-action">
@@ -181,7 +201,7 @@ export const Game05HUD: React.FC<Game05HUDProps> = ({
         </div>
       )}
 
-      {!nearestValve && nearestItem && (
+      {!isNearExit && !nearestValve && nearestItem && (
         <div className="game05-interaction-prompt" id="game05-prompt-dom">
           <div className="game05-prompt-target">[{nearestItem.title}]</div>
           <div className="game05-prompt-action">

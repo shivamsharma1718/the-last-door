@@ -17,6 +17,7 @@ import {
   getValves,
   isWaterWarning,
   isWaterCritical,
+  isExitUnlocked,
 } from './drowningHallLogic'
 
 /**
@@ -437,9 +438,11 @@ const ValveAssemblyMesh: React.FC<{
 }
 
 /**
- * 7. Heavy Industrial Emergency Exit Blast Door
+ * 7. Heavy Industrial Emergency Exit Blast Door (with dynamic Unlocked state)
  */
-const ExitDoorModel: React.FC = () => {
+const ExitDoorModel: React.FC<{ isUnlocked?: boolean }> = ({
+  isUnlocked = false,
+}) => {
   const [ex, , ez] = EXIT_POSITION
 
   return (
@@ -458,22 +461,41 @@ const ExitDoorModel: React.FC = () => {
         <meshStandardMaterial color="#1e2838" roughness={0.75} metalness={0.45} />
       </mesh>
 
-      {/* Main Double Blast Door Panels */}
-      <mesh position={[-0.54, 1.5, 0]} receiveShadow castShadow>
+      {/* Main Double Blast Door Panels (slightly parted when unlocked) */}
+      <mesh
+        position={[isUnlocked ? -0.62 : -0.54, 1.5, 0]}
+        receiveShadow
+        castShadow
+      >
         <boxGeometry args={[1.05, 2.9, 0.16]} />
         <meshStandardMaterial color="#121924" roughness={0.7} metalness={0.65} />
       </mesh>
-      <mesh position={[0.54, 1.5, 0]} receiveShadow castShadow>
+      <mesh
+        position={[isUnlocked ? 0.62 : 0.54, 1.5, 0]}
+        receiveShadow
+        castShadow
+      >
         <boxGeometry args={[1.05, 2.9, 0.16]} />
         <meshStandardMaterial color="#121924" roughness={0.7} metalness={0.65} />
       </mesh>
 
-      {/* Heavy Hydraulic Locking Pistons */}
-      <mesh position={[-0.9, 1.5, 0.1]}>
+      {/* Center Door Unlocked Seam Light */}
+      {isUnlocked && (
+        <pointLight
+          position={[0, 1.5, -0.1]}
+          color="#38bdf8"
+          intensity={4.0}
+          distance={5.0}
+          decay={2}
+        />
+      )}
+
+      {/* Heavy Hydraulic Locking Pistons (retracted when unlocked) */}
+      <mesh position={[-0.9, 1.5, isUnlocked ? 0.02 : 0.1]}>
         <cylinderGeometry args={[0.05, 0.05, 0.45, 12]} />
         <meshStandardMaterial color="#475569" roughness={0.3} metalness={0.9} />
       </mesh>
-      <mesh position={[0.9, 1.5, 0.1]}>
+      <mesh position={[0.9, 1.5, isUnlocked ? 0.02 : 0.1]}>
         <cylinderGeometry args={[0.05, 0.05, 0.45, 12]} />
         <meshStandardMaterial color="#475569" roughness={0.3} metalness={0.9} />
       </mesh>
@@ -488,38 +510,52 @@ const ExitDoorModel: React.FC = () => {
         <meshStandardMaterial color="#334155" roughness={0.5} metalness={0.7} />
       </mesh>
 
-      {/* Prominent High-Contrast LOCKED Sign Plaque */}
+      {/* Prominent High-Contrast LOCKED / UNLOCKED Sign Plaque */}
       <group position={[0, 3.58, 0.15]}>
         <mesh castShadow>
-          <boxGeometry args={[1.1, 0.34, 0.08]} />
-          <meshStandardMaterial color="#0a0f1d" roughness={0.7} metalness={0.5} />
+          <boxGeometry args={[1.15, 0.34, 0.08]} />
+          <meshStandardMaterial
+            color={isUnlocked ? '#06121e' : '#0a0f1d'}
+            roughness={0.7}
+            metalness={0.5}
+          />
         </mesh>
         <mesh position={[0, 0, 0.042]}>
-          <boxGeometry args={[1.04, 0.28, 0.01]} />
-          <meshBasicMaterial color="#ef4444" transparent opacity={0.3} />
+          <boxGeometry args={[1.08, 0.28, 0.01]} />
+          <meshBasicMaterial
+            color={isUnlocked ? '#38bdf8' : '#ef4444'}
+            transparent
+            opacity={0.3}
+          />
         </mesh>
         <Text
           position={[0, 0, 0.05]}
-          fontSize={0.15}
-          color="#f87171"
+          fontSize={0.14}
+          color={isUnlocked ? '#38bdf8' : '#f87171'}
           anchorX="center"
           anchorY="middle"
-          letterSpacing={0.3}
+          letterSpacing={0.25}
           fontWeight="bold"
         >
-          LOCKED
+          {isUnlocked ? 'UNLOCKED' : 'LOCKED'}
         </Text>
-        <pointLight position={[0, 0, 0.25]} color="#ef4444" intensity={2.0} distance={4.0} decay={2} />
+        <pointLight
+          position={[0, 0, 0.25]}
+          color={isUnlocked ? '#38bdf8' : '#ef4444'}
+          intensity={isUnlocked ? 3.0 : 2.0}
+          distance={4.5}
+          decay={2}
+        />
       </group>
 
       {/* Status Warning Beacon Indicators */}
       <mesh position={[-1.3, 3.2, 0.2]}>
         <sphereGeometry args={[0.04, 12, 12]} />
-        <meshBasicMaterial color="#ef4444" />
+        <meshBasicMaterial color={isUnlocked ? '#38bdf8' : '#ef4444'} />
       </mesh>
       <mesh position={[1.3, 3.2, 0.2]}>
         <sphereGeometry args={[0.04, 12, 12]} />
-        <meshBasicMaterial color="#ef4444" />
+        <meshBasicMaterial color={isUnlocked ? '#38bdf8' : '#ef4444'} />
       </mesh>
     </group>
   )
@@ -659,6 +695,7 @@ export const TheDrowningHallArena: React.FC<TheDrowningHallArenaProps> = ({
 
   const isWarning = isWaterWarning(waterLevel)
   const isCritical = isWaterCritical(waterLevel)
+  const isUnlocked = isExitUnlocked(activatedValves)
 
   const halfWidth = ROOM05_WIDTH / 2
   const halfHeight = ROOM05_HEIGHT / 2
@@ -828,8 +865,8 @@ export const TheDrowningHallArena: React.FC<TheDrowningHallArenaProps> = ({
         />
       ))}
 
-      {/* 8. Locked Industrial Emergency Exit Blast Door */}
-      <ExitDoorModel />
+      {/* 8. Industrial Emergency Exit Blast Door (with dynamic Unlocked state) */}
+      <ExitDoorModel isUnlocked={isUnlocked} />
     </>
   )
 }

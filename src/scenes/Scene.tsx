@@ -16,7 +16,7 @@ export interface SceneProps {
   onDoorOpen?: () => void
 }
 
-export type GameStage = 'hallway' | 'intro' | 'game01' | 'game02' | 'game03' | 'game04' | 'game05'
+export type GameStage = 'hallway' | 'intro' | 'game01' | 'game02' | 'game03' | 'game04' | 'game05' | 'game06'
 
 export const Scene: React.FC<SceneProps> = ({
   isDoorOpen: propIsDoorOpen,
@@ -192,7 +192,21 @@ export const Scene: React.FC<SceneProps> = ({
 
   // If in Game 05 arena
   if (stage === 'game05') {
-    return <TheDrowningHallGame onComplete={() => setStage('game05')} />
+    return <TheDrowningHallGame onComplete={() => setStage('game06')} />
+  }
+
+  // If in Game 06 arena (placeholder stage for Game 05 completion)
+  if (stage === 'game06') {
+    return (
+      <>
+        <color attach="background" args={['#04060a']} />
+        <fog attach="fog" args={['#04060a', 4, 18]} />
+        <ambientLight color="#1e293b" intensity={0.6} />
+        <pointLight position={[0, 3, 0]} color="#38bdf8" intensity={2.5} distance={12} decay={2} />
+        <Room width={6} height={3.5} depth={12} />
+        <PlayerControls roomWidth={6} roomDepth={12} enabled={true} />
+      </>
+    )
   }
 
   return (

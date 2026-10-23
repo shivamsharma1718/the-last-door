@@ -1,2 +1,2 @@
-// Game 06 placeholder
-export {}
+export * from './endlessMazeTypes'
+export * from './endlessMazeLogic'

@@ -17,6 +17,7 @@ export interface EndlessMazeState {
   status: Game06Status
   activeClue: MazeInvestigationObject | null
   nearestClue: MazeInvestigationObject | null
+  isNearExit: boolean
   examinedIds: Set<string>
   layout: MazeLayout
   shiftState: MazeShiftState
@@ -33,6 +34,7 @@ const initialState: EndlessMazeState = {
   status: 'intro',
   activeClue: null,
   nearestClue: null,
+  isNearExit: false,
   examinedIds: new Set(),
   layout: initialLayout,
   shiftState: initialShift,
@@ -78,6 +80,13 @@ export const endlessMazeStore = {
   setNearestClue: (nearestClue: MazeInvestigationObject | null) => {
     if (currentState.nearestClue?.id !== nearestClue?.id) {
       currentState = { ...currentState, nearestClue }
+      emitChange()
+    }
+  },
+
+  setIsNearExit: (isNearExit: boolean) => {
+    if (currentState.isNearExit !== isNearExit) {
+      currentState = { ...currentState, isNearExit }
       emitChange()
     }
   },
@@ -181,6 +190,55 @@ export const endlessMazeStore = {
         emitChange()
       }
     }, 3500)
+  },
+
+  triggerExitSuccess: () => {
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+    currentState = {
+      ...currentState,
+      status: 'victory_cinematic',
+    }
+    emitChange()
+  },
+
+  triggerVictory: () => {
+    currentState = {
+      ...currentState,
+      status: 'victory',
+    }
+    emitChange()
+  },
+
+  continueNextTrial: () => {
+    currentState = {
+      ...currentState,
+      status: 'next_trial',
+      isActive: false,
+    }
+    emitChange()
+    if (onCompleteCallback) {
+      onCompleteCallback()
+    }
+  },
+
+  restart: () => {
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+    if (shiftNoticeTimer) {
+      clearTimeout(shiftNoticeTimer)
+      shiftNoticeTimer = null
+    }
+    currentState = {
+      ...initialState,
+      isActive: true,
+      layout: createInitialMazeLayout(),
+      shiftState: createInitialShiftState(),
+      resetCounter: currentState.resetCounter + 1,
+    }
+    emitChange()
   },
 
   initFreshRun: () => {

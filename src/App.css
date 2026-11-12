@@ -77,6 +77,8 @@ body:has(#game05-victory-dom) .hud-overlay .game-title,
 body:has(#game06-intro-overlay-dom) .hud-overlay .game-title,
 body:has(#game06-hud-dom) .hud-overlay .game-title,
 body:has(#game06-examination-dom) .hud-overlay .game-title,
+body:has(#game06-victory-cinematic-dom) .hud-overlay .game-title,
+body:has(#game06-victory-dom) .hud-overlay .game-title,
 body:has(#game01-hud-dom) .hud-overlay .instructions,
 body:has(#game02-intro-overlay-dom) .hud-overlay .instructions,
 body:has(#game02-hud-dom) .hud-overlay .instructions,
@@ -111,7 +113,9 @@ body:has(#game05-victory-cinematic-dom) .hud-overlay .instructions,
 body:has(#game05-victory-dom) .hud-overlay .instructions,
 body:has(#game06-intro-overlay-dom) .hud-overlay .instructions,
 body:has(#game06-hud-dom) .hud-overlay .instructions,
-body:has(#game06-examination-dom) .hud-overlay .instructions {
+body:has(#game06-examination-dom) .hud-overlay .instructions,
+body:has(#game06-victory-cinematic-dom) .hud-overlay .instructions,
+body:has(#game06-victory-dom) .hud-overlay .instructions {
   display: none !important;
 }
 
@@ -3835,6 +3839,148 @@ body:has(#game06-examination-dom) .hud-overlay .instructions {
   font-style: italic;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
 }
+
+/* ========================================================= */
+/* GAME 06 VICTORY & ESCAPE CINEMATIC                        */
+/* ========================================================= */
+
+.game06-victory-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(6, 10, 18, 0.96) 0%, rgba(2, 4, 7, 0.99) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn 0.8s ease-out;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game06-victory-card {
+  max-width: 620px;
+  width: 90%;
+  background: rgba(10, 16, 26, 0.95);
+  border: 1.5px solid rgba(56, 189, 248, 0.4);
+  border-top: 3px solid #38bdf8;
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.95),
+    0 0 50px rgba(56, 189, 248, 0.16);
+  border-radius: 12px;
+  padding: 3.5rem 3rem 3rem;
+  text-align: center;
+  backdrop-filter: blur(20px);
+}
+
+.game06-victory-tag {
+  display: inline-block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  color: #38bdf8;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+  margin-bottom: 0.4rem;
+}
+
+.game06-victory-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #f8fafc;
+  text-transform: uppercase;
+  margin: 0.2rem 0 1.2rem;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95);
+}
+
+.game06-victory-divider {
+  width: 70px;
+  height: 2px;
+  background: #38bdf8;
+  margin: 0 auto 1.8rem;
+  opacity: 0.7;
+}
+
+.game06-victory-lore {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 2.8rem;
+}
+
+.game06-victory-quote {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #38bdf8;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+  margin: 0;
+}
+
+.game06-victory-subtext {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  font-style: italic;
+  margin: 0;
+}
+
+.game06-victory-button {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 0.9rem 2.8rem;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+  transition: all 0.25s ease;
+  pointer-events: auto;
+}
+
+.game06-victory-button:hover {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  box-shadow: 0 8px 26px rgba(56, 189, 248, 0.6);
+  transform: translateY(-2px);
+}
+
+.game06-victory-button:active {
+  transform: translateY(1px);
+}
+
+.game06-victory-cinematic-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: #020407;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.game06-transition-card {
+  max-width: 700px;
+  width: 90%;
+  text-align: center;
+  padding: 2rem;
+}
+
+.game06-transition-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.game06-fade-in {
+  animation: fadeIn 1.2s ease-out forwards;
+}
+
 
 
 

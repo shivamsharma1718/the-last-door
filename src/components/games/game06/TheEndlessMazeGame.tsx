@@ -17,6 +17,8 @@ import {
   computeMazeWallAABBs,
   constrainPlayerPositionInMaze,
   evaluateShiftTrigger,
+  isExitUnlocked,
+  isPlayerNearExitDoor,
 } from './endlessMazeLogic'
 import {
   useEndlessMazeStore,
@@ -26,7 +28,7 @@ import {
 /**
  * 3D coordinator for Game 06: THE ENDLESS MAZE.
  * Renders Three.js arena and first-person player controls inside R3F Canvas.
- * Synchronizes gameplay state, continuous look-direction shift triggers, and clue investigation.
+ * Synchronizes gameplay state, continuous look-direction shift triggers, clue investigation, and exit escape sequence.
  */
 export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
   onComplete,
@@ -34,6 +36,7 @@ export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
   const {
     status,
     nearestClue,
+    isNearExit,
     examinedIds,
     layout,
     shiftState,
@@ -47,11 +50,16 @@ export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
   const nearestClueRef = useRef(nearestClue)
   nearestClueRef.current = nearestClue
 
+  const isNearExitRef = useRef(isNearExit)
+  isNearExitRef.current = isNearExit
+
   const examinedIdsRef = useRef(examinedIds)
   examinedIdsRef.current = examinedIds
 
   const shiftStateRef = useRef(shiftState)
   shiftStateRef.current = shiftState
+
+  const isEscapingRef = useRef<boolean>(false)
 
   // Reusable 3D vector for GC-free camera look direction detection
   const lookDirVector = useMemo(() => new THREE.Vector3(), [])
@@ -71,6 +79,11 @@ export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
     [wallAABBs]
   )
 
+  // Reset escape sequence flag on run reset
+  useEffect(() => {
+    isEscapingRef.current = false
+  }, [resetCounter])
+
   // Activate Game 06 in store on mount and clean up on unmount
   useEffect(() => {
     endlessMazeStore.setActive(true)
@@ -82,20 +95,26 @@ export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
     }
   }, [onComplete])
 
-  // Ensure pointer lock is cleanly released during modals (intro or examination)
+  // Ensure pointer lock is cleanly released during non-exploring modal/cinematic states
   useEffect(() => {
-    if (status === 'intro' || status === 'examining') {
+    const isPlayerActive =
+      status === 'exploring' || status === 'maze_shifting'
+
+    if (!isPlayerActive) {
       if (typeof document !== 'undefined' && document.pointerLockElement) {
         document.exitPointerLock()
       }
     }
   }, [status])
 
-  // Continuous frame loop for shift trigger evaluation & clue proximity detection
+  // Continuous frame loop for shift trigger evaluation, exit proximity, & clue detection
   useFrame(({ camera }) => {
     if (statusRef.current !== 'exploring') {
       if (nearestClueRef.current !== null) {
         endlessMazeStore.setNearestClue(null)
+      }
+      if (isNearExitRef.current) {
+        endlessMazeStore.setIsNearExit(false)
       }
       return
     }
@@ -120,7 +139,11 @@ export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
       return
     }
 
-    // 3. Proximity detection for unexamined lore clues
+    // 3. Proximity detection for Northern Exit blast door
+    const nearExit = isPlayerNearExitDoor(camera.position.x, camera.position.z, 2.6)
+    endlessMazeStore.setIsNearExit(nearExit)
+
+    // 4. Proximity detection for unexamined lore clues
     const nearest = getNearestMazeClue(
       camera.position.x,
       camera.position.z,
@@ -146,6 +169,22 @@ export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
 
       if (e.code === 'KeyE') {
         if (statusRef.current === 'exploring') {
+          // Check Exit interaction first
+          if (isNearExitRef.current) {
+            const unlocked = isExitUnlocked(
+              examinedIdsRef.current.size,
+              shiftStateRef.current
+            )
+            if (unlocked && !isEscapingRef.current) {
+              isEscapingRef.current = true
+              e.preventDefault()
+              e.stopPropagation()
+              endlessMazeStore.triggerExitSuccess()
+              return
+            }
+          }
+
+          // Check Clue interaction
           if (
             nearestClueRef.current &&
             !examinedIdsRef.current.has(nearestClueRef.current.id as string)
@@ -173,17 +212,19 @@ export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
   }, [])
 
   const isExitRevealed = shiftState.activeShifts.includes('shift_exit_unseal')
-  const isControlsEnabled = status !== 'intro' && status !== 'examining'
+  const isControlsEnabled = status === 'exploring' || status === 'maze_shifting'
   const isMovementEnabled = status === 'exploring'
+  const isEscaping = status === 'victory_cinematic' || status === 'victory'
 
   return (
     <>
-      {/* 3D Arena environment with dynamic shifted layout and horror flicker */}
+      {/* 3D Arena environment with dynamic shifted layout, horror flicker, and opening blast door */}
       <TheEndlessMazeArena
         layout={layout}
         examinedIds={examinedIds}
         isExitRevealed={isExitRevealed}
         isShifting={isShifting}
+        isEscaping={isEscaping}
       />
 
       {/* First-person player controls constrained to maze corridors */}

@@ -729,6 +729,34 @@ export function canEscapeMaze(
   return exitRevealed && isPlayerAtExit(playerCoord)
 }
 
+/**
+ * Checks whether all conditions required to escape the maze are satisfied:
+ * All four investigation remnants must be discovered, and the exit unseal shift must have executed.
+ */
+export function isExitUnlocked(
+  cluesCount: number,
+  shiftState: MazeShiftState
+): boolean {
+  return (
+    cluesCount >= REQUIRED_CLUES_COUNT_G06 &&
+    shiftState.activeShifts.includes('shift_exit_unseal')
+  )
+}
+
+/**
+ * Checks if the player's continuous world position is within interaction range of the exit blast door.
+ * Door threshold is positioned at [0.0, -10.0] leading into exit chamber (3, 0).
+ */
+export function isPlayerNearExitDoor(
+  playerX: number,
+  playerZ: number,
+  threshold: number = 2.6
+): boolean {
+  const dx = playerX - 0.0
+  const dz = playerZ - (-10.0)
+  return Math.sqrt(dx * dx + dz * dz) <= threshold
+}
+
 // ---------------------------------------------------------------------------
 // Maze Collision Boundaries & Movement Constraints
 // ---------------------------------------------------------------------------

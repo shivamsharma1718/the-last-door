@@ -340,8 +340,9 @@ const EntranceAirlock: React.FC = () => {
 // 3. Exit Blast Door & Chamber (North row 0)
 // ---------------------------------------------------------------------------
 
-const ExitBlastDoor: React.FC<{ isUnlocked?: boolean }> = ({
+const ExitBlastDoor: React.FC<{ isUnlocked?: boolean; isEscaping?: boolean }> = ({
   isUnlocked = false,
+  isEscaping = false,
 }) => {
   const [ex, , ez] = EXIT_WORLD_POS
 
@@ -364,7 +365,11 @@ const ExitBlastDoor: React.FC<{ isUnlocked?: boolean }> = ({
 
       {/* Main Double Blast Door Panels */}
       <mesh
-        position={[isUnlocked ? -0.7 : -0.55, 1.6, -CELL_SIZE / 2 + 0.2]}
+        position={[
+          isEscaping ? -1.35 : isUnlocked ? -0.85 : -0.55,
+          1.6,
+          -CELL_SIZE / 2 + 0.2,
+        ]}
         receiveShadow
         castShadow
       >
@@ -372,7 +377,11 @@ const ExitBlastDoor: React.FC<{ isUnlocked?: boolean }> = ({
         <meshStandardMaterial color="#0e131b" roughness={0.7} metalness={0.65} />
       </mesh>
       <mesh
-        position={[isUnlocked ? 0.7 : 0.55, 1.6, -CELL_SIZE / 2 + 0.2]}
+        position={[
+          isEscaping ? 1.35 : isUnlocked ? 0.85 : 0.55,
+          1.6,
+          -CELL_SIZE / 2 + 0.2,
+        ]}
         receiveShadow
         castShadow
       >
@@ -483,6 +492,7 @@ export interface TheEndlessMazeArenaProps {
   examinedIds?: Set<string>
   isExitRevealed?: boolean
   isShifting?: boolean
+  isEscaping?: boolean
 }
 
 /**
@@ -496,6 +506,7 @@ export const TheEndlessMazeArena: React.FC<TheEndlessMazeArenaProps> = ({
   examinedIds = new Set(),
   isExitRevealed = false,
   isShifting = false,
+  isEscaping = false,
 }) => {
   const maze = useMemo(() => propLayout || createInitialMazeLayout(), [propLayout])
   const clues = useMemo(() => getMazeClues(), [])
@@ -713,7 +724,7 @@ export const TheEndlessMazeArena: React.FC<TheEndlessMazeArenaProps> = ({
       <EntranceAirlock />
 
       {/* 9. Sealed Exit Blast Door Chamber */}
-      <ExitBlastDoor isUnlocked={isExitRevealed} />
+      <ExitBlastDoor isUnlocked={isExitRevealed} isEscaping={isEscaping} />
     </>
   )
 }

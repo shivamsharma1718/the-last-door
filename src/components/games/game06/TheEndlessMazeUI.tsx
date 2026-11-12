@@ -6,7 +6,9 @@ import {
 import { Game06Intro } from './ui/Game06Intro'
 import { Game06HUD } from './ui/Game06HUD'
 import { Game06Examination } from './ui/Game06Examination'
+import { Game06Victory, Game06VictoryCinematic } from './ui/Game06Victory'
 import { REQUIRED_CLUES_COUNT_G06 } from './endlessMazeTypes'
+import { isExitUnlocked } from './endlessMazeLogic'
 
 export const TheEndlessMazeUI: React.FC = () => {
   const state = useEndlessMazeStore()
@@ -19,6 +21,8 @@ export const TheEndlessMazeUI: React.FC = () => {
     state.status === 'exploring' ||
     state.status === 'examining' ||
     state.status === 'maze_shifting'
+
+  const exitUnlocked = isExitUnlocked(state.examinedIds.size, state.shiftState)
 
   return (
     <>
@@ -35,6 +39,8 @@ export const TheEndlessMazeUI: React.FC = () => {
               ? state.nearestClue
               : null
           }
+          isNearExit={state.status !== 'examining' ? state.isNearExit : false}
+          isExitUnlocked={exitUnlocked}
           examinedIds={state.examinedIds}
           shiftNotice={state.shiftNotice}
         />
@@ -50,6 +56,16 @@ export const TheEndlessMazeUI: React.FC = () => {
           item={state.activeClue}
           onClose={endlessMazeStore.closeExamination}
         />
+      )}
+
+      {state.status === 'victory_cinematic' && (
+        <Game06VictoryCinematic
+          onSequenceComplete={endlessMazeStore.triggerVictory}
+        />
+      )}
+
+      {state.status === 'victory' && (
+        <Game06Victory onContinue={endlessMazeStore.continueNextTrial} />
       )}
     </>
   )

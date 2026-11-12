@@ -17,7 +17,7 @@ export interface SceneProps {
   onDoorOpen?: () => void
 }
 
-export type GameStage = 'hallway' | 'intro' | 'game01' | 'game02' | 'game03' | 'game04' | 'game05' | 'game06'
+export type GameStage = 'hallway' | 'intro' | 'game01' | 'game02' | 'game03' | 'game04' | 'game05' | 'game06' | 'game07'
 
 export const Scene: React.FC<SceneProps> = ({
   isDoorOpen: propIsDoorOpen,
@@ -198,7 +198,21 @@ export const Scene: React.FC<SceneProps> = ({
 
   // If in Game 06 arena
   if (stage === 'game06') {
-    return <TheEndlessMazeGame />
+    return <TheEndlessMazeGame onComplete={() => setStage('game07')} />
+  }
+
+  // If in Game 07 arena (placeholder stage for Game 06 completion)
+  if (stage === 'game07') {
+    return (
+      <>
+        <color attach="background" args={['#04060a']} />
+        <fog attach="fog" args={['#04060a', 4, 18]} />
+        <ambientLight color="#1e293b" intensity={0.6} />
+        <pointLight position={[0, 3, 0]} color="#38bdf8" intensity={2.5} distance={12} decay={2} />
+        <Room width={6} height={3.5} depth={12} />
+        <PlayerControls roomWidth={6} roomDepth={12} enabled={true} />
+      </>
+    )
   }
 
   return (

@@ -9,6 +9,7 @@ import { RoomOfNamesGame } from '../components/games/game02/RoomOfNamesGame'
 import { ThreeDoorsGame } from '../components/games/game03/ThreeDoorsGame'
 import { TheWatcherGame } from '../components/games/game04/TheWatcherGame'
 import { TheDrowningHallGame } from '../components/games/game05/TheDrowningHallGame'
+import { TheEndlessMazeGame } from '../components/games/game06'
 
 export interface SceneProps {
   isDoorOpen?: boolean
@@ -195,18 +196,9 @@ export const Scene: React.FC<SceneProps> = ({
     return <TheDrowningHallGame onComplete={() => setStage('game06')} />
   }
 
-  // If in Game 06 arena (placeholder stage for Game 05 completion)
+  // If in Game 06 arena
   if (stage === 'game06') {
-    return (
-      <>
-        <color attach="background" args={['#04060a']} />
-        <fog attach="fog" args={['#04060a', 4, 18]} />
-        <ambientLight color="#1e293b" intensity={0.6} />
-        <pointLight position={[0, 3, 0]} color="#38bdf8" intensity={2.5} distance={12} decay={2} />
-        <Room width={6} height={3.5} depth={12} />
-        <PlayerControls roomWidth={6} roomDepth={12} enabled={true} />
-      </>
-    )
+    return <TheEndlessMazeGame />
   }
 
   return (

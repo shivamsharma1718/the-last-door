@@ -14,6 +14,11 @@ interface PlayerControlsProps {
   resetTrigger?: number
   onPositionChange?: (pos: { x: number; z: number }) => void
   onMovingChange?: (isMoving: boolean) => void
+  constrainPosition?: (
+    proposed: { x: number; z: number },
+    current: { x: number; z: number },
+    radius: number
+  ) => { x: number; z: number }
 }
 
 interface KeyState {
@@ -35,6 +40,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   resetTrigger = 0,
   onPositionChange,
   onMovingChange,
+  constrainPosition,
 }) => {
   const { camera } = useThree()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -213,15 +219,26 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
       const nextX = camera.position.x + displacementX
       const nextZ = camera.position.z + displacementZ
 
-      // 6. Collision boundaries (AABB room bounds with player radius and door margin)
-      const minX = -roomWidth / 2 + playerRadius
-      const maxX = roomWidth / 2 - playerRadius
-      const minZ = -roomDepth / 2 + playerRadius + 0.15 // Offset to prevent passing through far boundary
-      const maxZ = roomDepth / 2 - playerRadius
+      if (constrainPosition) {
+        // Custom environmental collision constraint (e.g. Game 06 endless maze corridors)
+        const constrained = constrainPosition(
+          { x: nextX, z: nextZ },
+          { x: camera.position.x, z: camera.position.z },
+          playerRadius
+        )
+        camera.position.x = constrained.x
+        camera.position.z = constrained.z
+      } else {
+        // 6. Collision boundaries (AABB room bounds with player radius and door margin)
+        const minX = -roomWidth / 2 + playerRadius
+        const maxX = roomWidth / 2 - playerRadius
+        const minZ = -roomDepth / 2 + playerRadius + 0.15 // Offset to prevent passing through far boundary
+        const maxZ = roomDepth / 2 - playerRadius
 
-      // 7. Clamp position within boundaries
-      camera.position.x = Math.max(minX, Math.min(maxX, nextX))
-      camera.position.z = Math.max(minZ, Math.min(maxZ, nextZ))
+        // 7. Clamp position within boundaries
+        camera.position.x = Math.max(minX, Math.min(maxX, nextX))
+        camera.position.z = Math.max(minZ, Math.min(maxZ, nextZ))
+      }
     }
 
     // Ensure camera height stays fixed at eye level

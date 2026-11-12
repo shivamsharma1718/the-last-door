@@ -2,6 +2,7 @@ import { Canvas } from '@react-three/fiber'
 import { Scene } from './scenes/Scene'
 import { TheWatcherUI } from './components/games/game04'
 import { TheDrowningHallUI } from './components/games/game05'
+import { TheEndlessMazeUI } from './components/games/game06'
 import './App.css'
 
 function App() {
@@ -30,6 +31,9 @@ function App() {
 
       {/* Game 05 DOM UI Layer (Outside Canvas) */}
       <TheDrowningHallUI />
+
+      {/* Game 06 DOM UI Layer (Outside Canvas) */}
+      <TheEndlessMazeUI />
 
       {/* Atmospheric UI Overlay */}
       <div className="hud-overlay">

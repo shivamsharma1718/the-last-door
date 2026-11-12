@@ -619,3 +619,148 @@ export function canEscapeMaze(
 ): boolean {
   return exitRevealed && isPlayerAtExit(playerCoord)
 }
+
+// ---------------------------------------------------------------------------
+// Maze Collision Boundaries & Movement Constraints
+// ---------------------------------------------------------------------------
+
+export interface MazeWallAABB {
+  minX: number
+  maxX: number
+  minZ: number
+  maxZ: number
+}
+
+/**
+ * Computes the axis-aligned bounding boxes (AABB) for all solid walls and obstacles in the maze layout.
+ */
+export function computeMazeWallAABBs(layout: MazeLayout): MazeWallAABB[] {
+  const walls: MazeWallAABB[] = []
+  const halfW = Math.floor(layout.width / 2)
+  const halfD = Math.floor(layout.depth / 2)
+
+  for (const cell of Object.values(layout.cells)) {
+    // Only process cells that are active or part of the maze
+    if (cell.connections.length === 0 && !cell.isExit && cell.type !== 'shifting_corridor') {
+      continue
+    }
+
+    const { x, z, connections } = cell
+
+    // West boundary (x - 1)
+    if (!connections.includes('west')) {
+      const wx = (x - 0.5 - halfW) * CELL_SIZE
+      const wz = (z - halfD) * CELL_SIZE
+      walls.push({
+        minX: wx - 0.15,
+        maxX: wx + 0.15,
+        minZ: wz - (CELL_SIZE / 2 + 0.15),
+        maxZ: wz + (CELL_SIZE / 2 + 0.15),
+      })
+    }
+    // East boundary (x + 1)
+    if (!connections.includes('east')) {
+      const wx = (x + 0.5 - halfW) * CELL_SIZE
+      const wz = (z - halfD) * CELL_SIZE
+      walls.push({
+        minX: wx - 0.15,
+        maxX: wx + 0.15,
+        minZ: wz - (CELL_SIZE / 2 + 0.15),
+        maxZ: wz + (CELL_SIZE / 2 + 0.15),
+      })
+    }
+    // North boundary (z - 1)
+    if (!connections.includes('north')) {
+      const wx = (x - halfW) * CELL_SIZE
+      const wz = (z - 0.5 - halfD) * CELL_SIZE
+      walls.push({
+        minX: wx - (CELL_SIZE / 2 + 0.15),
+        maxX: wx + (CELL_SIZE / 2 + 0.15),
+        minZ: wz - 0.15,
+        maxZ: wz + 0.15,
+      })
+    }
+    // South boundary (z + 1)
+    if (!connections.includes('south')) {
+      const wx = (x - halfW) * CELL_SIZE
+      const wz = (z + 0.5 - halfD) * CELL_SIZE
+      walls.push({
+        minX: wx - (CELL_SIZE / 2 + 0.15),
+        maxX: wx + (CELL_SIZE / 2 + 0.15),
+        minZ: wz - 0.15,
+        maxZ: wz + 0.15,
+      })
+    }
+  }
+
+  // Include the 4 clue investigation pedestals as obstacles so player does not walk through them
+  for (const clue of MAZE_CLUES) {
+    const [px, , pz] = clue.worldPosition
+    walls.push({
+      minX: px - 0.55,
+      maxX: px + 0.55,
+      minZ: pz - 0.55,
+      maxZ: pz + 0.55,
+    })
+  }
+
+  return walls
+}
+
+/**
+ * Checks if a circular footprint of radius `radius` centered at (px, pz) intersects any wall AABB.
+ */
+export function isPointCollidingWithWalls(
+  px: number,
+  pz: number,
+  radius: number,
+  walls: readonly MazeWallAABB[]
+): boolean {
+  const rSq = radius * radius
+
+  for (let i = 0; i < walls.length; i++) {
+    const w = walls[i]
+    const closestX = Math.max(w.minX, Math.min(w.maxX, px))
+    const closestZ = Math.max(w.minZ, Math.min(w.maxZ, pz))
+    const dx = px - closestX
+    const dz = pz - closestZ
+
+    if (dx * dx + dz * dz < rSq) {
+      return true
+    }
+  }
+
+  return false
+}
+
+/**
+ * Constrains player movement inside the maze corridors.
+ * Enables smooth sliding along corridor walls by resolving X and Z displacements independently.
+ */
+export function constrainPlayerPositionInMaze(
+  proposed: { x: number; z: number },
+  current: { x: number; z: number },
+  radius: number,
+  walls: readonly MazeWallAABB[]
+): { x: number; z: number } {
+  let nextX = proposed.x
+  let nextZ = proposed.z
+
+  // Attempt X axis movement with current Z
+  if (isPointCollidingWithWalls(nextX, current.z, radius, walls)) {
+    nextX = current.x
+  }
+
+  // Attempt Z axis movement with resolved X
+  if (isPointCollidingWithWalls(nextX, nextZ, radius, walls)) {
+    nextZ = current.z
+  }
+
+  // Final check: if diagonal movement into a corner causes a collision, keep current
+  if (isPointCollidingWithWalls(nextX, nextZ, radius, walls)) {
+    return current
+  }
+
+  return { x: nextX, z: nextZ }
+}
+

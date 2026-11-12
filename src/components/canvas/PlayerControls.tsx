@@ -11,6 +11,7 @@ interface PlayerControlsProps {
   initialPosition?: [number, number, number]
   initialLookAt?: [number, number, number]
   enabled?: boolean
+  movementEnabled?: boolean
   resetTrigger?: number
   onPositionChange?: (pos: { x: number; z: number }) => void
   onMovingChange?: (isMoving: boolean) => void
@@ -37,6 +38,7 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   initialPosition = [0, 1.65, 5.2],
   initialLookAt = [0, 1.4, -6.95],
   enabled = true,
+  movementEnabled = true,
   resetTrigger = 0,
   onPositionChange,
   onMovingChange,
@@ -159,8 +161,8 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
 
   // Movement loop
   useFrame((_, delta) => {
-    // If controls are disabled (e.g. game failure state or menu modal), freeze movement
-    if (!enabled) {
+    // If controls or movement are disabled (e.g. game failure, menu modal, or maze shifting), freeze movement
+    if (!enabled || !movementEnabled) {
       if (wasMovingRef.current) {
         wasMovingRef.current = false
         onMovingChange?.(false)

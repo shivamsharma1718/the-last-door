@@ -6,6 +6,7 @@ export interface Game06HUDProps {
   totalClues?: number
   nearestClue?: MazeInvestigationObject | null
   examinedIds?: Set<string>
+  shiftNotice?: string | null
 }
 
 export const Game06HUD: React.FC<Game06HUDProps> = ({
@@ -13,6 +14,7 @@ export const Game06HUD: React.FC<Game06HUDProps> = ({
   totalClues = 4,
   nearestClue = null,
   examinedIds = new Set(),
+  shiftNotice = null,
 }) => {
   const isInvestigationComplete = cluesFound >= totalClues
   const isUnexaminedClueNear = Boolean(nearestClue && !examinedIds.has(nearestClue.id))
@@ -40,6 +42,17 @@ export const Game06HUD: React.FC<Game06HUDProps> = ({
         )}
       </div>
 
+      {/* Atmospheric Labyrinth Shift Notification Banner */}
+      {shiftNotice && (
+        <div className="game06-shift-notice-banner" id="game06-shift-notice-dom">
+          <div className="game06-shift-icon">◈</div>
+          <div className="game06-shift-body">
+            <span className="game06-shift-title">LABYRINTH REALIGNMENT</span>
+            <span className="game06-shift-desc">{shiftNotice}</span>
+          </div>
+        </div>
+      )}
+
       {/* Dynamic Bottom-Center Interaction Prompt for Unexamined Clue */}
       {isUnexaminedClueNear && nearestClue && (
         <div className="game06-interaction-prompt" id="game06-prompt-dom">
@@ -52,4 +65,3 @@ export const Game06HUD: React.FC<Game06HUDProps> = ({
     </div>
   )
 }
-

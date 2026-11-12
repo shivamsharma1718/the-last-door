@@ -1,4 +1,6 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import type { AmbientLight, DirectionalLight } from 'three'
 import { Text } from '@react-three/drei'
 import type {
   MazeLayout,
@@ -480,6 +482,7 @@ export interface TheEndlessMazeArenaProps {
   layout?: MazeLayout
   examinedIds?: Set<string>
   isExitRevealed?: boolean
+  isShifting?: boolean
 }
 
 /**
@@ -492,9 +495,38 @@ export const TheEndlessMazeArena: React.FC<TheEndlessMazeArenaProps> = ({
   layout: propLayout,
   examinedIds = new Set(),
   isExitRevealed = false,
+  isShifting = false,
 }) => {
   const maze = useMemo(() => propLayout || createInitialMazeLayout(), [propLayout])
   const clues = useMemo(() => getMazeClues(), [])
+
+  const ambientRef = useRef<AmbientLight>(null)
+  const dirLightRef = useRef<DirectionalLight>(null)
+
+  // Atmospheric lighting modulation during labyrinth shifting
+  useFrame(({ clock }, delta) => {
+    if (!ambientRef.current || !dirLightRef.current) return
+
+    if (isShifting) {
+      // Subtle horror flicker during maze shift
+      const t = clock.elapsedTime * 28
+      const flickerNoise = 0.16 + 0.12 * Math.sin(t) + 0.08 * Math.cos(t * 1.6)
+      ambientRef.current.intensity = Math.max(0.06, Math.min(0.35, flickerNoise))
+      dirLightRef.current.intensity = Math.max(0.03, Math.min(0.18, flickerNoise * 0.5))
+    } else {
+      // Smooth return to default atmospheric illumination
+      if (ambientRef.current.intensity < 0.78) {
+        ambientRef.current.intensity = Math.min(0.8, ambientRef.current.intensity + delta * 2.5)
+      } else {
+        ambientRef.current.intensity = 0.8
+      }
+      if (dirLightRef.current.intensity < 0.38) {
+        dirLightRef.current.intensity = Math.min(0.4, dirLightRef.current.intensity + delta * 1.5)
+      } else {
+        dirLightRef.current.intensity = 0.4
+      }
+    }
+  })
 
   // Deduplicated wall segment generation
   const { vWalls, hWalls, traversableCells } = useMemo(() => {
@@ -560,9 +592,9 @@ export const TheEndlessMazeArena: React.FC<TheEndlessMazeArenaProps> = ({
       <color attach="background" args={['#05080d']} />
       <fog attach="fog" args={['#05080d', 6, 26]} />
 
-      {/* 2. Global Ambient & Directional Fill */}
-      <ambientLight color="#151d28" intensity={0.8} />
-      <directionalLight position={[0, 4.0, 0]} color="#334155" intensity={0.4} />
+      {/* 2. Global Ambient & Directional Fill with Shift Flicker */}
+      <ambientLight ref={ambientRef} color="#151d28" intensity={0.8} />
+      <directionalLight ref={dirLightRef} position={[0, 4.0, 0]} color="#334155" intensity={0.4} />
 
       {/* 3. Floors and Ceilings for Each Traversable Cell */}
       {traversableCells.map((cell) => {

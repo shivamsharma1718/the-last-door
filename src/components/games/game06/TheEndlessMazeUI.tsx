@@ -16,7 +16,9 @@ export const TheEndlessMazeUI: React.FC = () => {
   }
 
   const isExploringOrExamining =
-    state.status === 'exploring' || state.status === 'examining'
+    state.status === 'exploring' ||
+    state.status === 'examining' ||
+    state.status === 'maze_shifting'
 
   return (
     <>
@@ -28,9 +30,19 @@ export const TheEndlessMazeUI: React.FC = () => {
         <Game06HUD
           cluesFound={state.examinedIds.size}
           totalClues={REQUIRED_CLUES_COUNT_G06}
-          nearestClue={state.status !== 'examining' ? state.nearestClue : null}
+          nearestClue={
+            state.status !== 'examining' && state.status !== 'maze_shifting'
+              ? state.nearestClue
+              : null
+          }
           examinedIds={state.examinedIds}
+          shiftNotice={state.shiftNotice}
         />
+      )}
+
+      {/* Subtle Horror Vignette & Flicker Overlay during Labyrinth Shifting */}
+      {state.isShifting && (
+        <div className="game06-shift-flicker-overlay" />
       )}
 
       {state.status === 'examining' && state.activeClue && (
@@ -42,4 +54,3 @@ export const TheEndlessMazeUI: React.FC = () => {
     </>
   )
 }
-

@@ -2,7 +2,15 @@ import { useSyncExternalStore } from 'react'
 import type {
   Game06Status,
   MazeInvestigationObject,
+  MazeLayout,
+  MazeShiftState,
 } from './endlessMazeTypes'
+import {
+  createInitialMazeLayout,
+  createInitialShiftState,
+  applyDeterministicShift,
+  getShiftLoreNotice,
+} from './endlessMazeLogic'
 
 export interface EndlessMazeState {
   isActive: boolean
@@ -10,8 +18,15 @@ export interface EndlessMazeState {
   activeClue: MazeInvestigationObject | null
   nearestClue: MazeInvestigationObject | null
   examinedIds: Set<string>
+  layout: MazeLayout
+  shiftState: MazeShiftState
+  shiftNotice: string | null
+  isShifting: boolean
   resetCounter: number
 }
+
+const initialLayout = createInitialMazeLayout()
+const initialShift = createInitialShiftState()
 
 const initialState: EndlessMazeState = {
   isActive: false,
@@ -19,11 +34,16 @@ const initialState: EndlessMazeState = {
   activeClue: null,
   nearestClue: null,
   examinedIds: new Set(),
+  layout: initialLayout,
+  shiftState: initialShift,
+  shiftNotice: null,
+  isShifting: false,
   resetCounter: 0,
 }
 
 let currentState: EndlessMazeState = { ...initialState }
 const listeners = new Set<() => void>()
+let shiftNoticeTimer: ReturnType<typeof setTimeout> | null = null
 
 function emitChange() {
   for (const listener of listeners) {
@@ -101,13 +121,81 @@ export const endlessMazeStore = {
     emitChange()
   },
 
+  triggerShift: (ruleId: string) => {
+    if (
+      currentState.status !== 'exploring' ||
+      currentState.shiftState.activeShifts.includes(ruleId)
+    ) {
+      return
+    }
+
+    if (shiftNoticeTimer) {
+      clearTimeout(shiftNoticeTimer)
+      shiftNoticeTimer = null
+    }
+
+    const loreNotice = getShiftLoreNotice(ruleId)
+
+    // Phase 1: Begin shifting state & initiate lighting flicker
+    currentState = {
+      ...currentState,
+      status: 'maze_shifting',
+      isShifting: true,
+      shiftNotice: loreNotice,
+    }
+    emitChange()
+
+    // Phase 2: After 350ms, update the physical 3D layout while lights are dim
+    setTimeout(() => {
+      const { layout, shiftState } = applyDeterministicShift(
+        currentState.layout,
+        currentState.shiftState,
+        ruleId
+      )
+
+      currentState = {
+        ...currentState,
+        layout,
+        shiftState,
+      }
+      emitChange()
+    }, 350)
+
+    // Phase 3: At 1200ms, restore exploration and player movement
+    setTimeout(() => {
+      currentState = {
+        ...currentState,
+        status: 'exploring',
+        isShifting: false,
+      }
+      emitChange()
+    }, 1200)
+
+    // Phase 4: Clear the shift notice after 3500ms
+    shiftNoticeTimer = setTimeout(() => {
+      if (currentState.shiftNotice) {
+        currentState = {
+          ...currentState,
+          shiftNotice: null,
+        }
+        emitChange()
+      }
+    }, 3500)
+  },
+
   initFreshRun: () => {
     if (typeof document !== 'undefined' && document.pointerLockElement) {
       document.exitPointerLock()
     }
+    if (shiftNoticeTimer) {
+      clearTimeout(shiftNoticeTimer)
+      shiftNoticeTimer = null
+    }
     currentState = {
       ...initialState,
       isActive: true,
+      layout: createInitialMazeLayout(),
+      shiftState: createInitialShiftState(),
       resetCounter: currentState.resetCounter + 1,
     }
     emitChange()
@@ -129,4 +217,3 @@ export function useEndlessMazeStore(): EndlessMazeState {
     endlessMazeStore.getSnapshot
   )
 }
-

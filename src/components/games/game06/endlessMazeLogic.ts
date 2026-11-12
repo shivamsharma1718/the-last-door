@@ -573,6 +573,115 @@ export function applyDeterministicShift(
   return { layout: updatedLayout, shiftState: updatedShiftState }
 }
 
+/**
+ * Atmospheric lore notices displayed upon each deterministic labyrinth shift.
+ */
+export function getShiftLoreNotice(ruleId: string): string {
+  switch (ruleId) {
+    case 'shift_west_corridor':
+      return 'A distant grinding of stone echoes behind you... the western passage has reoriented.'
+    case 'shift_east_corridor':
+      return 'Mortar cracks in the darkness behind you... the eastern corridor has shifted.'
+    case 'shift_center_cross':
+      return 'The central junction yields... stone walls recede into the shadows.'
+    case 'shift_exit_unseal':
+      return 'A deep mechanical latch disengages to the north... the exit blast door unseals.'
+    default:
+      return 'The labyrinth reorients behind your back.'
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Camera Direction & Shift Trigger Detection
+// ---------------------------------------------------------------------------
+
+export interface PlayerLookState {
+  position: { x: number; z: number }
+  lookDirection: { x: number; z: number } // Normalized horizontal vector (dx, dz)
+}
+
+/**
+ * Returns the focal 2D world coordinate that the player must turn their back on to trigger the shift.
+ */
+export function getShiftTargetFocusPoint(rule: MazeShiftRule): { x: number; z: number } {
+  if (rule.id === 'shift_exit_unseal') {
+    // The northern blast doorway threshold between corridor (3, 1) and exit chamber (3, 0)
+    return { x: 0, z: -10.0 }
+  }
+  const worldPos = gridToWorldPosition(rule.targetCoord)
+  return { x: worldPos[0], z: worldPos[2] }
+}
+
+/**
+ * Checks if the player's continuous world position is within proximity of the shift target area.
+ */
+export function isPlayerNearShiftTarget(
+  playerPosition: { x: number; z: number },
+  rule: MazeShiftRule,
+  threshold: number = 6.5
+): boolean {
+  const focus = getShiftTargetFocusPoint(rule)
+  const dx = focus.x - playerPosition.x
+  const dz = focus.z - playerPosition.z
+  return Math.sqrt(dx * dx + dz * dz) <= threshold
+}
+
+/**
+ * Checks if the player's camera look direction is turned away from the target corridor.
+ * Returns true when the angle between camera look direction and vector to target exceeds ~95 degrees (dot <= -0.15).
+ */
+export function isPlayerLookingAwayFromTarget(
+  playerPosition: { x: number; z: number },
+  lookDirection: { x: number; z: number },
+  rule: MazeShiftRule
+): boolean {
+  const focus = getShiftTargetFocusPoint(rule)
+  const toTargetX = focus.x - playerPosition.x
+  const toTargetZ = focus.z - playerPosition.z
+  const dist = Math.sqrt(toTargetX * toTargetX + toTargetZ * toTargetZ)
+
+  // Edge case: if player is standing immediately at center of shift_center_cross
+  if (dist < 0.6) {
+    if (rule.id === 'shift_center_cross') {
+      // East/West walls shift; looking North or South (|dz| > 0.6) faces away from the shifting walls
+      return Math.abs(lookDirection.z) > 0.6
+    }
+    return false
+  }
+
+  const nx = toTargetX / dist
+  const nz = toTargetZ / dist
+  const dot = lookDirection.x * nx + lookDirection.z * nz
+
+  // Negative dot product ensures the player is turned away from the corridor
+  return dot <= -0.15
+}
+
+/**
+ * Evaluates whether an eligible deterministic shift rule should trigger based on actual camera look direction and position.
+ * Returns the rule to execute, or null if no shift conditions are met.
+ */
+export function evaluateShiftTrigger(
+  playerLook: PlayerLookState,
+  discoveredClueCount: number,
+  shiftState: MazeShiftState
+): MazeShiftRule | null {
+  for (const rule of MAZE_SHIFT_RULES) {
+    if (!canApplyShiftRule(rule, discoveredClueCount, shiftState)) {
+      continue
+    }
+
+    if (
+      isPlayerNearShiftTarget(playerLook.position, rule) &&
+      isPlayerLookingAwayFromTarget(playerLook.position, playerLook.lookDirection, rule)
+    ) {
+      return rule
+    }
+  }
+
+  return null
+}
+
 // ---------------------------------------------------------------------------
 // Exit & Escape Conditions
 // ---------------------------------------------------------------------------

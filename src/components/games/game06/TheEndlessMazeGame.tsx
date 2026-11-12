@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react'
 import { useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
 import { TheEndlessMazeArena } from './TheEndlessMazeArena'
 import { PlayerControls } from '../../canvas/PlayerControls'
 import type { TheEndlessMazeProps } from './endlessMazeTypes'
@@ -12,10 +13,10 @@ import {
   INTERACTION_DISTANCE_THRESHOLD_G06,
 } from './endlessMazeTypes'
 import {
-  createInitialMazeLayout,
   getNearestMazeClue,
   computeMazeWallAABBs,
   constrainPlayerPositionInMaze,
+  evaluateShiftTrigger,
 } from './endlessMazeLogic'
 import {
   useEndlessMazeStore,
@@ -25,7 +26,7 @@ import {
 /**
  * 3D coordinator for Game 06: THE ENDLESS MAZE.
  * Renders Three.js arena and first-person player controls inside R3F Canvas.
- * Synchronizes gameplay state, continuous proximity checks, and clue investigation with endlessMazeStore.
+ * Synchronizes gameplay state, continuous look-direction shift triggers, and clue investigation.
  */
 export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
   onComplete,
@@ -34,6 +35,9 @@ export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
     status,
     nearestClue,
     examinedIds,
+    layout,
+    shiftState,
+    isShifting,
     resetCounter,
   } = useEndlessMazeStore()
 
@@ -46,9 +50,14 @@ export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
   const examinedIdsRef = useRef(examinedIds)
   examinedIdsRef.current = examinedIds
 
-  // Memoize maze layout and pre-computed wall collision bounding boxes
-  const mazeLayout = useMemo(() => createInitialMazeLayout(), [])
-  const wallAABBs = useMemo(() => computeMazeWallAABBs(mazeLayout), [mazeLayout])
+  const shiftStateRef = useRef(shiftState)
+  shiftStateRef.current = shiftState
+
+  // Reusable 3D vector for GC-free camera look direction detection
+  const lookDirVector = useMemo(() => new THREE.Vector3(), [])
+
+  // Pre-computed wall collision bounding boxes from current active layout
+  const wallAABBs = useMemo(() => computeMazeWallAABBs(layout), [layout])
 
   // Custom position constraint for maze corridors preventing walking through walls
   const handleConstrainPosition = useCallback(
@@ -73,16 +82,16 @@ export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
     }
   }, [onComplete])
 
-  // Ensure pointer lock is cleanly released whenever entering non-exploring states
+  // Ensure pointer lock is cleanly released during modals (intro or examination)
   useEffect(() => {
-    if (status !== 'exploring') {
+    if (status === 'intro' || status === 'examining') {
       if (typeof document !== 'undefined' && document.pointerLockElement) {
         document.exitPointerLock()
       }
     }
   }, [status])
 
-  // Continuous frame loop for clue proximity checks using player/camera world position
+  // Continuous frame loop for shift trigger evaluation & clue proximity detection
   useFrame(({ camera }) => {
     if (statusRef.current !== 'exploring') {
       if (nearestClueRef.current !== null) {
@@ -91,6 +100,27 @@ export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
       return
     }
 
+    // 1. Detect actual horizontal camera look direction
+    camera.getWorldDirection(lookDirVector)
+    lookDirVector.y = 0
+    lookDirVector.normalize()
+
+    // 2. Evaluate deterministic shift triggers when looking away from designated corridors
+    const triggerRule = evaluateShiftTrigger(
+      {
+        position: { x: camera.position.x, z: camera.position.z },
+        lookDirection: { x: lookDirVector.x, z: lookDirVector.z },
+      },
+      examinedIdsRef.current.size,
+      shiftStateRef.current
+    )
+
+    if (triggerRule) {
+      endlessMazeStore.triggerShift(triggerRule.id)
+      return
+    }
+
+    // 3. Proximity detection for unexamined lore clues
     const nearest = getNearestMazeClue(
       camera.position.x,
       camera.position.z,
@@ -142,15 +172,18 @@ export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
+  const isExitRevealed = shiftState.activeShifts.includes('shift_exit_unseal')
+  const isControlsEnabled = status !== 'intro' && status !== 'examining'
   const isMovementEnabled = status === 'exploring'
 
   return (
     <>
-      {/* 3D Arena environment */}
+      {/* 3D Arena environment with dynamic shifted layout and horror flicker */}
       <TheEndlessMazeArena
-        layout={mazeLayout}
+        layout={layout}
         examinedIds={examinedIds}
-        isExitRevealed={false}
+        isExitRevealed={isExitRevealed}
+        isShifting={isShifting}
       />
 
       {/* First-person player controls constrained to maze corridors */}
@@ -160,11 +193,11 @@ export const TheEndlessMazeGame: React.FC<TheEndlessMazeProps> = ({
         playerRadius={0.35}
         initialPosition={INITIAL_MAZE_POS}
         initialLookAt={INITIAL_MAZE_LOOK}
-        enabled={isMovementEnabled}
+        enabled={isControlsEnabled}
+        movementEnabled={isMovementEnabled}
         resetTrigger={resetCounter}
         constrainPosition={handleConstrainPosition}
       />
     </>
   )
 }
-

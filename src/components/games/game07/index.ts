@@ -5,3 +5,4 @@
 
 export * from './mirrorTrialTypes'
 export * from './mirrorTrialLogic'
+export * from './TheMirrorTrialArena'

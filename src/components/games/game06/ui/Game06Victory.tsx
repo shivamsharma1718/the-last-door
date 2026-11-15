@@ -7,6 +7,7 @@ export interface Game06VictoryProps {
 export const Game06Victory: React.FC<Game06VictoryProps> = ({ onContinue }) => {
   return (
     <div className="game06-victory-overlay" id="game06-victory-dom">
+
       <div className="game06-victory-card">
         <span className="game06-victory-tag">GAME 06 COMPLETE</span>
         <h1 className="game06-victory-title">THE ENDLESS MAZE</h1>

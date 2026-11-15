@@ -1,6 +1,7 @@
 /**
  * Game 07: THE MIRROR TRIAL - Pure Game Logic & Rules Engine
  * Theme: Reality vs Deception, Perception, and Psychological Horror.
+ * 7
  */
 
 import type {

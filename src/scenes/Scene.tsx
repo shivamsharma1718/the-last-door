@@ -10,6 +10,7 @@ import { ThreeDoorsGame } from '../components/games/game03/ThreeDoorsGame'
 import { TheWatcherGame } from '../components/games/game04/TheWatcherGame'
 import { TheDrowningHallGame } from '../components/games/game05/TheDrowningHallGame'
 import { TheEndlessMazeGame } from '../components/games/game06'
+import { TheMirrorTrialGame } from '../components/games/game07'
 
 export interface SceneProps {
   isDoorOpen?: boolean
@@ -17,7 +18,7 @@ export interface SceneProps {
   onDoorOpen?: () => void
 }
 
-export type GameStage = 'hallway' | 'intro' | 'game01' | 'game02' | 'game03' | 'game04' | 'game05' | 'game06' | 'game07'
+export type GameStage = 'hallway' | 'intro' | 'game01' | 'game02' | 'game03' | 'game04' | 'game05' | 'game06' | 'game07' | 'game08'
 
 export const Scene: React.FC<SceneProps> = ({
   isDoorOpen: propIsDoorOpen,
@@ -201,8 +202,13 @@ export const Scene: React.FC<SceneProps> = ({
     return <TheEndlessMazeGame onComplete={() => setStage('game07')} />
   }
 
-  // If in Game 07 arena (placeholder stage for Game 06 completion)
+  // If in Game 07 arena
   if (stage === 'game07') {
+    return <TheMirrorTrialGame onComplete={() => setStage('game08')} />
+  }
+
+  // If in Game 08 arena (placeholder stage for Game 07 completion)
+  if (stage === 'game08') {
     return (
       <>
         <color attach="background" args={['#04060a']} />

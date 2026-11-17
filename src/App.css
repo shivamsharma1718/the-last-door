@@ -79,6 +79,9 @@ body:has(#game06-hud-dom) .hud-overlay .game-title,
 body:has(#game06-examination-dom) .hud-overlay .game-title,
 body:has(#game06-victory-cinematic-dom) .hud-overlay .game-title,
 body:has(#game06-victory-dom) .hud-overlay .game-title,
+body:has(#game07-intro-overlay-dom) .hud-overlay .game-title,
+body:has(#game07-hud-dom) .hud-overlay .game-title,
+body:has(#game07-examination-dom) .hud-overlay .game-title,
 body:has(#game01-hud-dom) .hud-overlay .instructions,
 body:has(#game02-intro-overlay-dom) .hud-overlay .instructions,
 body:has(#game02-hud-dom) .hud-overlay .instructions,
@@ -115,7 +118,10 @@ body:has(#game06-intro-overlay-dom) .hud-overlay .instructions,
 body:has(#game06-hud-dom) .hud-overlay .instructions,
 body:has(#game06-examination-dom) .hud-overlay .instructions,
 body:has(#game06-victory-cinematic-dom) .hud-overlay .instructions,
-body:has(#game06-victory-dom) .hud-overlay .instructions {
+body:has(#game06-victory-dom) .hud-overlay .instructions,
+body:has(#game07-intro-overlay-dom) .hud-overlay .instructions,
+body:has(#game07-hud-dom) .hud-overlay .instructions,
+body:has(#game07-examination-dom) .hud-overlay .instructions {
   display: none !important;
 }
 
@@ -3980,6 +3986,478 @@ body:has(#game06-victory-dom) .hud-overlay .instructions {
 .game06-fade-in {
   animation: fadeIn 1.2s ease-out forwards;
 }
+
+/* ==========================================================================
+   Game 07: THE MIRROR TRIAL Styles
+   ========================================================================== */
+
+/* Intro Lore Lines */
+.game07-intro-line-1 { animation: fadeIn 0.8s ease-out 0.2s both; }
+.game07-intro-line-2 { animation: fadeIn 0.8s ease-out 0.4s both; }
+.game07-intro-line-3 { animation: fadeIn 0.8s ease-out 0.6s both; }
+.game07-intro-line-4 { animation: fadeIn 0.8s ease-out 0.8s both; }
+
+/* HUD Header & Positioning */
+.game07-hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  font-family: 'Cinzel Decorative', 'Cinzel', serif, Georgia;
+}
+
+.game07-hud-header {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  text-align: center;
+}
+
+.game07-hud-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: #f1f5f9;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 16px rgba(56, 189, 248, 0.4);
+}
+
+.game07-hud-subtitle {
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  color: #94a3b8;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+}
+
+.game07-hud-counters-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.25rem;
+  background: rgba(10, 15, 24, 0.7);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 999px;
+  padding: 0.3rem 1.1rem;
+  backdrop-filter: blur(8px);
+}
+
+.game07-hud-counter {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  color: #cbd5e1;
+}
+
+.game07-hud-counter-divider {
+  color: #475569;
+}
+
+.game07-counter-highlight {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.game07-hud-complete {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #38bdf8;
+  margin-top: 0.3rem;
+  text-shadow: 0 0 14px rgba(56, 189, 248, 0.7);
+  animation: pulse 2.5s infinite;
+}
+
+/* Context-Sensitive Interaction Prompt */
+.game07-interaction-prompt {
+  position: absolute;
+  bottom: 5.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.8rem 1.6rem;
+  background: rgba(10, 14, 22, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 8px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 20px rgba(56, 189, 248, 0.2);
+  animation: fadeIn 0.25s ease-out;
+}
+
+.game07-prompt-target {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+.game07-prompt-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #f8fafc;
+}
+
+/* Examination Modal Overlay & Card */
+.game07-examination-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 12, 0.82);
+  backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  pointer-events: auto;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.game07-examination-card {
+  width: 90%;
+  max-width: 860px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(8, 12, 20, 0.98));
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85), 0 0 30px rgba(56, 189, 248, 0.15);
+  padding: 2.2rem;
+  color: #e2e8f0;
+  font-family: 'Cinzel Decorative', 'Cinzel', serif, Georgia;
+}
+
+.game07-exam-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.game07-exam-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+.game07-exam-latin-pill {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: #94a3b8;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+}
+
+.game07-exam-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.game07-exam-divider {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.6), transparent);
+  margin: 1rem 0 1.2rem;
+}
+
+.game07-exam-inscription {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(30, 41, 59, 0.4);
+  border-left: 3px solid #38bdf8;
+  padding: 0.8rem 1.1rem;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 1.5rem;
+}
+
+.game07-inscription-icon {
+  font-size: 1.2rem;
+}
+
+.game07-inscription-text {
+  font-size: 0.92rem;
+  font-style: italic;
+  color: #cbd5e1;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Side-by-Side Comparison Grid */
+.game07-exam-comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.4rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .game07-exam-comparison-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.game07-exam-column {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 8px;
+  padding: 1.2rem;
+  border: 1px solid rgba(71, 85, 105, 0.35);
+}
+
+.game07-column-reality {
+  border-left: 3px solid #38bdf8;
+}
+
+.game07-column-reflection {
+  border-left: 3px solid #c084fc;
+}
+
+.game07-column-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.game07-col-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  padding: 0.18rem 0.5rem;
+  border-radius: 3px;
+  width: fit-content;
+}
+
+.reality-badge {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.reflection-badge {
+  background: rgba(192, 132, 252, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(192, 132, 252, 0.3);
+}
+
+.game07-col-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #f1f5f9;
+  margin: 0;
+}
+
+.game07-column-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.game07-evidence-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.game07-evidence-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.game07-evidence-desc {
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+/* Observations Section */
+.game07-exam-clues-section {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 8px;
+  padding: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.game07-clues-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #94a3b8;
+  margin: 0 0 0.8rem;
+  text-transform: uppercase;
+}
+
+.game07-exam-clues-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.game07-exam-clue-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.game07-exam-clue-bullet {
+  color: #38bdf8;
+  font-size: 0.8rem;
+  margin-top: 0.15rem;
+}
+
+.game07-clue-content {
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+.game07-clue-item-title {
+  color: #f8fafc;
+}
+
+.game07-exam-clue-text {
+  color: #cbd5e1;
+}
+
+/* Examination Footer */
+.game07-exam-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+.game07-exam-close-button {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #f8fafc;
+  border: none;
+  padding: 0.65rem 1.6rem;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+  transition: all 0.2s ease;
+}
+
+.game07-exam-close-button:hover {
+  background: linear-gradient(135deg, #0369a1, #075985);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.6);
+  transform: translateY(-1px);
+}
+
+.game07-exam-keyhint {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: #64748b;
+}
+
+/* Altar Inscription Specific Card */
+.game07-altar-card {
+  max-width: 680px;
+}
+
+.game07-altar-inscription-panel {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  margin-bottom: 1.4rem;
+}
+
+.game07-altar-verse {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 1rem;
+  font-style: italic;
+  color: #cbd5e1;
+  letter-spacing: 0.05em;
+  line-height: 1.6;
+}
+
+.game07-altar-rule {
+  color: #38bdf8;
+  font-weight: 600;
+  margin-top: 0.4rem;
+  font-style: normal;
+  letter-spacing: 0.08em;
+}
+
+.game07-altar-status-panel {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 8px;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.4rem;
+}
+
+.game07-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+}
+
+.game07-status-label {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.game07-altar-lore-text {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.game07-altar-stats-row {
+  display: flex;
+  gap: 1.8rem;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  letter-spacing: 0.06em;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(71, 85, 105, 0.2);
+}
+
+.game07-altar-stats-row strong {
+  color: #38bdf8;
+}
+
 
 
 

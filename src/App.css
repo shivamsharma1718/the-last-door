@@ -82,6 +82,9 @@ body:has(#game06-victory-dom) .hud-overlay .game-title,
 body:has(#game07-intro-overlay-dom) .hud-overlay .game-title,
 body:has(#game07-hud-dom) .hud-overlay .game-title,
 body:has(#game07-examination-dom) .hud-overlay .game-title,
+body:has(#game07-verdict-dom) .hud-overlay .game-title,
+body:has(#game07-verdict-transition-dom) .hud-overlay .game-title,
+body:has(#game07-failure-dom) .hud-overlay .game-title,
 body:has(#game01-hud-dom) .hud-overlay .instructions,
 body:has(#game02-intro-overlay-dom) .hud-overlay .instructions,
 body:has(#game02-hud-dom) .hud-overlay .instructions,
@@ -121,7 +124,10 @@ body:has(#game06-victory-cinematic-dom) .hud-overlay .instructions,
 body:has(#game06-victory-dom) .hud-overlay .instructions,
 body:has(#game07-intro-overlay-dom) .hud-overlay .instructions,
 body:has(#game07-hud-dom) .hud-overlay .instructions,
-body:has(#game07-examination-dom) .hud-overlay .instructions {
+body:has(#game07-examination-dom) .hud-overlay .instructions,
+body:has(#game07-verdict-dom) .hud-overlay .instructions,
+body:has(#game07-verdict-transition-dom) .hud-overlay .instructions,
+body:has(#game07-failure-dom) .hud-overlay .instructions {
   display: none !important;
 }
 
@@ -4457,6 +4463,409 @@ body:has(#game07-examination-dom) .hud-overlay .instructions {
 .game07-altar-stats-row strong {
   color: #38bdf8;
 }
+
+/* ==========================================================================
+   Game 07: Altar Verdict & Failure Sequence Styles
+   ========================================================================== */
+
+/* Altar Verdict Modal Overlay & Card */
+.game07-verdict-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 12, 0.85);
+  backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  pointer-events: auto;
+  animation: fadeIn 0.3s ease-out;
+  font-family: 'Cinzel Decorative', 'Cinzel', serif, Georgia;
+}
+
+.game07-verdict-card {
+  width: 90%;
+  max-width: 680px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(8, 12, 20, 0.98));
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.9), 0 0 35px rgba(56, 189, 248, 0.2);
+  padding: 2.2rem;
+  color: #e2e8f0;
+}
+
+.game07-verdict-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.game07-verdict-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+.game07-verdict-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.game07-verdict-divider {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.6), transparent);
+  margin: 0.9rem 0 1.2rem;
+}
+
+.game07-verdict-inscription {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 8px;
+  padding: 1.2rem;
+  text-align: center;
+  margin-bottom: 1.2rem;
+}
+
+.game07-verdict-inscription p {
+  margin: 0.2rem 0;
+  font-size: 0.92rem;
+  font-style: italic;
+  color: #cbd5e1;
+  letter-spacing: 0.04em;
+}
+
+.game07-verdict-rule {
+  color: #38bdf8 !important;
+  font-weight: 600;
+  margin-top: 0.5rem !important;
+  font-style: normal !important;
+}
+
+.game07-verdict-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(239, 68, 68, 0.1);
+  border-left: 3px solid #ef4444;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 1.4rem;
+}
+
+.game07-warning-icon {
+  color: #ef4444;
+  font-size: 1.1rem;
+}
+
+.game07-warning-text {
+  font-size: 0.8rem;
+  color: #fca5a5;
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+.game07-verdict-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.6rem;
+}
+
+.game07-verdict-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(71, 85, 105, 0.4);
+  border-radius: 8px;
+  padding: 0.85rem 1.1rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  color: #e2e8f0;
+}
+
+.game07-verdict-option-btn:hover:not(:disabled) {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(56, 189, 248, 0.6);
+  transform: translateX(4px);
+}
+
+.game07-verdict-option-btn.selected {
+  background: rgba(2, 132, 199, 0.15);
+  border-color: #38bdf8;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.3);
+}
+
+.game07-option-indicator {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.game07-verdict-option-btn.selected .game07-option-indicator {
+  border-color: #38bdf8;
+}
+
+.game07-option-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.game07-verdict-option-btn.selected .game07-option-dot {
+  background: #38bdf8;
+}
+
+.game07-option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.game07-option-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #f8fafc;
+}
+
+.game07-option-subtitle {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}
+
+.game07-verdict-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+.game07-verdict-cancel-btn {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  padding: 0.65rem 1.4rem;
+  font-family: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.game07-verdict-cancel-btn:hover:not(:disabled) {
+  background: rgba(30, 41, 59, 0.6);
+  color: #f1f5f9;
+}
+
+.game07-verdict-submit-btn {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #f8fafc;
+  border: none;
+  padding: 0.7rem 1.8rem;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+  transition: all 0.2s ease;
+}
+
+.game07-verdict-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0369a1, #075985);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.6);
+  transform: translateY(-1px);
+}
+
+.game07-verdict-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Verdict Transition Atmospheric Card */
+.game07-verdict-transition-card {
+  width: 90%;
+  max-width: 620px;
+  background: linear-gradient(180deg, rgba(8, 15, 28, 0.96), rgba(4, 8, 15, 0.98));
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.9), 0 0 50px rgba(56, 189, 248, 0.3);
+  padding: 3rem 2.2rem;
+  text-align: center;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.game07-verdict-transition-lore {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin: 2rem 0;
+}
+
+.game07-verdict-line {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: #e2e8f0;
+  margin: 0;
+}
+
+.game07-verdict-line-1 { animation: fadeIn 1s ease-out 0.3s both; }
+.game07-verdict-line-2 { animation: fadeIn 1s ease-out 1.2s both; }
+.game07-verdict-line-3 { animation: fadeIn 1s ease-out 2.1s both; }
+
+.game07-verdict-pulse-indicator {
+  width: 40px;
+  height: 2px;
+  background: #38bdf8;
+  margin: 1.5rem auto 0;
+  box-shadow: 0 0 12px #38bdf8;
+  animation: pulse 1.8s infinite;
+}
+
+/* Failure Cinematic Overlay (Distortion & Blackout) */
+.game07-failure-cinematic-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  background: rgba(10, 0, 0, 0.4);
+  animation: failureBlackout 6.5s ease-in forwards;
+}
+
+.game07-failure-vignette {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 160px rgba(120, 10, 10, 0.9);
+  animation: pulse 1.2s infinite;
+}
+
+.game07-failure-glitch-pulse {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, transparent 40%, rgba(200, 20, 20, 0.4) 100%);
+  animation: glitchFlicker 0.4s infinite;
+}
+
+@keyframes failureBlackout {
+  0% { opacity: 0; background: rgba(10, 0, 0, 0.1); }
+  60% { opacity: 0.6; background: rgba(20, 2, 2, 0.5); }
+  85% { opacity: 0.9; background: rgba(5, 0, 0, 0.85); }
+  100% { opacity: 1; background: #000000; }
+}
+
+@keyframes glitchFlicker {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.02); }
+}
+
+/* Failure Screen Overlay */
+.game07-failure-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 5, 8, 0.94);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  pointer-events: auto;
+  animation: fadeIn 0.8s ease-out;
+  font-family: 'Cinzel Decorative', 'Cinzel', serif, Georgia;
+}
+
+.game07-failure-card {
+  width: 90%;
+  max-width: 620px;
+  background: linear-gradient(180deg, rgba(20, 10, 15, 0.96), rgba(8, 4, 6, 0.98));
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.9), 0 0 40px rgba(239, 68, 68, 0.25);
+  padding: 2.8rem 2.2rem;
+  text-align: center;
+}
+
+.game07-failure-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: #ef4444;
+  text-transform: uppercase;
+}
+
+.game07-failure-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #f8fafc;
+  margin: 0.6rem 0 0;
+}
+
+.game07-failure-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.6), transparent);
+  margin: 1.2rem 0 1.6rem;
+}
+
+.game07-failure-lore {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-bottom: 2.2rem;
+}
+
+.game07-failure-quote {
+  font-size: 0.95rem;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.game07-failure-button {
+  background: linear-gradient(135deg, #b91c1c, #991b1b);
+  color: #f8fafc;
+  border: none;
+  padding: 0.85rem 2.4rem;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(185, 28, 28, 0.4);
+  transition: all 0.2s ease;
+}
+
+.game07-failure-button:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 6px 24px rgba(220, 38, 38, 0.6);
+  transform: translateY(-1px);
+}
+
 
 
 

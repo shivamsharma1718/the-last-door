@@ -3,12 +3,13 @@
  * Theme: Reality vs Deception, Perception, and Psychological Horror.
  *
  * Manages:
- * - Active status (intro, exploring, examining, altar_ready)
+ * - Active status (intro, exploring, examining, altar_ready, altar_verdict, verdict_transition, failure_cinematic, failed, victory_cinematic)
  * - Examined mirror IDs (Set<MirrorId>)
  * - Discrepancies discovered count
  * - Current nearest mirror, artifact, and altar proximity
  * - Active examination modal target (MirrorDefinition or Altar)
  * - Altar availability state (unlocked after all 4 mirrors examined)
+ * - Selected verdict (North, East, West, South) and failed mirror ID
  * - Reset counter for player controls reset
  * - Completion callback for game progression
  */
@@ -23,6 +24,7 @@ import type {
 import {
   getMirrorById,
   hasExaminedAllMirrors,
+  isTrueMirror,
 } from './mirrorTrialLogic'
 
 export type ProximityType = 'mirror' | 'artifact' | 'altar' | null
@@ -44,6 +46,8 @@ export interface MirrorTrialStoreState {
   isExaminingAltar: boolean
   proximity: ProximityState
   altarUnlocked: boolean
+  selectedVerdict: MirrorId | null
+  failedMirrorId: MirrorId | null
   resetCounter: number
 }
 
@@ -64,12 +68,15 @@ const initialState: MirrorTrialStoreState = {
   isExaminingAltar: false,
   proximity: initialProximity,
   altarUnlocked: false,
+  selectedVerdict: null,
+  failedMirrorId: null,
   resetCounter: 0,
 }
 
 let currentState: MirrorTrialStoreState = { ...initialState }
 const listeners = new Set<() => void>()
 let onCompleteCallback: (() => void) | null = null
+let verdictTimer: ReturnType<typeof setTimeout> | null = null
 
 function emitChange() {
   for (const listener of listeners) {
@@ -135,7 +142,7 @@ export const mirrorTrialStore = {
 
     if (nearAltar) {
       type = 'altar'
-      promptText = 'READ INSCRIPTION'
+      promptText = currentState.altarUnlocked ? 'PRESENT VERDICT' : 'READ INSCRIPTION'
     } else if (nearArtifact && isCloserToArtifact && mirrorForArtifact) {
       type = 'artifact'
       artifact = nearArtifact
@@ -158,7 +165,8 @@ export const mirrorTrialStore = {
       prev.type !== type ||
       prev.isNearAltar !== nearAltar ||
       prev.mirror?.id !== mirror?.id ||
-      prev.artifact?.id !== artifact?.id
+      prev.artifact?.id !== artifact?.id ||
+      prev.promptText !== promptText
 
     if (hasChanged) {
       currentState = {
@@ -235,16 +243,108 @@ export const mirrorTrialStore = {
     emitChange()
   },
 
+  openAltarVerdict: () => {
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+
+    if (!currentState.altarUnlocked) {
+      return
+    }
+
+    currentState = {
+      ...currentState,
+      status: 'altar_verdict',
+    }
+    emitChange()
+  },
+
+  closeAltarVerdict: () => {
+    if (currentState.status !== 'altar_verdict') {
+      return
+    }
+
+    currentState = {
+      ...currentState,
+      status: 'altar_ready',
+    }
+    emitChange()
+  },
+
+  submitVerdict: (chosenMirrorId: MirrorId) => {
+    if (
+      currentState.status !== 'altar_verdict' ||
+      currentState.selectedVerdict !== null
+    ) {
+      return
+    }
+
+    if (!hasExaminedAllMirrors(currentState.examinedMirrorIds)) {
+      return
+    }
+
+    if (verdictTimer) {
+      clearTimeout(verdictTimer)
+      verdictTimer = null
+    }
+
+    const isCorrect = isTrueMirror(chosenMirrorId)
+
+    if (isCorrect) {
+      // Correct choice: North (Speculum Veritatis)
+      currentState = {
+        ...currentState,
+        selectedVerdict: chosenMirrorId,
+        status: 'verdict_transition',
+      }
+      emitChange()
+
+      verdictTimer = setTimeout(() => {
+        currentState = {
+          ...currentState,
+          status: 'victory_cinematic',
+        }
+        emitChange()
+      }, 4200)
+    } else {
+      // Wrong choice: East, West, or South
+      currentState = {
+        ...currentState,
+        selectedVerdict: chosenMirrorId,
+        failedMirrorId: chosenMirrorId,
+        status: 'failure_cinematic',
+      }
+      emitChange()
+
+      verdictTimer = setTimeout(() => {
+        currentState = {
+          ...currentState,
+          status: 'failed',
+        }
+        emitChange()
+      }, 6500)
+    }
+  },
+
   restartTrial: () => {
     if (typeof document !== 'undefined' && document.pointerLockElement) {
       document.exitPointerLock()
     }
 
+    if (verdictTimer) {
+      clearTimeout(verdictTimer)
+      verdictTimer = null
+    }
+
     currentState = {
       ...initialState,
       isActive: true,
+      status: 'exploring',
       examinedMirrorIds: new Set<MirrorId>(),
       discoveredDiscrepancies: new Set<string>(),
+      altarUnlocked: false,
+      selectedVerdict: null,
+      failedMirrorId: null,
       resetCounter: currentState.resetCounter + 1,
     }
     emitChange()
@@ -255,11 +355,20 @@ export const mirrorTrialStore = {
       document.exitPointerLock()
     }
 
+    if (verdictTimer) {
+      clearTimeout(verdictTimer)
+      verdictTimer = null
+    }
+
     currentState = {
       ...initialState,
       isActive: true,
+      status: 'intro',
       examinedMirrorIds: new Set<MirrorId>(),
       discoveredDiscrepancies: new Set<string>(),
+      altarUnlocked: false,
+      selectedVerdict: null,
+      failedMirrorId: null,
       resetCounter: currentState.resetCounter + 1,
     }
     emitChange()

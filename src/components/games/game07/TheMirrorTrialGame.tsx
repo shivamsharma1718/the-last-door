@@ -6,13 +6,15 @@
  * - 3D Arena rendering (TheMirrorTrialArena)
  * - First-person PlayerControls with octagonal chamber collision
  * - Proximity detection for mirrors, physical artifacts, and the central altar
- * - E-key interaction dispatch (open/close examination)
+ * - E-key interaction dispatch (open/close examination, altar verdict)
+ * - Camera focus interpolation during the failure horror sequence
  * - Pointer-lock lifecycle management
  * - Position reset isolation
  */
 
-import React, { useEffect, useRef, useCallback } from 'react'
+import React, { useEffect, useRef, useCallback, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
 import { TheMirrorTrialArena, constrainMirrorTrialPosition } from './TheMirrorTrialArena'
 import { PlayerControls } from '../../canvas/PlayerControls'
 import type { TheMirrorTrialProps } from './mirrorTrialTypes'
@@ -44,6 +46,8 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
     examinedMirrorIds,
     proximity,
     altarUnlocked,
+    selectedVerdict,
+    failedMirrorId,
     resetCounter,
   } = useMirrorTrialStore()
 
@@ -52,6 +56,17 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
 
   const proximityRef = useRef(proximity)
   proximityRef.current = proximity
+
+  const altarUnlockedRef = useRef(altarUnlocked)
+  altarUnlockedRef.current = altarUnlocked
+
+  const failedMirrorIdRef = useRef(failedMirrorId)
+  failedMirrorIdRef.current = failedMirrorId
+
+  // Pre-allocated vectors & matrices for smooth camera look-at during failure sequence
+  const failedTargetVec = useMemo(() => new THREE.Vector3(), [])
+  const lookMatrix = useMemo(() => new THREE.Matrix4(), [])
+  const targetQuat = useMemo(() => new THREE.Quaternion(), [])
 
   // Position constraint preventing walking through walls, mirrors, altar, or pedestals
   const handleConstrainPosition = useCallback(
@@ -76,7 +91,7 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
     }
   }, [onComplete])
 
-  // Release pointer lock cleanly when opening examination or on non-exploring states
+  // Release pointer lock cleanly when opening examination, verdict, or cinematic states
   useEffect(() => {
     const isPlayerActive = status === 'exploring' || status === 'altar_ready'
 
@@ -87,8 +102,23 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
     }
   }, [status])
 
-  // Continuous frame loop for proximity evaluation (mirrors, artifacts, altar)
+  // Continuous frame loop for camera cinematic tracking and proximity evaluation
   useFrame(({ camera }) => {
+    // 1. Failure cinematic: Smoothly focus camera on the reacting deceptive mirror
+    if (statusRef.current === 'failure_cinematic') {
+      const failedId = failedMirrorIdRef.current
+      if (failedId) {
+        const mirrorDef = MIRROR_DEFINITIONS.find((m) => m.id === failedId)
+        if (mirrorDef) {
+          failedTargetVec.set(...mirrorDef.mirrorPosition)
+          lookMatrix.lookAt(camera.position, failedTargetVec, camera.up)
+          targetQuat.setFromRotationMatrix(lookMatrix)
+          camera.quaternion.slerp(targetQuat, 0.08)
+        }
+      }
+      return
+    }
+
     if (statusRef.current !== 'exploring' && statusRef.current !== 'altar_ready') {
       return
     }
@@ -96,13 +126,13 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
     const px = camera.position.x
     const pz = camera.position.z
 
-    // 1. Proximity to Central Altar
+    // 2. Proximity to Central Altar
     const nearAltar = isNearAltar(px, pz, ALTAR_DISTANCE_THRESHOLD_G07)
 
-    // 2. Proximity to Physical Artifacts
+    // 3. Proximity to Physical Artifacts
     const nearArtifact = getNearestArtifact(px, pz, INTERACTION_DISTANCE_THRESHOLD_G07)
 
-    // 3. Proximity to Mirror Frames
+    // 4. Proximity to Mirror Frames
     const nearMirror = getNearestMirror(px, pz, INTERACTION_DISTANCE_THRESHOLD_G07)
 
     // Find corresponding mirror definition for artifact if near artifact
@@ -155,11 +185,15 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
         if (curStatus === 'exploring' || curStatus === 'altar_ready') {
           const prox = proximityRef.current
 
-          // Priority 1: Central Altar Inscription
+          // Priority 1: Central Altar Inscription / Verdict
           if (prox.isNearAltar) {
             e.preventDefault()
             e.stopPropagation()
-            mirrorTrialStore.openAltarExamination()
+            if (altarUnlockedRef.current) {
+              mirrorTrialStore.openAltarVerdict()
+            } else {
+              mirrorTrialStore.openAltarExamination()
+            }
             return
           }
 
@@ -180,6 +214,10 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
           e.preventDefault()
           e.stopPropagation()
           mirrorTrialStore.closeExamination()
+        } else if (curStatus === 'altar_verdict') {
+          e.preventDefault()
+          e.stopPropagation()
+          mirrorTrialStore.closeAltarVerdict()
         }
       }
     }
@@ -197,6 +235,9 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
       <TheMirrorTrialArena
         investigatedMirrorIds={Array.from(examinedMirrorIds)}
         altarUnlocked={altarUnlocked}
+        status={status}
+        failedMirrorId={failedMirrorId}
+        selectedVerdict={selectedVerdict}
       />
 
       {/* First-person player controls constrained to octagonal gothic chamber */}

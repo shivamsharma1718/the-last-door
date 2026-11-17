@@ -211,9 +211,12 @@ export const MIRROR_DEFINITIONS: MirrorDefinition[] = [
 
 const VALID_STATE_TRANSITIONS: Record<Game07Status, Game07Status[]> = {
   intro: ['exploring'],
-  exploring: ['examining', 'altar_ready', 'failing', 'failed'],
-  examining: ['exploring', 'altar_ready', 'failing', 'failed'],
-  altar_ready: ['resolving', 'exploring', 'examining', 'failing', 'failed'],
+  exploring: ['examining', 'altar_ready', 'altar_verdict', 'failing', 'failed'],
+  examining: ['exploring', 'altar_ready', 'altar_verdict', 'failing', 'failed'],
+  altar_ready: ['altar_verdict', 'resolving', 'exploring', 'examining', 'failing', 'failed'],
+  altar_verdict: ['verdict_transition', 'failure_cinematic', 'exploring', 'altar_ready'],
+  verdict_transition: ['victory_cinematic'],
+  failure_cinematic: ['failed'],
   resolving: ['victory_cinematic', 'failing', 'failed'],
   victory_cinematic: ['victory'],
   victory: ['next_trial'],

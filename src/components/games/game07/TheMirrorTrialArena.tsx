@@ -20,7 +20,7 @@ import React, { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
 import * as THREE from 'three'
-import type { MirrorId } from './mirrorTrialTypes'
+import type { MirrorId, Game07Status } from './mirrorTrialTypes'
 import {
   CHAMBER_WIDTH,
   CHAMBER_DEPTH,
@@ -536,12 +536,77 @@ const PhysicalSealedArch: React.FC<{ isExamined?: boolean }> = ({ isExamined }) 
 // 6. Baroque Mirror Frame & Controlled Reflection Systems
 // ---------------------------------------------------------------------------
 
+const HorrorSilhouette: React.FC<{ progress: number }> = ({ progress }) => {
+  // progress goes from 0.0 to 1.0 over ~6 seconds
+  // z starts at -1.5 (deep inside alcove), moves forward to +0.65 (stepping beyond glass)
+  const zPos = -1.5 + progress * 2.15
+  const armReach = Math.min(1.0, progress * 1.5)
+
+  return (
+    <group position={[0, -0.2, zPos]}>
+      {/* Hooded Head */}
+      <mesh position={[0, 0.72, 0]}>
+        <sphereGeometry args={[0.16, 16, 16]} />
+        <meshStandardMaterial color="#020305" roughness={0.98} />
+      </mesh>
+      {/* Hood cowl */}
+      <mesh position={[0, 0.68, 0.04]} rotation={[0.2, 0, 0]}>
+        <coneGeometry args={[0.24, 0.35, 16]} />
+        <meshStandardMaterial color="#05070a" roughness={0.98} />
+      </mesh>
+
+      {/* Torso & Shadow Shroud */}
+      <mesh position={[0, 0.18, 0]}>
+        <cylinderGeometry args={[0.22, 0.18, 0.85, 12]} />
+        <meshStandardMaterial color="#020305" roughness={0.98} />
+      </mesh>
+      {/* Cloak draping to ground */}
+      <mesh position={[0, -0.45, 0]}>
+        <coneGeometry args={[0.38, 0.7, 14]} />
+        <meshStandardMaterial color="#020305" roughness={0.98} />
+      </mesh>
+
+      {/* Reaching Shadow Arms */}
+      {[-1, 1].map((dir) => (
+        <group key={`arm-${dir}`} position={[dir * 0.22, 0.35, 0.05]}>
+          <mesh
+            rotation={[
+              Math.PI / 4 + armReach * (Math.PI / 4),
+              dir * 0.15,
+              dir * 0.1,
+            ]}
+          >
+            <cylinderGeometry args={[0.04, 0.05, 0.65, 8]} />
+            <meshStandardMaterial color="#030407" roughness={0.98} />
+          </mesh>
+          {/* Shadow Claw/Hand */}
+          <mesh position={[0, 0, 0.35]} rotation={[0.3, 0, 0]}>
+            <boxGeometry args={[0.06, 0.02, 0.12]} />
+            <meshStandardMaterial color="#010103" roughness={0.98} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Eerie Shadow Aura Light */}
+      <pointLight
+        color="#7f1d1d"
+        intensity={2.8 * Math.min(1.0, progress * 2)}
+        distance={3.5}
+        decay={2}
+      />
+    </group>
+  )
+}
+
 interface MirrorStructureProps {
   id: MirrorId
   position: [number, number, number]
   rotation: [number, number, number]
   latinTitle: string
   englishTitle: string
+  isFailing?: boolean
+  failureProgress?: number
+  isTruthGlowing?: boolean
   children?: React.ReactNode
 }
 
@@ -550,6 +615,9 @@ const BaroqueMirrorFrame: React.FC<MirrorStructureProps> = ({
   rotation,
   latinTitle,
   englishTitle,
+  isFailing = false,
+  failureProgress = 0,
+  isTruthGlowing = false,
   children,
 }) => {
   return (
@@ -586,41 +654,77 @@ const BaroqueMirrorFrame: React.FC<MirrorStructureProps> = ({
       {/* Left Column */}
       <mesh position={[-1.02, 0, 0.08]} castShadow>
         <boxGeometry args={[0.22, 3.1, 0.2]} />
-        <meshStandardMaterial color="#2d2b27" roughness={0.55} metalness={0.65} />
+        <meshStandardMaterial
+          color={isFailing ? '#180707' : '#2d2b27'}
+          roughness={0.55}
+          metalness={0.65}
+        />
       </mesh>
       {/* Right Column */}
       <mesh position={[1.02, 0, 0.08]} castShadow>
         <boxGeometry args={[0.22, 3.1, 0.2]} />
-        <meshStandardMaterial color="#2d2b27" roughness={0.55} metalness={0.65} />
+        <meshStandardMaterial
+          color={isFailing ? '#180707' : '#2d2b27'}
+          roughness={0.55}
+          metalness={0.65}
+        />
       </mesh>
       {/* Top Arched Pediment */}
       <mesh position={[0, 1.58, 0.08]} castShadow>
         <boxGeometry args={[2.26, 0.22, 0.2]} />
-        <meshStandardMaterial color="#35312a" roughness={0.5} metalness={0.7} />
+        <meshStandardMaterial
+          color={isFailing ? '#220b0b' : '#35312a'}
+          roughness={0.5}
+          metalness={0.7}
+        />
       </mesh>
       {/* Bottom Plinth Ledge */}
       <mesh position={[0, -1.58, 0.08]} castShadow>
         <boxGeometry args={[2.26, 0.22, 0.2]} />
-        <meshStandardMaterial color="#35312a" roughness={0.5} metalness={0.7} />
+        <meshStandardMaterial
+          color={isFailing ? '#220b0b' : '#35312a'}
+          roughness={0.5}
+          metalness={0.7}
+        />
       </mesh>
 
       {/* Inner Decorative Gilded Bezel Ring */}
       <mesh position={[0, 0, 0.06]}>
         <boxGeometry args={[1.88, 2.98, 0.04]} />
-        <meshStandardMaterial color="#854d0e" roughness={0.4} metalness={0.8} />
+        <meshStandardMaterial
+          color={isTruthGlowing ? '#38bdf8' : isFailing ? '#7f1d1d' : '#854d0e'}
+          roughness={0.4}
+          metalness={0.8}
+        />
       </mesh>
 
       {/* Semi-Translucent Reflective Mirror Glass */}
       <mesh position={[0, 0, 0.04]}>
         <planeGeometry args={[1.76, 2.86]} />
         <meshStandardMaterial
-          color="#cbd5e1"
-          metalness={0.92}
-          roughness={0.12}
+          color={isTruthGlowing ? '#e0f2fe' : isFailing ? '#450a0a' : '#cbd5e1'}
+          emissive={isTruthGlowing ? '#0284c7' : isFailing ? '#7f1d1d' : '#000000'}
+          emissiveIntensity={isTruthGlowing ? 1.0 : isFailing ? 0.8 : 0.0}
+          metalness={isFailing ? 0.4 : 0.92}
+          roughness={isFailing ? 0.4 : 0.12}
           transparent
-          opacity={0.65}
+          opacity={isFailing ? 0.4 : 0.65}
         />
       </mesh>
+
+      {/* Celestial Radiance on Truth Mirror during Victory Transition */}
+      {isTruthGlowing && (
+        <pointLight
+          position={[0, 0, 0.8]}
+          color="#38bdf8"
+          intensity={3.2}
+          distance={5.0}
+          decay={2}
+        />
+      )}
+
+      {/* Emerging Shadow Silhouette during Failure Cinematic */}
+      {isFailing && <HorrorSilhouette progress={failureProgress} />}
 
       {/* Light-Blocking Dark Alcove Box Behind the Mirror Frame */}
       {/* This encloses the reflection geometry completely so it doesn't bleed outside */}
@@ -980,9 +1084,13 @@ const ReflectedDoorSouth: React.FC = () => {
 
 interface CentralAltarProps {
   altarUnlocked?: boolean
+  isTruthResolved?: boolean
 }
 
-const CentralAltar: React.FC<CentralAltarProps> = ({ altarUnlocked = false }) => {
+const CentralAltar: React.FC<CentralAltarProps> = ({
+  altarUnlocked = false,
+  isTruthResolved = false,
+}) => {
   const [ax, , az] = ALTAR_WORLD_POS
 
   return (
@@ -1028,9 +1136,9 @@ const CentralAltar: React.FC<CentralAltarProps> = ({ altarUnlocked = false }) =>
       <mesh position={[0, 1.035, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.2, 0.38, 32]} />
         <meshStandardMaterial
-          color={altarUnlocked ? '#38bdf8' : '#334155'}
-          emissive={altarUnlocked ? '#0284c7' : '#000000'}
-          emissiveIntensity={altarUnlocked ? 0.6 : 0.0}
+          color={isTruthResolved ? '#38bdf8' : altarUnlocked ? '#38bdf8' : '#334155'}
+          emissive={isTruthResolved ? '#38bdf8' : altarUnlocked ? '#0284c7' : '#000000'}
+          emissiveIntensity={isTruthResolved ? 1.6 : altarUnlocked ? 0.6 : 0.0}
           roughness={0.2}
           metalness={0.7}
         />
@@ -1045,7 +1153,9 @@ const CentralAltar: React.FC<CentralAltarProps> = ({ altarUnlocked = false }) =>
         >
           <planeGeometry args={[0.04, 0.22]} />
           <meshStandardMaterial
-            color={altarUnlocked ? '#38bdf8' : '#1e293b'}
+            color={isTruthResolved ? '#38bdf8' : altarUnlocked ? '#38bdf8' : '#1e293b'}
+            emissive={isTruthResolved ? '#38bdf8' : '#000000'}
+            emissiveIntensity={isTruthResolved ? 1.2 : 0.0}
             roughness={0.4}
           />
         </mesh>
@@ -1103,12 +1213,12 @@ const CentralAltar: React.FC<CentralAltarProps> = ({ altarUnlocked = false }) =>
         </Text>
       </group>
 
-      {/* Central Dormant Downlight */}
+      {/* Central Dormant / Awakened Downlight */}
       <pointLight
         position={[0, 2.2, 0]}
-        color={altarUnlocked ? '#38bdf8' : '#64748b'}
-        intensity={altarUnlocked ? 1.5 : 0.4}
-        distance={4.0}
+        color={isTruthResolved ? '#38bdf8' : altarUnlocked ? '#38bdf8' : '#64748b'}
+        intensity={isTruthResolved ? 3.5 : altarUnlocked ? 1.5 : 0.4}
+        distance={isTruthResolved ? 6.0 : 4.0}
         decay={2}
       />
     </group>
@@ -1338,16 +1448,37 @@ const OctagonalChamberShell: React.FC = () => {
 export interface TheMirrorTrialArenaProps {
   investigatedMirrorIds?: MirrorId[]
   altarUnlocked?: boolean
+  status?: Game07Status
+  failedMirrorId?: MirrorId | null
+  selectedVerdict?: MirrorId | null
 }
 
 export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
   investigatedMirrorIds = [],
   altarUnlocked = false,
+  status = 'exploring',
+  failedMirrorId = null,
+  selectedVerdict = null,
 }) => {
   const investigatedSet = useMemo(
     () => new Set(investigatedMirrorIds),
     [investigatedMirrorIds]
   )
+
+  const failureProgressRef = useRef<number>(0)
+  const isFailure = status === 'failure_cinematic'
+  const isVerdictTransition = status === 'verdict_transition'
+
+  useFrame((_, delta) => {
+    if (isFailure) {
+      failureProgressRef.current = Math.min(
+        1.0,
+        failureProgressRef.current + delta / 5.5
+      )
+    } else {
+      failureProgressRef.current = 0
+    }
+  })
 
   const northMirror = MIRROR_DEFINITIONS[0]
   const eastMirror = MIRROR_DEFINITIONS[1]
@@ -1358,18 +1489,31 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
     <>
       {/* 1. Psychological Horror Atmosphere & Fog */}
       <color attach="background" args={['#04060a']} />
-      <fog attach="fog" args={['#04060a', 3.5, 17.5]} />
+      <fog
+        attach="fog"
+        args={['#04060a', isFailure ? 2.0 : 3.5, isFailure ? 12.0 : 17.5]}
+      />
 
-      {/* 2. Restrained Gothic Lighting */}
-      {/* Cold Deep Slate Ambient Light */}
-      <ambientLight color="#141a26" intensity={0.42} />
+      {/* 2. Restrained Gothic Lighting with Failure Flicker & Verdict Radiance */}
+      <ambientLight
+        color={isVerdictTransition ? '#1e3a5f' : isFailure ? '#2a0a0a' : '#141a26'}
+        intensity={isFailure ? 0.08 : isVerdictTransition ? 0.6 : 0.42}
+      />
 
-      {/* Central Chandelier Moonlit Downlight */}
+      {/* Central Chandelier Moonlit Downlight / Horror Flicker */}
       <spotLight
         position={[0, CHAMBER_HEIGHT - 0.2, 0]}
         target-position={[0, 0, 0]}
-        color="#38bdf8"
-        intensity={1.2}
+        color={isFailure ? '#991b1b' : '#38bdf8'}
+        intensity={
+          isFailure
+            ? Math.random() > 0.45
+              ? 1.2
+              : 0.0
+            : isVerdictTransition
+            ? 2.8
+            : 1.2
+        }
         distance={10.0}
         angle={Math.PI / 3}
         penumbra={0.8}
@@ -1380,7 +1524,10 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
       <OctagonalChamberShell />
 
       {/* 4. Central Altar of Truth */}
-      <CentralAltar altarUnlocked={altarUnlocked} />
+      <CentralAltar
+        altarUnlocked={altarUnlocked}
+        isTruthResolved={isVerdictTransition}
+      />
 
       {/* 5. Four Physical Inspectable Artifacts */}
       <PhysicalPocketWatch isExamined={investigatedSet.has('mirror_north')} />
@@ -1396,6 +1543,7 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
         rotation={northMirror.mirrorRotation}
         latinTitle={northMirror.latinTitle}
         englishTitle={northMirror.englishTitle}
+        isTruthGlowing={isVerdictTransition && selectedVerdict === 'mirror_north'}
       >
         <ReflectedTruthNorth />
       </BaroqueMirrorFrame>
@@ -1407,6 +1555,8 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
         rotation={eastMirror.mirrorRotation}
         latinTitle={eastMirror.latinTitle}
         englishTitle={eastMirror.englishTitle}
+        isFailing={isFailure && failedMirrorId === 'mirror_east'}
+        failureProgress={failureProgressRef.current}
       >
         <ReflectedFlameEast />
       </BaroqueMirrorFrame>
@@ -1418,6 +1568,8 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
         rotation={westMirror.mirrorRotation}
         latinTitle={westMirror.latinTitle}
         englishTitle={westMirror.englishTitle}
+        isFailing={isFailure && failedMirrorId === 'mirror_west'}
+        failureProgress={failureProgressRef.current}
       >
         <ReflectedTimeWest />
       </BaroqueMirrorFrame>
@@ -1429,6 +1581,8 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
         rotation={southMirror.mirrorRotation}
         latinTitle={southMirror.latinTitle}
         englishTitle={southMirror.englishTitle}
+        isFailing={isFailure && failedMirrorId === 'mirror_south'}
+        failureProgress={failureProgressRef.current}
       >
         <ReflectedDoorSouth />
       </BaroqueMirrorFrame>

@@ -41,9 +41,18 @@ import { MIRROR_DEFINITIONS } from './mirrorTrialLogic'
 export function constrainMirrorTrialPosition(
   proposed: { x: number; z: number },
   _current: { x: number; z: number },
-  radius: number = 0.35
+  radius: number = 0.35,
+  passageOpen: boolean = false
 ): { x: number; z: number } {
   let { x, z } = proposed
+
+  // If passage is open and player is stepping through the North passage archway
+  if (passageOpen && z <= -5.0 && Math.abs(x) <= 1.2) {
+    const corridorLimitX = 1.05 - radius
+    x = Math.max(-corridorLimitX, Math.min(corridorLimitX, x))
+    z = Math.max(-9.6 + radius, z)
+    return { x, z }
+  }
 
   // 1. Cardinal wall boundaries (half-extent ~5.6m)
   const maxCardinal = 5.4 - radius
@@ -70,8 +79,9 @@ export function constrainMirrorTrialPosition(
   }
 
   // 4. Four Artifact Pedestals (circles around pedestals)
+  // When passage is open, allow player to walk past North pedestal without being blocked
   const pedestals = [
-    { x: 0, z: -4.8 }, // North Pedestal
+    ...(passageOpen ? [] : [{ x: 0, z: -4.8 }]), // North Pedestal
     { x: 4.8, z: 0 },  // East Pedestal
     { x: -4.8, z: 0 }, // West Pedestal
     { x: 0, z: 4.8 },  // South Pedestal
@@ -598,6 +608,102 @@ const HorrorSilhouette: React.FC<{ progress: number }> = ({ progress }) => {
   )
 }
 
+// ---------------------------------------------------------------------------
+// 6b. Revealed 3D Northern Exit Passage Environment (Behind Speculum Veritatis)
+// ---------------------------------------------------------------------------
+
+interface NorthPassageCorridorProps {
+  isOpen: boolean
+}
+
+const NorthPassageCorridor: React.FC<NorthPassageCorridorProps> = ({ isOpen }) => {
+  if (!isOpen) return null
+
+  return (
+    <group position={[0, 0, 0]}>
+      {/* Stone Floor of the Passage (y = -1.8 in local mirror space = world y = 0) */}
+      <mesh position={[0, -1.78, -2.4]} receiveShadow>
+        <boxGeometry args={[2.3, 0.08, 4.8]} />
+        <meshStandardMaterial color="#0f141d" roughness={0.85} metalness={0.2} />
+      </mesh>
+      {/* Floor Center Brass Inlay Strip */}
+      <mesh position={[0, -1.73, -2.4]}>
+        <planeGeometry args={[0.2, 4.8]} />
+        <meshStandardMaterial color="#38bdf8" roughness={0.3} metalness={0.8} />
+      </mesh>
+
+      {/* Ceiling of the Passage (y = 2.38 in local mirror space = world y = 4.18) */}
+      <mesh position={[0, 2.38, -2.4]} receiveShadow>
+        <boxGeometry args={[2.3, 0.08, 4.8]} />
+        <meshStandardMaterial color="#0c1018" roughness={0.9} metalness={0.1} />
+      </mesh>
+
+      {/* Left Wall of Passage */}
+      <mesh position={[-1.15, 0.3, -2.4]} receiveShadow castShadow>
+        <boxGeometry args={[0.1, 4.16, 4.8]} />
+        <meshStandardMaterial color="#111622" roughness={0.88} metalness={0.2} />
+      </mesh>
+      {/* Right Wall of Passage */}
+      <mesh position={[1.15, 0.3, -2.4]} receiveShadow castShadow>
+        <boxGeometry args={[0.1, 4.16, 4.8]} />
+        <meshStandardMaterial color="#111622" roughness={0.88} metalness={0.2} />
+      </mesh>
+
+      {/* Gothic Wall Buttresses & Cyan Sconces along Corridor */}
+      {[-1.2, -2.4, -3.6].map((pz, idx) => (
+        <group key={`passage-rib-${idx}`}>
+          <mesh position={[-1.1, 0.3, pz]} castShadow>
+            <boxGeometry args={[0.12, 4.1, 0.22]} />
+            <meshStandardMaterial color="#1a2232" roughness={0.7} metalness={0.3} />
+          </mesh>
+          <mesh position={[1.1, 0.3, pz]} castShadow>
+            <boxGeometry args={[0.12, 4.1, 0.22]} />
+            <meshStandardMaterial color="#1a2232" roughness={0.7} metalness={0.3} />
+          </mesh>
+          {/* Steady Cyan Passage Light */}
+          <pointLight
+            position={[0, 0.6, pz]}
+            color="#38bdf8"
+            intensity={1.8}
+            distance={4.5}
+            decay={2}
+          />
+        </group>
+      ))}
+
+      {/* Far End Portal Threshold at z = -4.75 (World z = -10.55) */}
+      <group position={[0, 0.3, -4.75]}>
+        {/* End Archway Frame */}
+        <mesh position={[-0.95, 0, 0]}>
+          <boxGeometry args={[0.25, 4.1, 0.2]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.6} metalness={0.4} />
+        </mesh>
+        <mesh position={[0.95, 0, 0]}>
+          <boxGeometry args={[0.25, 4.1, 0.2]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.6} metalness={0.4} />
+        </mesh>
+        <mesh position={[0, 2.0, 0]}>
+          <boxGeometry args={[2.15, 0.3, 0.2]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.6} metalness={0.4} />
+        </mesh>
+
+        {/* Radiant Celestial Luminous Horizon */}
+        <mesh position={[0, -0.2, 0.05]}>
+          <planeGeometry args={[1.7, 3.7]} />
+          <meshBasicMaterial color="#38bdf8" transparent opacity={0.88} />
+        </mesh>
+        <pointLight
+          position={[0, 0.5, 0.8]}
+          color="#38bdf8"
+          intensity={4.0}
+          distance={6.0}
+          decay={2}
+        />
+      </group>
+    </group>
+  )
+}
+
 interface MirrorStructureProps {
   id: MirrorId
   position: [number, number, number]
@@ -607,10 +713,13 @@ interface MirrorStructureProps {
   isFailing?: boolean
   failureProgress?: number
   isTruthGlowing?: boolean
+  isPassageOpen?: boolean
+  isSilenced?: boolean
   children?: React.ReactNode
 }
 
 const BaroqueMirrorFrame: React.FC<MirrorStructureProps> = ({
+  id,
   position,
   rotation,
   latinTitle,
@@ -618,8 +727,29 @@ const BaroqueMirrorFrame: React.FC<MirrorStructureProps> = ({
   isFailing = false,
   failureProgress = 0,
   isTruthGlowing = false,
+  isPassageOpen = false,
+  isSilenced = false,
   children,
 }) => {
+  const slideGroupRef = useRef<THREE.Group>(null!)
+  const slideProgressRef = useRef<number>(0)
+
+  useFrame((_, delta) => {
+    if (isPassageOpen && id === 'mirror_north') {
+      slideProgressRef.current = THREE.MathUtils.damp(
+        slideProgressRef.current,
+        1,
+        2.2,
+        delta
+      )
+    } else {
+      slideProgressRef.current = 0
+    }
+    if (slideGroupRef.current) {
+      slideGroupRef.current.position.x = -slideProgressRef.current * 1.95
+    }
+  })
+
   return (
     <group position={position} rotation={rotation}>
       {/* 3D Inscription Plaque above Mirror */}
@@ -688,31 +818,64 @@ const BaroqueMirrorFrame: React.FC<MirrorStructureProps> = ({
         />
       </mesh>
 
-      {/* Inner Decorative Gilded Bezel Ring */}
-      <mesh position={[0, 0, 0.06]}>
-        <boxGeometry args={[1.88, 2.98, 0.04]} />
-        <meshStandardMaterial
-          color={isTruthGlowing ? '#38bdf8' : isFailing ? '#7f1d1d' : '#854d0e'}
-          roughness={0.4}
-          metalness={0.8}
-        />
-      </mesh>
+      {/* Sliding Inner Bezel and Mirror Glass */}
+      <group ref={slideGroupRef}>
+        {/* Inner Decorative Gilded Bezel Ring */}
+        <mesh position={[0, 0, 0.06]}>
+          <boxGeometry args={[1.88, 2.98, 0.04]} />
+          <meshStandardMaterial
+            color={
+              isTruthGlowing
+                ? '#38bdf8'
+                : isFailing
+                ? '#7f1d1d'
+                : isSilenced
+                ? '#334155'
+                : '#854d0e'
+            }
+            roughness={0.4}
+            metalness={0.8}
+          />
+        </mesh>
 
-      {/* Semi-Translucent Reflective Mirror Glass */}
-      <mesh position={[0, 0, 0.04]}>
-        <planeGeometry args={[1.76, 2.86]} />
-        <meshStandardMaterial
-          color={isTruthGlowing ? '#e0f2fe' : isFailing ? '#450a0a' : '#cbd5e1'}
-          emissive={isTruthGlowing ? '#0284c7' : isFailing ? '#7f1d1d' : '#000000'}
-          emissiveIntensity={isTruthGlowing ? 1.0 : isFailing ? 0.8 : 0.0}
-          metalness={isFailing ? 0.4 : 0.92}
-          roughness={isFailing ? 0.4 : 0.12}
-          transparent
-          opacity={isFailing ? 0.4 : 0.65}
-        />
-      </mesh>
+        {/* Semi-Translucent Reflective Mirror Glass */}
+        <mesh position={[0, 0, 0.04]}>
+          <planeGeometry args={[1.76, 2.86]} />
+          <meshStandardMaterial
+            color={
+              isTruthGlowing
+                ? '#e0f2fe'
+                : isFailing
+                ? '#450a0a'
+                : isSilenced
+                ? '#0f172a'
+                : '#cbd5e1'
+            }
+            emissive={
+              isTruthGlowing
+                ? '#0284c7'
+                : isFailing
+                ? '#7f1d1d'
+                : '#000000'
+            }
+            emissiveIntensity={isTruthGlowing ? 1.0 : isFailing ? 0.8 : 0.0}
+            metalness={isFailing ? 0.4 : isSilenced ? 0.95 : 0.92}
+            roughness={isFailing ? 0.4 : isSilenced ? 0.05 : 0.12}
+            transparent
+            opacity={
+              isPassageOpen && id === 'mirror_north'
+                ? 0.35
+                : isFailing
+                ? 0.4
+                : isSilenced
+                ? 0.3
+                : 0.65
+            }
+          />
+        </mesh>
+      </group>
 
-      {/* Celestial Radiance on Truth Mirror during Victory Transition */}
+      {/* Celestial Radiance on Truth Mirror during Victory Transition / Passage Open */}
       {isTruthGlowing && (
         <pointLight
           position={[0, 0, 0.8]}
@@ -729,11 +892,13 @@ const BaroqueMirrorFrame: React.FC<MirrorStructureProps> = ({
       {/* Light-Blocking Dark Alcove Box Behind the Mirror Frame */}
       {/* This encloses the reflection geometry completely so it doesn't bleed outside */}
       <group position={[0, 0, -1.0]}>
-        {/* Back Wall */}
-        <mesh position={[0, 0, -0.9]}>
-          <planeGeometry args={[2.4, 3.4]} />
-          <meshStandardMaterial color="#05070a" roughness={0.98} />
-        </mesh>
+        {/* Back Wall (Omitted for North mirror when passage is open) */}
+        {!(isPassageOpen && id === 'mirror_north') && (
+          <mesh position={[0, 0, -0.9]}>
+            <planeGeometry args={[2.4, 3.4]} />
+            <meshStandardMaterial color="#05070a" roughness={0.98} />
+          </mesh>
+        )}
         {/* Top & Bottom Alcove Slabs */}
         <mesh position={[0, 1.65, 0]}>
           <boxGeometry args={[2.4, 0.1, 1.8]} />
@@ -753,8 +918,13 @@ const BaroqueMirrorFrame: React.FC<MirrorStructureProps> = ({
           <meshStandardMaterial color="#06080d" roughness={0.95} />
         </mesh>
 
-        {/* Reflected Scene Geometry Mounted Inside Alcove */}
-        {children}
+        {/* 3D Exit Corridor for North Mirror */}
+        {id === 'mirror_north' && (
+          <NorthPassageCorridor isOpen={isPassageOpen} />
+        )}
+
+        {/* Reflected Scene Geometry Mounted Inside Alcove (hidden if North mirror passage is open) */}
+        {!(isPassageOpen && id === 'mirror_north') && children}
       </group>
     </group>
   )
@@ -824,11 +994,17 @@ const ReflectedTruthNorth: React.FC = () => {
 // 8. Deterministic Reflection 2: East (Phantom Flame - Speculum Ignis)
 // ---------------------------------------------------------------------------
 
-const ReflectedFlameEast: React.FC = () => {
+const ReflectedFlameEast: React.FC<{ isSilenced?: boolean }> = ({
+  isSilenced = false,
+}) => {
   const flameLightRef = useRef<THREE.PointLight>(null!)
   const flameGroupRef = useRef<THREE.Group>(null!)
 
   useFrame(({ clock }) => {
+    if (isSilenced) {
+      if (flameLightRef.current) flameLightRef.current.intensity = 0
+      return
+    }
     const t = clock.getElapsedTime()
     // Dynamic flickering of phantom flames
     if (flameLightRef.current) {
@@ -875,39 +1051,62 @@ const ReflectedFlameEast: React.FC = () => {
           </mesh>
         ))}
 
-        {/* Three Candles with SPECTRAL VIOLET FLAMES (ONLY IN REFLECTION) */}
-        <group ref={flameGroupRef}>
-          {[
-            { pos: [0, 0.36, 0] as const },
-            { pos: [-0.2, 0.32, 0] as const },
-            { pos: [0.2, 0.32, 0] as const },
-          ].map((c, idx) => (
-            <group key={`ref-candle-${idx}`} position={c.pos}>
-              {/* Candle Body */}
-              <mesh position={[0, 0.08, 0]}>
-                <cylinderGeometry args={[0.028, 0.03, 0.16, 12]} />
-                <meshStandardMaterial color="#eae6da" roughness={0.7} />
-              </mesh>
-              {/* Ethereal Violet Flame TearDrop */}
-              <mesh position={[0, 0.22, 0]}>
-                <coneGeometry args={[0.022, 0.08, 10]} />
-                <meshBasicMaterial color="#c084fc" />
-              </mesh>
-              <mesh position={[0, 0.21, 0]}>
-                <sphereGeometry args={[0.025, 8, 8]} />
-                <meshBasicMaterial color="#a855f7" />
-              </mesh>
-            </group>
-          ))}
-        </group>
+        {/* Three Candles with SPECTRAL VIOLET FLAMES (ONLY IN REFLECTION, EXTINGUISHED WHEN SILENCED) */}
+        {!isSilenced && (
+          <group ref={flameGroupRef}>
+            {[
+              { pos: [0, 0.36, 0] as const },
+              { pos: [-0.2, 0.32, 0] as const },
+              { pos: [0.2, 0.32, 0] as const },
+            ].map((c, idx) => (
+              <group key={`ref-candle-${idx}`} position={c.pos}>
+                {/* Candle Body */}
+                <mesh position={[0, 0.08, 0]}>
+                  <cylinderGeometry args={[0.028, 0.03, 0.16, 12]} />
+                  <meshStandardMaterial color="#eae6da" roughness={0.7} />
+                </mesh>
+                {/* Ethereal Violet Flame TearDrop */}
+                <mesh position={[0, 0.22, 0]}>
+                  <coneGeometry args={[0.022, 0.08, 10]} />
+                  <meshBasicMaterial color="#c084fc" />
+                </mesh>
+                <mesh position={[0, 0.21, 0]}>
+                  <sphereGeometry args={[0.025, 8, 8]} />
+                  <meshBasicMaterial color="#a855f7" />
+                </mesh>
+              </group>
+            ))}
+          </group>
+        )}
+
+        {isSilenced && (
+          <group>
+            {[
+              { pos: [0, 0.36, 0] as const },
+              { pos: [-0.2, 0.32, 0] as const },
+              { pos: [0.2, 0.32, 0] as const },
+            ].map((c, idx) => (
+              <group key={`ref-cold-candle-${idx}`} position={c.pos}>
+                <mesh position={[0, 0.08, 0]}>
+                  <cylinderGeometry args={[0.028, 0.03, 0.16, 12]} />
+                  <meshStandardMaterial color="#94a3b8" roughness={0.9} />
+                </mesh>
+                <mesh position={[0, 0.18, 0]}>
+                  <cylinderGeometry args={[0.004, 0.004, 0.03, 6]} />
+                  <meshStandardMaterial color="#1e293b" roughness={0.9} />
+                </mesh>
+              </group>
+            ))}
+          </group>
+        )}
       </group>
 
-      {/* Violet Phantom Light Source (Confined to mirror alcove) */}
+      {/* Violet Phantom Light Source (Confined to mirror alcove, dark when silenced) */}
       <pointLight
         ref={flameLightRef}
         position={[0, 0.85, 0.1]}
         color="#a855f7"
-        intensity={2.0}
+        intensity={isSilenced ? 0.0 : 2.0}
         distance={2.5}
         decay={2}
       />
@@ -919,10 +1118,11 @@ const ReflectedFlameEast: React.FC = () => {
 // 9. Deterministic Reflection 3: West (Inverted Time - Speculum Temporis)
 // ---------------------------------------------------------------------------
 
-const ReflectedTimeWest: React.FC = () => {
+const ReflectedTimeWest: React.FC<{ isSilenced?: boolean }> = ({ isSilenced = false }) => {
   const sandStreamRef = useRef<THREE.Group>(null!)
 
   useFrame(({ clock }) => {
+    if (isSilenced) return
     const t = clock.getElapsedTime()
     // Animate upward streaming sand particles
     if (sandStreamRef.current) {
@@ -986,21 +1186,22 @@ const ReflectedTimeWest: React.FC = () => {
         </mesh>
 
         {/* Inverted Sand Physics: Upper bulb fills, lower bulb empties, stream flows UP */}
-        {/* Upper Bulb Sand Mound (Growing upside-down or filling) */}
         <mesh position={[0, 0.32, 0]}>
           <coneGeometry args={[0.075, 0.08, 14]} />
           <meshStandardMaterial color="#dc2626" roughness={0.85} />
         </mesh>
 
-        {/* Upward Streaming Particles */}
-        <group ref={sandStreamRef}>
-          {[-0.03, 0, 0.03].map((oy, idx) => (
-            <mesh key={`particle-${idx}`} position={[0, 0.2 + oy, 0]}>
-              <sphereGeometry args={[0.005, 6, 6]} />
-              <meshBasicMaterial color="#f87171" />
-            </mesh>
-          ))}
-        </group>
+        {/* Upward Streaming Particles (Still/omitted when silenced) */}
+        {!isSilenced && (
+          <group ref={sandStreamRef}>
+            {[-0.03, 0, 0.03].map((oy, idx) => (
+              <mesh key={`particle-${idx}`} position={[0, 0.2 + oy, 0]}>
+                <sphereGeometry args={[0.005, 6, 6]} />
+                <meshBasicMaterial color="#f87171" />
+              </mesh>
+            ))}
+          </group>
+        )}
 
         {/* Lower Bulb Sand (Depleted funnel) */}
         <mesh position={[0, 0.09, 0]}>
@@ -1008,18 +1209,20 @@ const ReflectedTimeWest: React.FC = () => {
           <meshStandardMaterial color="#991b1b" roughness={0.85} />
         </mesh>
 
-        {/* Chronological Distortion Ring (faint cyan shimmer) */}
-        <mesh position={[0, 0.22, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.16, 0.006, 12, 24]} />
-          <meshBasicMaterial color="#06b6d4" transparent opacity={0.4} />
-        </mesh>
+        {/* Chronological Distortion Ring (omitted when silenced) */}
+        {!isSilenced && (
+          <mesh position={[0, 0.22, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.16, 0.006, 12, 24]} />
+            <meshBasicMaterial color="#06b6d4" transparent opacity={0.4} />
+          </mesh>
+        )}
       </group>
 
-      {/* Cold Cyan Ambient Light (Confined to mirror alcove) */}
+      {/* Cold Cyan Ambient Light (Dark when silenced) */}
       <pointLight
         position={[0, 0.7, 0.1]}
         color="#06b6d4"
-        intensity={0.9}
+        intensity={isSilenced ? 0.0 : 0.9}
         distance={2.2}
         decay={2}
       />
@@ -1031,7 +1234,19 @@ const ReflectedTimeWest: React.FC = () => {
 // 10. Deterministic Reflection 4: South (False Door - Speculum Ianuae)
 // ---------------------------------------------------------------------------
 
-const ReflectedDoorSouth: React.FC = () => {
+const ReflectedDoorSouth: React.FC<{ isSilenced?: boolean }> = ({ isSilenced = false }) => {
+  if (isSilenced) {
+    return (
+      <group position={[0, 0, -0.4]}>
+        {/* Solid impassable dark stone matches reality */}
+        <mesh position={[0, 0.4, -0.4]}>
+          <boxGeometry args={[2.0, 3.2, 0.3]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.95} />
+        </mesh>
+      </group>
+    )
+  }
+
   return (
     <group position={[0, 0, -0.4]}>
       {/* Phantom Open Archway (NO SEALED SLAB IN REFLECTION!) */}
@@ -1229,7 +1444,9 @@ const CentralAltar: React.FC<CentralAltarProps> = ({
 // 12. Gothic Chamber Room Shell (Octagonal 12m x 12m x 4.2m)
 // ---------------------------------------------------------------------------
 
-const OctagonalChamberShell: React.FC = () => {
+const OctagonalChamberShell: React.FC<{ passageOpen?: boolean }> = ({
+  passageOpen = false,
+}) => {
   // Tile coordinates for checkerboard floor across chamber footprint
   const floorTiles = useMemo(() => {
     const tiles: { x: number; z: number; isDark: boolean }[] = []
@@ -1341,15 +1558,44 @@ const OctagonalChamberShell: React.FC = () => {
       </group>
 
       {/* 4. Cardinal Stone Walls (Width 6.0m each, Height 4.2m) */}
-      {/* North Wall */}
+      {/* North Wall - Left Segment */}
       <mesh
-        position={[0, CHAMBER_HEIGHT / 2, -6.0]}
+        position={[-2.15, CHAMBER_HEIGHT / 2, -6.0]}
         receiveShadow
         castShadow
       >
-        <boxGeometry args={[6.2, CHAMBER_HEIGHT, 0.4]} />
+        <boxGeometry args={[1.9, CHAMBER_HEIGHT, 0.4]} />
         <meshStandardMaterial color="#10141c" roughness={0.88} metalness={0.15} />
       </mesh>
+      {/* North Wall - Right Segment */}
+      <mesh
+        position={[2.15, CHAMBER_HEIGHT / 2, -6.0]}
+        receiveShadow
+        castShadow
+      >
+        <boxGeometry args={[1.9, CHAMBER_HEIGHT, 0.4]} />
+        <meshStandardMaterial color="#10141c" roughness={0.88} metalness={0.15} />
+      </mesh>
+      {/* North Wall - Top Lintel above doorway */}
+      <mesh
+        position={[0, 3.8, -6.0]}
+        receiveShadow
+        castShadow
+      >
+        <boxGeometry args={[2.4, 0.8, 0.4]} />
+        <meshStandardMaterial color="#10141c" roughness={0.88} metalness={0.15} />
+      </mesh>
+      {/* North Wall - Center Doorway Block (only present when passage is NOT open) */}
+      {!passageOpen && (
+        <mesh
+          position={[0, 1.7, -6.0]}
+          receiveShadow
+          castShadow
+        >
+          <boxGeometry args={[2.4, 3.4, 0.4]} />
+          <meshStandardMaterial color="#10141c" roughness={0.88} metalness={0.15} />
+        </mesh>
+      )}
       {/* South Wall */}
       <mesh
         position={[0, CHAMBER_HEIGHT / 2, 6.0]}
@@ -1451,6 +1697,7 @@ export interface TheMirrorTrialArenaProps {
   status?: Game07Status
   failedMirrorId?: MirrorId | null
   selectedVerdict?: MirrorId | null
+  passageOpen?: boolean
 }
 
 export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
@@ -1459,6 +1706,7 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
   status = 'exploring',
   failedMirrorId = null,
   selectedVerdict = null,
+  passageOpen = false,
 }) => {
   const investigatedSet = useMemo(
     () => new Set(investigatedMirrorIds),
@@ -1468,6 +1716,23 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
   const failureProgressRef = useRef<number>(0)
   const isFailure = status === 'failure_cinematic'
   const isVerdictTransition = status === 'verdict_transition'
+  const isVictoryCinematic = status === 'victory_cinematic'
+  const isPassageOpen =
+    passageOpen ||
+    status === 'passage_revealed' ||
+    status === 'escaping' ||
+    status === 'victory' ||
+    status === 'next_trial'
+
+  const isSilenced =
+    isVerdictTransition ||
+    isVictoryCinematic ||
+    isPassageOpen
+
+  const isTruthIlluminated =
+    (isVerdictTransition && selectedVerdict === 'mirror_north') ||
+    isVictoryCinematic ||
+    isPassageOpen
 
   useFrame((_, delta) => {
     if (isFailure) {
@@ -1496,8 +1761,20 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
 
       {/* 2. Restrained Gothic Lighting with Failure Flicker & Verdict Radiance */}
       <ambientLight
-        color={isVerdictTransition ? '#1e3a5f' : isFailure ? '#2a0a0a' : '#141a26'}
-        intensity={isFailure ? 0.08 : isVerdictTransition ? 0.6 : 0.42}
+        color={
+          isTruthIlluminated
+            ? '#1e3a5f'
+            : isFailure
+            ? '#2a0a0a'
+            : '#141a26'
+        }
+        intensity={
+          isFailure
+            ? 0.08
+            : isTruthIlluminated
+            ? 0.65
+            : 0.42
+        }
       />
 
       {/* Central Chandelier Moonlit Downlight / Horror Flicker */}
@@ -1510,7 +1787,7 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
             ? Math.random() > 0.45
               ? 1.2
               : 0.0
-            : isVerdictTransition
+            : isTruthIlluminated
             ? 2.8
             : 1.2
         }
@@ -1521,12 +1798,12 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
       />
 
       {/* 3. Octagonal Stone Chamber Architecture */}
-      <OctagonalChamberShell />
+      <OctagonalChamberShell passageOpen={isPassageOpen} />
 
       {/* 4. Central Altar of Truth */}
       <CentralAltar
         altarUnlocked={altarUnlocked}
-        isTruthResolved={isVerdictTransition}
+        isTruthResolved={isTruthIlluminated}
       />
 
       {/* 5. Four Physical Inspectable Artifacts */}
@@ -1536,14 +1813,15 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
       <PhysicalSealedArch isExamined={investigatedSet.has('mirror_south')} />
 
       {/* 6. Four Baroque Mirrors with Deterministic Deceptive Reflections */}
-      {/* NORTH MIRROR — Speculum Veritatis (TRUTH) */}
+      {/* NORTH MIRROR — Speculum Veritatis (TRUTH & EXIT PASSAGE) */}
       <BaroqueMirrorFrame
         id={northMirror.id}
         position={northMirror.mirrorPosition}
         rotation={northMirror.mirrorRotation}
         latinTitle={northMirror.latinTitle}
         englishTitle={northMirror.englishTitle}
-        isTruthGlowing={isVerdictTransition && selectedVerdict === 'mirror_north'}
+        isTruthGlowing={isTruthIlluminated}
+        isPassageOpen={isPassageOpen}
       >
         <ReflectedTruthNorth />
       </BaroqueMirrorFrame>
@@ -1557,8 +1835,9 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
         englishTitle={eastMirror.englishTitle}
         isFailing={isFailure && failedMirrorId === 'mirror_east'}
         failureProgress={failureProgressRef.current}
+        isSilenced={isSilenced}
       >
-        <ReflectedFlameEast />
+        <ReflectedFlameEast isSilenced={isSilenced} />
       </BaroqueMirrorFrame>
 
       {/* WEST MIRROR — Speculum Temporis (INVERTED TIME) */}
@@ -1570,8 +1849,9 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
         englishTitle={westMirror.englishTitle}
         isFailing={isFailure && failedMirrorId === 'mirror_west'}
         failureProgress={failureProgressRef.current}
+        isSilenced={isSilenced}
       >
-        <ReflectedTimeWest />
+        <ReflectedTimeWest isSilenced={isSilenced} />
       </BaroqueMirrorFrame>
 
       {/* SOUTH MIRROR — Speculum Ianuae (FALSE DOOR) */}
@@ -1583,8 +1863,9 @@ export const TheMirrorTrialArena: React.FC<TheMirrorTrialArenaProps> = ({
         englishTitle={southMirror.englishTitle}
         isFailing={isFailure && failedMirrorId === 'mirror_south'}
         failureProgress={failureProgressRef.current}
+        isSilenced={isSilenced}
       >
-        <ReflectedDoorSouth />
+        <ReflectedDoorSouth isSilenced={isSilenced} />
       </BaroqueMirrorFrame>
     </>
   )

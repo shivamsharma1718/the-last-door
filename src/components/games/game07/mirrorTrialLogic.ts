@@ -20,6 +20,8 @@ import {
   REQUIRED_MIRRORS_COUNT,
   TOTAL_DISCREPANCIES_COUNT,
   TRUE_MIRROR_ID,
+  NORTH_PASSAGE_WORLD_POS,
+  EXIT_INTERACTION_DISTANCE_G07,
 } from './mirrorTrialTypes'
 
 // ---------------------------------------------------------------------------
@@ -218,7 +220,9 @@ const VALID_STATE_TRANSITIONS: Record<Game07Status, Game07Status[]> = {
   verdict_transition: ['victory_cinematic'],
   failure_cinematic: ['failed'],
   resolving: ['victory_cinematic', 'failing', 'failed'],
-  victory_cinematic: ['victory'],
+  victory_cinematic: ['passage_revealed'],
+  passage_revealed: ['escaping'],
+  escaping: ['victory'],
   victory: ['next_trial'],
   failing: ['failed', 'exploring'],
   failed: ['intro', 'exploring'],
@@ -397,6 +401,23 @@ export function isNearAltar(
     playerZ,
     ALTAR_WORLD_POS[0],
     ALTAR_WORLD_POS[2]
+  )
+  return dist <= threshold
+}
+
+/**
+ * Returns whether the player is within interaction distance of the revealed North exit passage.
+ */
+export function isNearExitPassage(
+  playerX: number,
+  playerZ: number,
+  threshold: number = EXIT_INTERACTION_DISTANCE_G07
+): boolean {
+  const dist = calculateHorizontalDistance(
+    playerX,
+    playerZ,
+    NORTH_PASSAGE_WORLD_POS[0],
+    NORTH_PASSAGE_WORLD_POS[2]
   )
   return dist <= threshold
 }

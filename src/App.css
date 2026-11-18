@@ -84,7 +84,11 @@ body:has(#game07-hud-dom) .hud-overlay .game-title,
 body:has(#game07-examination-dom) .hud-overlay .game-title,
 body:has(#game07-verdict-dom) .hud-overlay .game-title,
 body:has(#game07-verdict-transition-dom) .hud-overlay .game-title,
+body:has(#game07-victory-cinematic-dom) .hud-overlay .game-title,
+body:has(#game07-escape-cinematic-dom) .hud-overlay .game-title,
+body:has(#game07-victory-dom) .hud-overlay .game-title,
 body:has(#game07-failure-dom) .hud-overlay .game-title,
+body:has(#game08-placeholder-dom) .hud-overlay .game-title,
 body:has(#game01-hud-dom) .hud-overlay .instructions,
 body:has(#game02-intro-overlay-dom) .hud-overlay .instructions,
 body:has(#game02-hud-dom) .hud-overlay .instructions,
@@ -127,7 +131,11 @@ body:has(#game07-hud-dom) .hud-overlay .instructions,
 body:has(#game07-examination-dom) .hud-overlay .instructions,
 body:has(#game07-verdict-dom) .hud-overlay .instructions,
 body:has(#game07-verdict-transition-dom) .hud-overlay .instructions,
-body:has(#game07-failure-dom) .hud-overlay .instructions {
+body:has(#game07-victory-cinematic-dom) .hud-overlay .instructions,
+body:has(#game07-escape-cinematic-dom) .hud-overlay .instructions,
+body:has(#game07-victory-dom) .hud-overlay .instructions,
+body:has(#game07-failure-dom) .hud-overlay .instructions,
+body:has(#game08-placeholder-dom) .hud-overlay .instructions {
   display: none !important;
 }
 
@@ -4864,6 +4872,246 @@ body:has(#game07-failure-dom) .hud-overlay .instructions {
   background: linear-gradient(135deg, #dc2626, #b91c1c);
   box-shadow: 0 6px 24px rgba(220, 38, 38, 0.6);
   transform: translateY(-1px);
+}
+
+/* ========================================================= */
+/* GAME 07 VICTORY & ESCAPE CINEMATIC OVERLAYS               */
+/* ========================================================= */
+.game07-victory-cinematic-overlay,
+.game07-escape-cinematic-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(6, 12, 22, 0.94) 0%, rgba(2, 4, 8, 0.98) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  pointer-events: auto;
+  backdrop-filter: blur(14px);
+  animation: fadeIn 0.8s ease-out;
+  font-family: 'Cinzel Decorative', 'Cinzel', serif, Georgia;
+}
+
+.game07-transition-card {
+  width: 90%;
+  max-width: 660px;
+  background: linear-gradient(180deg, rgba(8, 16, 28, 0.95), rgba(4, 8, 16, 0.98));
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.9), 0 0 50px rgba(56, 189, 248, 0.25);
+  padding: 3.2rem 2.4rem;
+  text-align: center;
+}
+
+.game07-transition-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: #38bdf8;
+  text-transform: uppercase;
+  margin-bottom: 1.8rem;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+.game07-transition-content {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.game07-cinematic-phase {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  align-items: center;
+}
+
+.game07-cinematic-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin: 0;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+  line-height: 1.4;
+}
+
+.game07-cinematic-subtext {
+  font-size: 0.92rem;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  margin: 0;
+  max-width: 520px;
+  line-height: 1.6;
+}
+
+.game07-transition-pulse-bar {
+  width: 48px;
+  height: 2px;
+  background: #38bdf8;
+  margin: 2.2rem auto 0;
+  box-shadow: 0 0 14px #38bdf8;
+  animation: pulse 1.8s infinite;
+}
+
+/* ========================================================= */
+/* GAME 07 COMPLETION SCREEN OVERLAY                         */
+/* ========================================================= */
+.game07-victory-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 6, 12, 0.94);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 110;
+  pointer-events: auto;
+  animation: fadeIn 0.8s ease-out;
+  font-family: 'Cinzel Decorative', 'Cinzel', serif, Georgia;
+}
+
+.game07-victory-card {
+  width: 90%;
+  max-width: 620px;
+  background: linear-gradient(180deg, rgba(10, 20, 36, 0.96), rgba(4, 9, 18, 0.98));
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-top: 3px solid #38bdf8;
+  border-radius: 12px;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.9),
+    0 0 55px rgba(56, 189, 248, 0.25);
+  padding: 3.2rem 2.4rem 2.8rem;
+  text-align: center;
+}
+
+.game07-victory-tag {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: #38bdf8;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+.game07-victory-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #f8fafc;
+  margin: 0.6rem 0 0;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+}
+
+.game07-victory-divider {
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+  margin: 1.5rem auto 1.8rem;
+}
+
+.game07-victory-lore {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-bottom: 2.6rem;
+}
+
+.game07-victory-quote {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: #38bdf8;
+  margin: 0;
+}
+
+.game07-victory-subtext {
+  font-size: 0.92rem;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.game07-victory-button {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #f8fafc;
+  border: 1px solid rgba(56, 189, 248, 0.6);
+  padding: 0.9rem 2.8rem;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.4);
+  transition: all 0.25s ease;
+}
+
+.game07-victory-button:hover {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  box-shadow: 0 6px 28px rgba(14, 165, 233, 0.6);
+  transform: translateY(-2px);
+}
+
+/* ========================================================= */
+/* GAME 08 ISOLATED ATMOSPHERIC PLACEHOLDER (WARD 13)       */
+/* ========================================================= */
+.game08-placeholder-overlay {
+  position: fixed;
+  top: 3.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  pointer-events: none;
+  animation: fadeIn 1.2s ease-out;
+  font-family: 'Cinzel Decorative', 'Cinzel', serif, Georgia;
+}
+
+.game08-placeholder-card {
+  background: rgba(8, 14, 24, 0.92);
+  border: 1px solid rgba(14, 165, 233, 0.4);
+  border-top: 3px solid #0ea5e9;
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9), 0 0 30px rgba(14, 165, 233, 0.2);
+  padding: 1.8rem 2.8rem;
+  text-align: center;
+  backdrop-filter: blur(12px);
+}
+
+.game08-placeholder-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  color: #0ea5e9;
+  text-transform: uppercase;
+}
+
+.game08-placeholder-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #f8fafc;
+  margin: 0.4rem 0 0.8rem;
+}
+
+.game08-placeholder-divider {
+  width: 60px;
+  height: 2px;
+  background: #0ea5e9;
+  margin: 0 auto 0.9rem;
+  opacity: 0.7;
+}
+
+.game08-placeholder-lore {
+  font-size: 0.88rem;
+  font-style: italic;
+  letter-spacing: 0.14em;
+  color: #94a3b8;
+  margin: 0;
 }
 
 

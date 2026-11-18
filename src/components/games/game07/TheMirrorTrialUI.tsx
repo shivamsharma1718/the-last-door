@@ -9,6 +9,11 @@ import { Game07Examination } from './ui/Game07Examination'
 import { Game07AltarVerdict } from './ui/Game07AltarVerdict'
 import { Game07Failure } from './ui/Game07Failure'
 import {
+  Game07VictoryCinematic,
+  Game07EscapeCinematic,
+  Game07Victory,
+} from './ui/Game07Victory'
+import {
   REQUIRED_MIRRORS_COUNT,
   TOTAL_DISCREPANCIES_COUNT,
 } from './mirrorTrialTypes'
@@ -23,7 +28,8 @@ export const TheMirrorTrialUI: React.FC = () => {
   const isExploringOrExamining =
     state.status === 'exploring' ||
     state.status === 'examining' ||
-    state.status === 'altar_ready'
+    state.status === 'altar_ready' ||
+    state.status === 'passage_revealed'
 
   return (
     <>
@@ -48,6 +54,7 @@ export const TheMirrorTrialUI: React.FC = () => {
                   mirror: null,
                   artifact: null,
                   isNearAltar: false,
+                  isNearExit: false,
                   promptText: null,
                 }
           }
@@ -76,7 +83,26 @@ export const TheMirrorTrialUI: React.FC = () => {
         />
       )}
 
-      {/* 5. Non-Graphic Horror Screen Distortion & Blackout during Failure Cinematic */}
+      {/* 5. 4-Phase Victory Revelation Sequence */}
+      {state.status === 'victory_cinematic' && (
+        <Game07VictoryCinematic
+          onSequenceComplete={mirrorTrialStore.revealExitPassage}
+        />
+      )}
+
+      {/* 6. 3-Phase Final Passage Escape Sequence */}
+      {state.status === 'escaping' && (
+        <Game07EscapeCinematic
+          onSequenceComplete={mirrorTrialStore.triggerVictory}
+        />
+      )}
+
+      {/* 7. Game 07 Victory & Progression Screen */}
+      {state.status === 'victory' && (
+        <Game07Victory onContinue={mirrorTrialStore.continueNextTrial} />
+      )}
+
+      {/* 8. Non-Graphic Horror Screen Distortion & Blackout during Failure Cinematic */}
       {state.status === 'failure_cinematic' && (
         <div
           className="game07-failure-cinematic-overlay"
@@ -87,7 +113,7 @@ export const TheMirrorTrialUI: React.FC = () => {
         </div>
       )}
 
-      {/* 6. Failure Screen */}
+      {/* 9. Failure Screen */}
       {state.status === 'failed' && (
         <Game07Failure onRestart={mirrorTrialStore.restartTrial} />
       )}

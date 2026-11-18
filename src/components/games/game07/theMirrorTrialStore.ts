@@ -27,13 +27,14 @@ import {
   isTrueMirror,
 } from './mirrorTrialLogic'
 
-export type ProximityType = 'mirror' | 'artifact' | 'altar' | null
+export type ProximityType = 'mirror' | 'artifact' | 'altar' | 'exit' | null
 
 export interface ProximityState {
   type: ProximityType
   mirror: MirrorDefinition | null
   artifact: MirrorArtifact | null
   isNearAltar: boolean
+  isNearExit: boolean
   promptText: string | null
 }
 
@@ -56,6 +57,7 @@ const initialProximity: ProximityState = {
   mirror: null,
   artifact: null,
   isNearAltar: false,
+  isNearExit: false,
   promptText: null,
 }
 
@@ -132,15 +134,27 @@ export const mirrorTrialStore = {
     nearMirror: MirrorDefinition | null
     mirrorForArtifact: MirrorDefinition | null
     isCloserToArtifact: boolean
+    nearExit?: boolean
   }) => {
-    const { nearAltar, nearArtifact, nearMirror, mirrorForArtifact, isCloserToArtifact } = params
+    const {
+      nearAltar,
+      nearArtifact,
+      nearMirror,
+      mirrorForArtifact,
+      isCloserToArtifact,
+      nearExit = false,
+    } = params
 
     let type: ProximityType = null
     let mirror: MirrorDefinition | null = null
     let artifact: MirrorArtifact | null = null
     let promptText: string | null = null
 
-    if (nearAltar) {
+    // In passage_revealed status, exit prompt takes precedence near the North opening
+    if (currentState.status === 'passage_revealed' && nearExit) {
+      type = 'exit'
+      promptText = 'ENTER THE PASSAGE'
+    } else if (nearAltar) {
       type = 'altar'
       promptText = currentState.altarUnlocked ? 'PRESENT VERDICT' : 'READ INSCRIPTION'
     } else if (nearArtifact && isCloserToArtifact && mirrorForArtifact) {
@@ -164,6 +178,7 @@ export const mirrorTrialStore = {
     const hasChanged =
       prev.type !== type ||
       prev.isNearAltar !== nearAltar ||
+      prev.isNearExit !== nearExit ||
       prev.mirror?.id !== mirror?.id ||
       prev.artifact?.id !== artifact?.id ||
       prev.promptText !== promptText
@@ -176,6 +191,7 @@ export const mirrorTrialStore = {
           mirror,
           artifact,
           isNearAltar: nearAltar,
+          isNearExit: nearExit,
           promptText,
         },
       }
@@ -326,7 +342,86 @@ export const mirrorTrialStore = {
     }
   },
 
+  revealExitPassage: () => {
+    if (
+      currentState.status !== 'victory_cinematic' ||
+      currentState.selectedVerdict !== 'mirror_north'
+    ) {
+      return
+    }
+
+    currentState = {
+      ...currentState,
+      status: 'passage_revealed',
+    }
+    emitChange()
+  },
+
+  triggerFinalEscape: () => {
+    if (
+      currentState.status !== 'passage_revealed' ||
+      currentState.selectedVerdict !== 'mirror_north'
+    ) {
+      return
+    }
+
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+
+    currentState = {
+      ...currentState,
+      status: 'escaping',
+    }
+    emitChange()
+  },
+
+  triggerVictory: () => {
+    if (currentState.status !== 'escaping') {
+      return
+    }
+
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+
+    currentState = {
+      ...currentState,
+      status: 'victory',
+    }
+    emitChange()
+  },
+
+  continueNextTrial: () => {
+    if (currentState.status !== 'victory') {
+      return
+    }
+
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+
+    currentState = {
+      ...currentState,
+      status: 'next_trial',
+      isActive: false,
+    }
+    emitChange()
+
+    if (onCompleteCallback) {
+      onCompleteCallback()
+    }
+  },
+
   restartTrial: () => {
+    // Prevent restarting if trial has already completed or progressed
+    if (
+      currentState.status === 'victory' ||
+      currentState.status === 'next_trial'
+    ) {
+      return
+    }
+
     if (typeof document !== 'undefined' && document.pointerLockElement) {
       document.exitPointerLock()
     }

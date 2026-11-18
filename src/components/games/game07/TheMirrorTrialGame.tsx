@@ -31,6 +31,7 @@ import {
   getNearestMirror,
   getNearestArtifact,
   isNearAltar,
+  isNearExitPassage,
   calculateHorizontalDistance,
 } from './mirrorTrialLogic'
 import {
@@ -69,13 +70,23 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
   const targetQuat = useMemo(() => new THREE.Quaternion(), [])
 
   // Position constraint preventing walking through walls, mirrors, altar, or pedestals
+  // Dynamically unseals North passage corridor when passage is revealed
   const handleConstrainPosition = useCallback(
     (
       proposed: { x: number; z: number },
       current: { x: number; z: number },
       radius: number
     ) => {
-      return constrainMirrorTrialPosition(proposed, current, radius)
+      const isPassageActive =
+        statusRef.current === 'passage_revealed' ||
+        statusRef.current === 'escaping' ||
+        statusRef.current === 'victory'
+      return constrainMirrorTrialPosition(
+        proposed,
+        current,
+        radius,
+        isPassageActive
+      )
     },
     []
   )
@@ -93,7 +104,10 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
 
   // Release pointer lock cleanly when opening examination, verdict, or cinematic states
   useEffect(() => {
-    const isPlayerActive = status === 'exploring' || status === 'altar_ready'
+    const isPlayerActive =
+      status === 'exploring' ||
+      status === 'altar_ready' ||
+      status === 'passage_revealed'
 
     if (!isPlayerActive) {
       if (typeof document !== 'undefined' && document.pointerLockElement) {
@@ -119,12 +133,21 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
       return
     }
 
-    if (statusRef.current !== 'exploring' && statusRef.current !== 'altar_ready') {
+    const curStatus = statusRef.current
+    if (
+      curStatus !== 'exploring' &&
+      curStatus !== 'altar_ready' &&
+      curStatus !== 'passage_revealed'
+    ) {
       return
     }
 
     const px = camera.position.x
     const pz = camera.position.z
+
+    // Proximity to North Exit Passage (active when passage is revealed)
+    const nearExit =
+      curStatus === 'passage_revealed' && isNearExitPassage(px, pz)
 
     // 2. Proximity to Central Altar
     const nearAltar = isNearAltar(px, pz, ALTAR_DISTANCE_THRESHOLD_G07)
@@ -166,6 +189,7 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
       nearMirror,
       mirrorForArtifact,
       isCloserToArtifact,
+      nearExit,
     })
   })
 
@@ -182,7 +206,15 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
       const curStatus = statusRef.current
 
       if (e.code === 'KeyE') {
-        if (curStatus === 'exploring' || curStatus === 'altar_ready') {
+        if (curStatus === 'passage_revealed') {
+          const prox = proximityRef.current
+          if (prox.isNearExit || prox.type === 'exit') {
+            e.preventDefault()
+            e.stopPropagation()
+            mirrorTrialStore.triggerFinalEscape()
+            return
+          }
+        } else if (curStatus === 'exploring' || curStatus === 'altar_ready') {
           const prox = proximityRef.current
 
           // Priority 1: Central Altar Inscription / Verdict
@@ -226,8 +258,19 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  const isControlsEnabled = status === 'exploring' || status === 'altar_ready'
-  const isMovementEnabled = status === 'exploring' || status === 'altar_ready'
+  const isControlsEnabled =
+    status === 'exploring' ||
+    status === 'altar_ready' ||
+    status === 'passage_revealed'
+  const isMovementEnabled =
+    status === 'exploring' ||
+    status === 'altar_ready' ||
+    status === 'passage_revealed'
+
+  const isPassageOpen =
+    status === 'passage_revealed' ||
+    status === 'escaping' ||
+    status === 'victory'
 
   return (
     <>
@@ -238,6 +281,7 @@ export const TheMirrorTrialGame: React.FC<TheMirrorTrialProps> = ({
         status={status}
         failedMirrorId={failedMirrorId}
         selectedVerdict={selectedVerdict}
+        passageOpen={isPassageOpen}
       />
 
       {/* First-person player controls constrained to octagonal gothic chamber */}

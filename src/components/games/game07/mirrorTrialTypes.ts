@@ -15,6 +15,8 @@ export type Game07Status =
   | 'failing'
   | 'failed'
   | 'victory_cinematic'
+  | 'passage_revealed'
+  | 'escaping'
   | 'victory'
   | 'next_trial'
 
@@ -115,4 +117,7 @@ export const REQUIRED_MIRRORS_COUNT = 4
 export const TOTAL_DISCREPANCIES_COUNT = 3
 
 export const TRUE_MIRROR_ID: MirrorId = 'mirror_north'
+
+export const NORTH_PASSAGE_WORLD_POS: Vector3Tuple = [0, 1.8, -5.8]
+export const EXIT_INTERACTION_DISTANCE_G07 = 2.2
 

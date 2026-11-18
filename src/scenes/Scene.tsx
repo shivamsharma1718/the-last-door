@@ -20,6 +20,45 @@ export interface SceneProps {
 
 export type GameStage = 'hallway' | 'intro' | 'game01' | 'game02' | 'game03' | 'game04' | 'game05' | 'game06' | 'game07' | 'game08'
 
+// ---------------------------------------------------------------------------
+// Isolated Game 08 Placeholder (WARD 13)
+// ---------------------------------------------------------------------------
+const Game08Placeholder: React.FC = () => {
+  useEffect(() => {
+    let el = document.getElementById('game08-placeholder-dom')
+    if (!el) {
+      el = document.createElement('div')
+      el.id = 'game08-placeholder-dom'
+      el.className = 'game08-placeholder-overlay'
+      el.innerHTML = `
+        <div class="game08-placeholder-card">
+          <span class="game08-placeholder-tag">GAME 08</span>
+          <h1 class="game08-placeholder-title">WARD 13</h1>
+          <div class="game08-placeholder-divider"></div>
+          <p class="game08-placeholder-lore">THE EXPERIMENT WAS NEVER OVER.</p>
+        </div>
+      `
+      document.body.appendChild(el)
+    }
+
+    return () => {
+      const existing = document.getElementById('game08-placeholder-dom')
+      if (existing) existing.remove()
+    }
+  }, [])
+
+  return (
+    <>
+      <color attach="background" args={['#030508']} />
+      <fog attach="fog" args={['#030508', 3, 16]} />
+      <ambientLight color="#0f172a" intensity={0.4} />
+      <pointLight position={[0, 2.8, -2]} color="#0ea5e9" intensity={2.2} distance={10} decay={2} />
+      <Room width={6} height={3.5} depth={14} />
+      <PlayerControls roomWidth={6} roomDepth={14} enabled={true} />
+    </>
+  )
+}
+
 export const Scene: React.FC<SceneProps> = ({
   isDoorOpen: propIsDoorOpen,
   onNearDoorChange,
@@ -209,16 +248,7 @@ export const Scene: React.FC<SceneProps> = ({
 
   // If in Game 08 arena (placeholder stage for Game 07 completion)
   if (stage === 'game08') {
-    return (
-      <>
-        <color attach="background" args={['#04060a']} />
-        <fog attach="fog" args={['#04060a', 4, 18]} />
-        <ambientLight color="#1e293b" intensity={0.6} />
-        <pointLight position={[0, 3, 0]} color="#38bdf8" intensity={2.5} distance={12} decay={2} />
-        <Room width={6} height={3.5} depth={12} />
-        <PlayerControls roomWidth={6} roomDepth={12} enabled={true} />
-      </>
-    )
+    return <Game08Placeholder />
   }
 
   return (

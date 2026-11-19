@@ -5,3 +5,4 @@
 
 export * from './ward13Types'
 export * from './ward13Logic'
+export * from './TheWard13Arena'

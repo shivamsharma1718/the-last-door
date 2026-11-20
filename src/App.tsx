@@ -4,6 +4,7 @@ import { TheWatcherUI } from './components/games/game04'
 import { TheDrowningHallUI } from './components/games/game05'
 import { TheEndlessMazeUI } from './components/games/game06'
 import { TheMirrorTrialUI } from './components/games/game07'
+import { TheWard13UI } from './components/games/game08'
 import './App.css'
 
 function App() {
@@ -38,6 +39,9 @@ function App() {
 
       {/* Game 07 DOM UI Layer (Outside Canvas) */}
       <TheMirrorTrialUI />
+
+      {/* Game 08 DOM UI Layer (Outside Canvas) */}
+      <TheWard13UI />
 
       {/* Atmospheric UI Overlay */}
       <div className="hud-overlay">

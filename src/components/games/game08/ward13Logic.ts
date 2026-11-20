@@ -541,7 +541,7 @@ export function createInitialWard13State(): Ward13GameState {
       activeEvidenceId: null,
       comparedEvidenceIds: null,
       currentClearanceLevel: 1,
-      unlockedRoomIds: ['reception', 'patient_ward'],
+      unlockedRoomIds: ['reception'],
       selectedDecision: null,
       isTerminalUnlocked: false,
       identityRevealed: false,
@@ -654,11 +654,22 @@ export function collectEvidence(
     evidenceId,
   ]
 
+  // Unlock Patient Ward once both Reception intake records are investigated
+  const hasBothReception =
+    updatedCollected.includes('evidence_intake_log') &&
+    updatedCollected.includes('evidence_triage_memo')
+
+  const updatedUnlockedRooms = [...state.investigation.unlockedRoomIds]
+  if (hasBothReception && !updatedUnlockedRooms.includes('patient_ward')) {
+    updatedUnlockedRooms.push('patient_ward')
+  }
+
   return {
     ...state,
     investigation: {
       ...state.investigation,
       collectedEvidenceIds: updatedCollected,
+      unlockedRoomIds: updatedUnlockedRooms,
       activeEvidenceId: evidenceId,
     },
   }

@@ -82,6 +82,20 @@ const SOLID_OBSTACLES: AABB[] = [
   { minX: -0.7, maxX: 0.7, minZ: -14.8, maxZ: -13.8 },
 ]
 
+// Locked door barrier AABBs to prevent passing into locked rooms
+const LOCKED_DOOR_BARRIERS: Partial<Record<Ward13RoomId, AABB>> = {
+  // Corridor 1: Reception -> Patient Ward
+  patient_ward: { minX: -1.3, maxX: 1.3, minZ: 5.7, maxZ: 6.3 },
+  // Corridor 2: Patient Ward -> Isolation Room
+  isolation_room: { minX: -6.7, maxX: -6.3, minZ: -0.1, maxZ: 2.1 },
+  // Corridor 3: Patient Ward -> Observation Room
+  observation_room: { minX: -1.3, maxX: 1.3, minZ: -3.7, maxZ: -3.3 },
+  // Corridor 4: Observation Room -> Records Archive
+  records_archive: { minX: 5.3, maxX: 5.7, minZ: -7.7, maxZ: -6.3 },
+  // Corridor 5: Observation Room -> Decon Exit
+  decon_exit: { minX: -1.3, maxX: 1.3, minZ: -11.0, maxZ: -10.5 },
+}
+
 function isInsideAnyZone(x: number, z: number, radius: number): boolean {
   for (const zone of WALKABLE_ZONES) {
     if (
@@ -96,7 +110,12 @@ function isInsideAnyZone(x: number, z: number, radius: number): boolean {
   return false
 }
 
-function isInsideAnyObstacle(x: number, z: number, radius: number): boolean {
+function isInsideAnyObstacle(
+  x: number,
+  z: number,
+  radius: number,
+  unlockedRoomIds?: Ward13RoomId[]
+): boolean {
   for (const obs of SOLID_OBSTACLES) {
     if (
       x >= obs.minX - radius &&
@@ -107,32 +126,53 @@ function isInsideAnyObstacle(x: number, z: number, radius: number): boolean {
       return true
     }
   }
+
+  if (unlockedRoomIds) {
+    for (const [roomId, barrier] of Object.entries(LOCKED_DOOR_BARRIERS) as [
+      Ward13RoomId,
+      AABB,
+    ][]) {
+      if (!unlockedRoomIds.includes(roomId)) {
+        if (
+          x >= barrier.minX - radius &&
+          x <= barrier.maxX + radius &&
+          z >= barrier.minZ - radius &&
+          z <= barrier.maxZ + radius
+        ) {
+          return true
+        }
+      }
+    }
+  }
+
   return false
 }
 
 /**
  * Constrains player position inside the interconnected hospital ward,
- * allowing smooth navigation through corridors while blocking wall and furniture clipping.
+ * allowing smooth navigation through corridors while blocking wall, furniture,
+ * and locked security door clipping.
  */
 export function constrainWard13Position(
   proposed: { x: number; z: number },
   current: { x: number; z: number },
-  radius: number = 0.35
+  radius: number = 0.35,
+  unlockedRoomIds?: Ward13RoomId[]
 ): { x: number; z: number } {
   let { x, z } = proposed
 
   // Test full move
-  if (isInsideAnyZone(x, z, radius) && !isInsideAnyObstacle(x, z, radius)) {
+  if (isInsideAnyZone(x, z, radius) && !isInsideAnyObstacle(x, z, radius, unlockedRoomIds)) {
     return { x, z }
   }
 
   // Slide along X axis
-  if (isInsideAnyZone(x, current.z, radius) && !isInsideAnyObstacle(x, current.z, radius)) {
+  if (isInsideAnyZone(x, current.z, radius) && !isInsideAnyObstacle(x, current.z, radius, unlockedRoomIds)) {
     return { x, z: current.z }
   }
 
   // Slide along Z axis
-  if (isInsideAnyZone(current.x, z, radius) && !isInsideAnyObstacle(current.x, z, radius)) {
+  if (isInsideAnyZone(current.x, z, radius) && !isInsideAnyObstacle(current.x, z, radius, unlockedRoomIds)) {
     return { x: current.x, z }
   }
 
@@ -1059,16 +1099,212 @@ const ConnectingCorridors: React.FC = () => {
 }
 
 // ---------------------------------------------------------------------------
+// 8b. Physical Security Doors with Clearance & Status Indicators
+// ---------------------------------------------------------------------------
+
+interface SecurityDoorsProps {
+  unlockedRoomIds: Ward13RoomId[]
+}
+
+const SecurityDoors: React.FC<SecurityDoorsProps> = ({
+  unlockedRoomIds,
+}) => {
+  const isPatientWardUnlocked = unlockedRoomIds.includes('patient_ward')
+  const isIsolationUnlocked = unlockedRoomIds.includes('isolation_room')
+  const isObservationUnlocked = unlockedRoomIds.includes('observation_room')
+  const isArchiveUnlocked = unlockedRoomIds.includes('records_archive')
+  const isDeconExitUnlocked = unlockedRoomIds.includes('decon_exit')
+
+  return (
+    <group>
+      {/* 1. Reception -> Patient Ward Security Shutter (Corridor 1, Z = 6.0) */}
+      <group position={[0, 0, 6.0]}>
+        {/* Door frame */}
+        <mesh position={[-1.25, 1.8, 0]}>
+          <boxGeometry args={[0.2, 3.6, 0.4]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} />
+        </mesh>
+        <mesh position={[1.25, 1.8, 0]}>
+          <boxGeometry args={[0.2, 3.6, 0.4]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} />
+        </mesh>
+        <mesh position={[0, 3.5, 0]}>
+          <boxGeometry args={[2.7, 0.2, 0.4]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} />
+        </mesh>
+        {/* Shutter Gate: Retracted up (Y=3.3) if unlocked, down (Y=1.7) if locked */}
+        <mesh position={[0, isPatientWardUnlocked ? 3.3 : 1.7, 0]}>
+          <boxGeometry args={[2.3, isPatientWardUnlocked ? 0.4 : 3.2, 0.1]} />
+          <meshStandardMaterial
+            color="#334155"
+            metalness={0.8}
+            roughness={0.4}
+            wireframe={!isPatientWardUnlocked}
+          />
+        </mesh>
+        {/* Status Indicator LED Panel */}
+        <mesh position={[1.1, 2.0, 0.22]}>
+          <boxGeometry args={[0.15, 0.3, 0.05]} />
+          <meshStandardMaterial
+            color={isPatientWardUnlocked ? '#22c55e' : '#ef4444'}
+            emissive={isPatientWardUnlocked ? '#15803d' : '#b91c1c'}
+            emissiveIntensity={1.5}
+          />
+        </mesh>
+        <pointLight
+          position={[1.1, 2.0, 0.3]}
+          color={isPatientWardUnlocked ? '#22c55e' : '#ef4444'}
+          intensity={0.8}
+          distance={2.5}
+        />
+      </group>
+
+      {/* 2. Patient Ward -> Isolation Vault Door (Corridor 2, X = -6.5, Z = 1.0) */}
+      <group position={[-6.5, 0, 1.0]}>
+        {/* Frame */}
+        <mesh position={[0, 1.7, 1.05]}>
+          <boxGeometry args={[0.4, 3.4, 0.2]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.8} />
+        </mesh>
+        <mesh position={[0, 1.7, -1.05]}>
+          <boxGeometry args={[0.4, 3.4, 0.2]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.8} />
+        </mesh>
+        {/* Vault door panel */}
+        <mesh
+          position={[0, 1.7, isIsolationUnlocked ? 0.9 : 0]}
+          rotation={[0, isIsolationUnlocked ? Math.PI * 0.45 : 0, 0]}
+        >
+          <boxGeometry args={[0.12, 3.2, 1.9]} />
+          <meshStandardMaterial color="#334155" metalness={0.85} roughness={0.3} />
+        </mesh>
+        {/* Status Light */}
+        <mesh position={[0.22, 2.0, 0.9]}>
+          <boxGeometry args={[0.05, 0.2, 0.2]} />
+          <meshStandardMaterial
+            color={isIsolationUnlocked ? '#22c55e' : '#ef4444'}
+            emissive={isIsolationUnlocked ? '#15803d' : '#b91c1c'}
+            emissiveIntensity={1.5}
+          />
+        </mesh>
+      </group>
+
+      {/* 3. Patient Ward -> Observation Bulkhead (Corridor 3, Z = -3.5) */}
+      <group position={[0, 0, -3.5]}>
+        <mesh position={[-1.25, 1.8, 0]}>
+          <boxGeometry args={[0.2, 3.6, 0.3]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} />
+        </mesh>
+        <mesh position={[1.25, 1.8, 0]}>
+          <boxGeometry args={[0.2, 3.6, 0.3]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} />
+        </mesh>
+        {/* Sliding panels: parted if unlocked, closed at center if locked */}
+        <mesh position={[isObservationUnlocked ? -1.0 : -0.55, 1.7, 0]}>
+          <boxGeometry args={[1.1, 3.2, 0.08]} />
+          <meshStandardMaterial color="#334155" metalness={0.75} roughness={0.4} />
+        </mesh>
+        <mesh position={[isObservationUnlocked ? 1.0 : 0.55, 1.7, 0]}>
+          <boxGeometry args={[1.1, 3.2, 0.08]} />
+          <meshStandardMaterial color="#334155" metalness={0.75} roughness={0.4} />
+        </mesh>
+        {/* Indicator */}
+        <mesh position={[1.1, 2.0, 0.18]}>
+          <boxGeometry args={[0.12, 0.25, 0.05]} />
+          <meshStandardMaterial
+            color={isObservationUnlocked ? '#22c55e' : '#ef4444'}
+            emissive={isObservationUnlocked ? '#15803d' : '#b91c1c'}
+            emissiveIntensity={1.5}
+          />
+        </mesh>
+      </group>
+
+      {/* 4. Observation -> Records Archive Gate (Corridor 4, X = 5.5, Z = -7.0) */}
+      <group position={[5.5, 0, -7.0]}>
+        <mesh position={[0, 1.8, -0.75]}>
+          <boxGeometry args={[0.3, 3.6, 0.2]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} />
+        </mesh>
+        <mesh position={[0, 1.8, 0.75]}>
+          <boxGeometry args={[0.3, 3.6, 0.2]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} />
+        </mesh>
+        {/* Sliding gate panel */}
+        <mesh position={[0, 1.7, isArchiveUnlocked ? -0.65 : 0]}>
+          <boxGeometry args={[0.08, 3.2, isArchiveUnlocked ? 0.3 : 1.3]} />
+          <meshStandardMaterial color="#334155" metalness={0.8} roughness={0.4} />
+        </mesh>
+        {/* Indicator */}
+        <mesh position={[-0.18, 2.0, -0.6]}>
+          <boxGeometry args={[0.05, 0.2, 0.15]} />
+          <meshStandardMaterial
+            color={isArchiveUnlocked ? '#22c55e' : '#ef4444'}
+            emissive={isArchiveUnlocked ? '#15803d' : '#b91c1c'}
+            emissiveIntensity={1.5}
+          />
+        </mesh>
+      </group>
+
+      {/* 5. Observation -> Decontamination Blast Airlock (Corridor 5, Z = -10.75) */}
+      <group position={[0, 0, -10.75]}>
+        <mesh position={[-1.25, 1.85, 0]}>
+          <boxGeometry args={[0.2, 3.7, 0.4]} />
+          <meshStandardMaterial color="#0f172a" metalness={0.9} />
+        </mesh>
+        <mesh position={[1.25, 1.85, 0]}>
+          <boxGeometry args={[0.2, 3.7, 0.4]} />
+          <meshStandardMaterial color="#0f172a" metalness={0.9} />
+        </mesh>
+        {/* Heavy pneumatic blast door */}
+        <mesh position={[0, isDeconExitUnlocked ? 3.4 : 1.7, 0]}>
+          <boxGeometry args={[2.3, isDeconExitUnlocked ? 0.4 : 3.3, 0.16]} />
+          <meshStandardMaterial
+            color="#1e293b"
+            metalness={0.85}
+            roughness={0.3}
+          />
+        </mesh>
+        {/* Hazard warning stripes on door */}
+        {!isDeconExitUnlocked && (
+          <mesh position={[0, 1.7, 0.09]}>
+            <planeGeometry args={[2.2, 0.4]} />
+            <meshStandardMaterial color="#eab308" roughness={0.5} />
+          </mesh>
+        )}
+        {/* Overhead Airlock Beacon */}
+        <mesh position={[0, 3.5, 0.25]}>
+          <cylinderGeometry args={[0.15, 0.15, 0.2, 12]} />
+          <meshStandardMaterial
+            color={isDeconExitUnlocked ? '#22c55e' : '#ef4444'}
+            emissive={isDeconExitUnlocked ? '#15803d' : '#b91c1c'}
+            emissiveIntensity={2.0}
+          />
+        </mesh>
+        <pointLight
+          position={[0, 3.5, 0.4]}
+          color={isDeconExitUnlocked ? '#22c55e' : '#ef4444'}
+          intensity={1.2}
+          distance={4.0}
+        />
+      </group>
+    </group>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // 9. Main Exported 3D Arena Component: TheWard13Arena
 // ---------------------------------------------------------------------------
 
 export interface TheWard13ArenaProps {
   collectedEvidenceIds?: string[]
   currentRoomId?: Ward13RoomId
+  unlockedRoomIds?: Ward13RoomId[]
+  clearanceLevel?: number
 }
 
 export const TheWard13Arena: React.FC<TheWard13ArenaProps> = ({
   collectedEvidenceIds = [],
+  unlockedRoomIds = ['reception'],
 }) => {
   const collectedSet = useMemo(
     () => new Set(collectedEvidenceIds),
@@ -1094,6 +1330,9 @@ export const TheWard13Arena: React.FC<TheWard13ArenaProps> = ({
 
       {/* 4. Interconnecting Security Corridors */}
       <ConnectingCorridors />
+
+      {/* 4b. Security Doors with Physical State & Lights */}
+      <SecurityDoors unlockedRoomIds={unlockedRoomIds} />
 
       {/* 5. Twelve Canonical Evidence Clue Props Placed in 3D Space */}
       {WARD13_EVIDENCE.map((item) => {

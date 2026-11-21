@@ -5649,12 +5649,1048 @@ body:has(#game08-hud-dom) .hud-overlay .instructions {
   text-transform: uppercase;
 }
 
+/* ========================================================= */
+/* GAME 08: STEP 4 — DEDUCTION STATIONS & UNLOCK TOAST       */
+/* ========================================================= */
+.prompt-station {
+  background: rgba(6, 32, 24, 0.94);
+  border: 1px solid #10b981;
+  border-left: 4px solid #10b981;
+}
 
+.prompt-station .game08-prompt-badge {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+}
 
+.game08-hud-board-btn {
+  background: rgba(14, 165, 233, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+}
 
+.game08-hud-board-btn:hover {
+  background: rgba(14, 165, 233, 0.3);
+  border-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+  transform: translateY(-1px);
+}
 
+.game08-unlock-toast {
+  position: absolute;
+  top: 7.2rem;
+  background: rgba(10, 20, 32, 0.96);
+  border: 1px solid #38bdf8;
+  border-top: 3px solid #38bdf8;
+  border-radius: 6px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.9), 0 0 25px rgba(56, 189, 248, 0.3);
+  padding: 0.9rem 1.6rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  pointer-events: auto;
+  animation: slideDownToast 0.4s ease-out;
+  max-width: 620px;
+  z-index: 100;
+}
 
+@keyframes slideDownToast {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
+.toast-body {
+  text-align: left;
+}
 
+.toast-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
 
+.toast-title {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #ffffff;
+  margin: 0.2rem 0;
+}
+
+.toast-unlocked {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #4ade80;
+}
+
+.toast-dismiss-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #94a3b8;
+  font-size: 0.9rem;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.toast-dismiss-btn:hover {
+  border-color: #38bdf8;
+  color: #ffffff;
+  background: rgba(56, 189, 248, 0.2);
+}
+
+/* ========================================================= */
+/* GAME 08: STEP 4 — CONTRADICTION & DEDUCTION BOARD         */
+/* ========================================================= */
+.game08-board-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 16, 0.92);
+  backdrop-filter: blur(14px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1200;
+  padding: 1.5rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.game08-board-container {
+  background: rgba(10, 16, 26, 0.98);
+  border: 1px solid rgba(14, 165, 233, 0.4);
+  border-top: 3px solid #0ea5e9;
+  border-radius: 8px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.95), 0 0 50px rgba(14, 165, 233, 0.15);
+  width: 95vw;
+  max-width: 1350px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  color: #f8fafc;
+  overflow: hidden;
+}
+
+.game08-board-header {
+  padding: 1.2rem 1.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(6, 10, 18, 0.6);
+}
+
+.game08-board-tag {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  color: #0ea5e9;
+  text-transform: uppercase;
+}
+
+.game08-board-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  margin: 0.15rem 0 0.1rem;
+  color: #ffffff;
+}
+
+.game08-board-subtitle {
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.game08-board-status-group {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+}
+
+.game08-board-stat {
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.game08-board-stat .stat-label {
+  color: #64748b;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.game08-board-stat .stat-val {
+  color: #cbd5e1;
+}
+
+.game08-board-stat .stat-val strong {
+  color: #38bdf8;
+}
+
+.game08-board-stat .stat-val.highlight strong {
+  color: #4ade80;
+}
+
+.game08-board-close-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.game08-board-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #ffffff;
+}
+
+.game08-board-workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  gap: 1.2rem;
+  padding: 1.2rem;
+}
+
+/* Left Dossier Panel */
+.game08-dossier-panel {
+  width: 400px;
+  background: rgba(6, 10, 18, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.game08-panel-header {
+  padding: 0.8rem 1.1rem;
+  background: rgba(14, 22, 36, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+.panel-count {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #64748b;
+}
+
+.clear-selection-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-selection-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.clear-selection-btn:not(:disabled):hover {
+  color: #f87171;
+  border-color: #f87171;
+}
+
+.game08-dossier-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.game08-dossier-item {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.game08-dossier-item.selected-a {
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  background: rgba(14, 165, 233, 0.1);
+}
+
+.game08-dossier-item.selected-b {
+  border-color: #f59e0b;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.game08-dossier-item.locked {
+  background: rgba(10, 14, 20, 0.4);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  opacity: 0.55;
+}
+
+.locked-badge {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #f43f5e;
+}
+
+.locked-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #64748b;
+}
+
+.locked-sub {
+  font-size: 0.7rem;
+  color: #475569;
+  font-style: italic;
+}
+
+.dossier-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-pill {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+
+.cat-patient {
+  background: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.cat-surveillance {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.cat-audio {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.cat-photo {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(192, 132, 252, 0.3);
+}
+
+.cat-memo {
+  background: rgba(249, 115, 22, 0.15);
+  color: #fb923c;
+  border: 1px solid rgba(251, 146, 60, 0.3);
+}
+
+.cat-terminal {
+  background: rgba(20, 184, 166, 0.15);
+  color: #2dd4bf;
+  border: 1px solid rgba(45, 212, 191, 0.3);
+}
+
+.slot-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 2px;
+}
+
+.badge-a {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.badge-b {
+  background: #d97706;
+  color: #ffffff;
+}
+
+.dossier-item-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin: 0.1rem 0;
+  color: #ffffff;
+}
+
+.dossier-item-source {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.dossier-item-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.slot-assign-btn {
+  flex: 1;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 0.35rem 0.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+}
+
+.slot-assign-btn.btn-a:hover,
+.slot-assign-btn.btn-a.active {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.slot-assign-btn.btn-b:hover,
+.slot-assign-btn.btn-b.active {
+  background: #d97706;
+  border-color: #f59e0b;
+  color: #ffffff;
+}
+
+/* Right Comparison Panel */
+.game08-comparison-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: rgba(6, 10, 18, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  overflow: hidden;
+  padding: 1rem;
+}
+
+.game08-comparison-slots {
+  display: flex;
+  flex: 1;
+  gap: 1rem;
+  min-height: 280px;
+}
+
+.comparison-slot {
+  flex: 1;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  overflow-y: auto;
+}
+
+.comparison-slot.slot-a {
+  border-top: 3px solid #38bdf8;
+}
+
+.comparison-slot.slot-b {
+  border-top: 3px solid #f59e0b;
+}
+
+.slot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 0.8rem;
+}
+
+.slot-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #94a3b8;
+}
+
+.slot-remove-btn {
+  background: transparent;
+  border: none;
+  color: #f87171;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+
+.slot-empty-prompt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #475569;
+}
+
+.empty-icon {
+  font-size: 2.2rem;
+  margin-bottom: 0.6rem;
+  opacity: 0.4;
+}
+
+.empty-text {
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+}
+
+.slot-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.slot-doc-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #ffffff;
+  margin: 0;
+}
+
+.slot-doc-source {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+}
+
+.slot-doc-excerpt {
+  background: rgba(3, 7, 18, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #38bdf8;
+  padding: 0.8rem;
+  border-radius: 4px;
+}
+
+.excerpt-label,
+.claim-label {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #64748b;
+  margin-bottom: 0.3rem;
+}
+
+.slot-doc-excerpt p {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.slot-doc-claim {
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 0.75rem;
+  border-radius: 4px;
+}
+
+.slot-doc-claim p {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: #e2e8f0;
+  margin: 0;
+  font-weight: 600;
+}
+
+.comparison-divider-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vs-badge {
+  background: rgba(14, 22, 36, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  color: #38bdf8;
+  padding: 0.4rem 0.6rem;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+}
+
+.comparison-action-bar {
+  display: flex;
+  justify-content: center;
+}
+
+.compare-execute-btn {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  padding: 0.85rem 3.5rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.4);
+}
+
+.compare-execute-btn.ready:hover {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  box-shadow: 0 6px 28px rgba(14, 165, 233, 0.6);
+  transform: translateY(-2px);
+}
+
+.compare-execute-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Comparison Results Area */
+.comparison-results-area {
+  min-height: 120px;
+}
+
+.result-card {
+  border-radius: 6px;
+  padding: 1.1rem 1.4rem;
+  text-align: left;
+}
+
+.idle-card {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.idle-instruction {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0;
+  letter-spacing: 0.08em;
+}
+
+.idle-instruction strong {
+  color: #94a3b8;
+}
+
+.failure-card {
+  background: rgba(38, 14, 14, 0.8);
+  border: 1px solid #f43f5e;
+}
+
+.failure-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #f43f5e;
+  text-transform: uppercase;
+}
+
+.failure-message {
+  font-size: 0.86rem;
+  color: #fecdd3;
+  margin: 0.35rem 0 0;
+  line-height: 1.5;
+}
+
+.success-card {
+  background: rgba(6, 30, 24, 0.9);
+  border: 1px solid #10b981;
+  border-top: 3px solid #10b981;
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.success-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: #34d399;
+  text-transform: uppercase;
+}
+
+.result-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #ffffff;
+  display: block;
+  margin-top: 0.1rem;
+}
+
+.result-comparison-claims {
+  display: flex;
+  gap: 1rem;
+}
+
+.claim-box {
+  flex: 1;
+  background: rgba(3, 10, 16, 0.7);
+  padding: 0.75rem;
+  border-radius: 4px;
+}
+
+.claim-origin {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #38bdf8;
+  margin-bottom: 0.25rem;
+}
+
+.claim-box.claim-b .claim-origin {
+  color: #fbbf24;
+}
+
+.claim-box p {
+  font-size: 0.82rem;
+  color: #e2e8f0;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.result-deduction {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  padding: 0.8rem 1rem;
+  border-radius: 4px;
+}
+
+.deduction-label {
+  display: block;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #34d399;
+  margin-bottom: 0.25rem;
+}
+
+.result-deduction p {
+  font-size: 0.88rem;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.initiate-synthesis-btn {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: #ffffff;
+  border: 1px solid rgba(52, 211, 153, 0.6);
+  padding: 0.85rem 2rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  border-radius: 6px;
+  cursor: pointer;
+  align-self: center;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(5, 150, 105, 0.4);
+}
+
+.initiate-synthesis-btn:hover {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 6px 30px rgba(16, 185, 129, 0.6);
+  transform: translateY(-2px);
+}
+
+/* ========================================================= */
+/* GAME 08: STEP 4 — CINEMATIC REVELATION SCREEN             */
+/* ========================================================= */
+.game08-revelation-overlay {
+  position: fixed;
+  inset: 0;
+  background: #020408;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1500;
+  padding: 2rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.game08-revelation-overlay.flicker {
+  animation: crtFlicker 0.25s infinite;
+}
+
+@keyframes crtFlicker {
+  0% { opacity: 0.92; }
+  50% { opacity: 0.98; }
+  100% { opacity: 0.94; }
+}
+
+.revelation-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    rgba(0, 0, 0, 0.35) 0px,
+    rgba(0, 0, 0, 0.35) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.revelation-crt-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 40%, rgba(2, 4, 8, 0.85) 100%);
+  pointer-events: none;
+}
+
+.revelation-content {
+  position: relative;
+  z-index: 10;
+  max-width: 900px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.revelation-header-tag {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.35em;
+  color: #38bdf8;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+.revelation-quote-container {
+  min-height: 160px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.revelation-quote-text {
+  font-size: 2.8rem;
+  font-weight: 900;
+  letter-spacing: 0.25em;
+  color: #f8fafc;
+  margin: 0;
+  text-shadow: 0 0 35px rgba(255, 255, 255, 0.5), 0 0 60px rgba(56, 189, 248, 0.3);
+  animation: revealFadeIn 0.5s ease-out;
+}
+
+@keyframes revealFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.revelation-progress-bar-container {
+  width: 280px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.revelation-progress-bar {
+  height: 100%;
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
+  transition: width 0.4s ease;
+}
+
+.revelation-tap-hint {
+  font-size: 0.68rem;
+  letter-spacing: 0.25em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+/* Revelation Summary Card */
+.revelation-summary-card {
+  position: relative;
+  z-index: 10;
+  background: rgba(10, 16, 26, 0.98);
+  border: 1px solid #10b981;
+  border-top: 3px solid #10b981;
+  border-radius: 8px;
+  padding: 2.5rem 3.2rem;
+  max-width: 720px;
+  text-align: center;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.95), 0 0 60px rgba(16, 185, 129, 0.25);
+  animation: fadeIn 0.6s ease-out;
+}
+
+.summary-stamp {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.35em;
+  color: #34d399;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.summary-title {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  color: #ffffff;
+  margin: 0.2rem 0 0.8rem;
+  text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.summary-verdict-banner {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.5);
+  color: #34d399;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  padding: 0.45rem 1.4rem;
+  border-radius: 4px;
+  margin-bottom: 1.4rem;
+}
+
+.summary-divider {
+  width: 80px;
+  height: 2px;
+  background: #10b981;
+  margin: 0 auto 1.4rem;
+  opacity: 0.6;
+}
+
+.summary-truth-text {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #e2e8f0;
+  font-style: italic;
+  margin: 0 0 1.8rem;
+}
+
+.summary-clearance-award {
+  background: rgba(6, 12, 22, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 1rem 1.4rem;
+  margin-bottom: 2rem;
+}
+
+.clearance-badge {
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: #38bdf8;
+  margin-bottom: 0.35rem;
+}
+
+.sector-unseal-notice {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #4ade80;
+}
+
+.revelation-return-button {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  padding: 0.95rem 3.5rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 6px 25px rgba(2, 132, 199, 0.4);
+  transition: all 0.25s ease;
+  text-transform: uppercase;
+}
+
+.revelation-return-button:hover {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  box-shadow: 0 8px 35px rgba(14, 165, 233, 0.6);
+  transform: translateY(-2px);
+}
 

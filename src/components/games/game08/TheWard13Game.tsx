@@ -97,6 +97,20 @@ export const TheWard13Game: React.FC<TheWard13Props> = ({
           ward13Store.interact()
         }
       }
+
+      if (e.code === 'KeyC' || e.code === 'Tab') {
+        if (statusRef.current === 'exploring') {
+          e.preventDefault()
+          ward13Store.openComparisonBoard()
+        }
+      }
+
+      if (e.code === 'Escape') {
+        if (statusRef.current === 'comparing_evidence') {
+          e.preventDefault()
+          ward13Store.closeComparisonBoard()
+        }
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)

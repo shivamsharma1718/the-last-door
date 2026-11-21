@@ -1292,6 +1292,73 @@ const SecurityDoors: React.FC<SecurityDoorsProps> = ({
 }
 
 // ---------------------------------------------------------------------------
+// 8c. Deduction & Contradiction Analysis Terminals in 3D Space
+// ---------------------------------------------------------------------------
+
+const DEDUCTION_STATIONS_DATA: Array<{
+  id: string
+  name: string
+  position: [number, number, number]
+}> = [
+  { id: 'station_reception', name: 'ADMISSIONS DEDUCTION DESK', position: [0.0, 0.85, 8.8] },
+  { id: 'station_patient_ward', name: 'TELEMETRY ANALYSIS STATION', position: [0.0, 0.85, 0.8] },
+  { id: 'station_observation', name: 'SURVEILLANCE ANALYSIS CONSOLE', position: [0.0, 0.85, -6.2] },
+  { id: 'station_archive', name: 'ARCHIVE RECONSTRUCTION TABLE', position: [8.5, 0.85, -6.5] },
+]
+
+const DeductionStations: React.FC = () => {
+  return (
+    <group>
+      {DEDUCTION_STATIONS_DATA.map((st) => (
+        <group key={st.id} position={st.position}>
+          {/* Terminal Desk Stand */}
+          <mesh position={[0, -0.4, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[0.25, 0.35, 0.8, 12]} />
+            <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.4} />
+          </mesh>
+
+          {/* Glowing CRT Monitor Housing */}
+          <mesh position={[0, 0.12, 0]} rotation={[-0.2, 0, 0]} castShadow>
+            <boxGeometry args={[0.55, 0.38, 0.35]} />
+            <meshStandardMaterial color="#0f172a" metalness={0.7} roughness={0.3} />
+          </mesh>
+
+          {/* CRT Screen with Green Phosphor Glow */}
+          <mesh position={[0, 0.13, 0.18]} rotation={[-0.2, 0, 0]}>
+            <planeGeometry args={[0.46, 0.28]} />
+            <meshStandardMaterial
+              color="#10b981"
+              emissive="#10b981"
+              emissiveIntensity={1.8}
+              roughness={0.2}
+            />
+          </mesh>
+
+          {/* 3D Floating Label */}
+          <Text
+            position={[0, 0.45, 0]}
+            fontSize={0.09}
+            color="#34d399"
+            anchorX="center"
+            anchorY="middle"
+          >
+            [E] DEDUCTION TERMINAL
+          </Text>
+
+          {/* Ambient Terminal Illumination */}
+          <pointLight
+            position={[0, 0.2, 0.3]}
+            color="#10b981"
+            intensity={0.7}
+            distance={2.8}
+          />
+        </group>
+      ))}
+    </group>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // 9. Main Exported 3D Arena Component: TheWard13Arena
 // ---------------------------------------------------------------------------
 
@@ -1333,6 +1400,9 @@ export const TheWard13Arena: React.FC<TheWard13ArenaProps> = ({
 
       {/* 4b. Security Doors with Physical State & Lights */}
       <SecurityDoors unlockedRoomIds={unlockedRoomIds} />
+
+      {/* 4c. Deduction & Analysis Terminals */}
+      <DeductionStations />
 
       {/* 5. Twelve Canonical Evidence Clue Props Placed in 3D Space */}
       {WARD13_EVIDENCE.map((item) => {

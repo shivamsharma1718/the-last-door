@@ -19,7 +19,51 @@ export interface SceneProps {
   onDoorOpen?: () => void
 }
 
-export type GameStage = 'hallway' | 'intro' | 'game01' | 'game02' | 'game03' | 'game04' | 'game05' | 'game06' | 'game07' | 'game08'
+export type GameStage =
+  | 'hallway'
+  | 'intro'
+  | 'game01'
+  | 'game02'
+  | 'game03'
+  | 'game04'
+  | 'game05'
+  | 'game06'
+  | 'game07'
+  | 'game08'
+  | 'game09'
+
+export const Game09Placeholder: React.FC = () => {
+  useEffect(() => {
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+  }, [])
+
+  return (
+    <div
+      className="game09-placeholder-overlay"
+      id="game09-placeholder-dom"
+      role="region"
+      aria-label="Game 09 Transition"
+    >
+      <div className="game09-placeholder-card">
+        <span className="game09-placeholder-tag">GAME 09</span>
+        <h1 className="game09-placeholder-title">THE CONTROL ROOM</h1>
+        <div className="game09-placeholder-divider" />
+        <div className="game09-placeholder-lore">
+          <p className="game09-placeholder-subtitle">“THE SYSTEM IS STILL RUNNING.”</p>
+          <p className="game09-placeholder-subtext">
+            You stepped beyond Ward 13 into the central nerve of the complex. The master consoles await.
+          </p>
+        </div>
+        <div className="game09-placeholder-status">
+          <span className="game09-status-dot" />
+          <span>FACILITY STATUS: ARCHIVE TERMINATED // SYSTEM COLD BOOT PENDING</span>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export const Scene: React.FC<SceneProps> = ({
   isDoorOpen: propIsDoorOpen,
@@ -30,6 +74,7 @@ export const Scene: React.FC<SceneProps> = ({
     if (typeof window !== 'undefined') {
       const search = new URLSearchParams(window.location.search)
       const g = search.get('game') || search.get('stage')
+      if (g === 'game09' || g === '09' || g === 'control_room') return 'game09'
       if (g === 'game08' || g === '08' || g === 'ward13') return 'game08'
       if (g === 'game07' || g === '07') return 'game07'
       if (g === 'game06' || g === '06') return 'game06'
@@ -224,7 +269,12 @@ export const Scene: React.FC<SceneProps> = ({
 
   // If in Game 08 arena (WARD 13)
   if (stage === 'game08') {
-    return <TheWard13Game onComplete={() => setStage('game08')} />
+    return <TheWard13Game onComplete={() => setStage('game09')} />
+  }
+
+  // If in Game 09 transition destination (THE CONTROL ROOM)
+  if (stage === 'game09') {
+    return <Game09Placeholder />
   }
 
   return (

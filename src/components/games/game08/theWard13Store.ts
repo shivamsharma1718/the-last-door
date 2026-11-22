@@ -22,9 +22,12 @@ import type {
   EvidenceId,
   EvidenceDefinition,
   ContradictionPair,
+  TerminalDecisionOption,
 } from './ward13Types'
 import {
   INTERACTION_DISTANCE_THRESHOLD_G08,
+  TERMINAL_WORLD_POS,
+  TERMINAL_DISTANCE_THRESHOLD_G08,
 } from './ward13Types'
 import {
   createInitialWard13State,
@@ -35,6 +38,8 @@ import {
   compareEvidence,
   getContradictionByKey,
   resolveContradiction,
+  validateFinalDecision,
+  isTerminalReady,
 } from './ward13Logic'
 
 export type ProximityTargetType =
@@ -42,6 +47,7 @@ export type ProximityTargetType =
   | 'locked_door'
   | 'comparison_station'
   | 'terminal'
+  | 'escape_exit'
   | null
 
 export interface Ward13ProximityState {
@@ -91,6 +97,14 @@ export interface Ward13StoreState {
   comparisonResult: ComparisonResultState | null
   activeRevelation: ActiveRevelationState | null
   recentUnlockNotification: UnlockNotificationState | null
+
+  // Step 5: Final Identity Verdict, Failure, Victory & Escape
+  isTerminalOpen: boolean
+  isTerminalActive: boolean
+  selectedDecision: TerminalDecisionOption | null
+  failedDecision: TerminalDecisionOption | null
+  isEscapePassageOpen: boolean
+  alarmsActive: boolean
 }
 
 const initialProximity: Ward13ProximityState = {
@@ -157,6 +171,12 @@ function getInitialStoreState(): Ward13StoreState {
     comparisonResult: null,
     activeRevelation: null,
     recentUnlockNotification: null,
+    isTerminalOpen: false,
+    isTerminalActive: false,
+    selectedDecision: null,
+    failedDecision: null,
+    isEscapePassageOpen: false,
+    alarmsActive: false,
   }
 }
 
@@ -251,12 +271,38 @@ export const ward13Store = {
     const { x, z } = pos
     const currentRoom = getRoomByPosition(x, z)
 
-    // 1. Check nearest evidence
-    const nearestEvidence = getNearestEvidence(x, z, INTERACTION_DISTANCE_THRESHOLD_G08)
+    const isTerminalActive = isTerminalReady(
+      currentState.collectedEvidenceIds.size,
+      currentState.resolvedContradictionKeys.length,
+      currentState.currentClearanceLevel
+    )
 
-    // 2. Check nearest comparison station (only if not standing on evidence)
+    // 0. Check physical escape corridor proximity when escape passage is open
+    let isNearEscape = false
+    if (currentState.isEscapePassageOpen) {
+      if (Math.abs(x) <= 1.8 && z <= -15.5) {
+        isNearEscape = true
+      }
+    }
+
+    // 1. Check nearest evidence (skip terminal manifest if terminal is already active)
+    let nearestEvidence = getNearestEvidence(x, z, INTERACTION_DISTANCE_THRESHOLD_G08)
+    if (nearestEvidence && nearestEvidence.id === 'evidence_terminal_manifest' && isTerminalActive) {
+      nearestEvidence = null
+    }
+
+    // 2. Check diagnostic terminal proximity in Area 6 (TERMINAL_WORLD_POS = [0, 1.1, -14.5])
+    let isNearTerminal = false
+    if (!nearestEvidence && !isNearEscape && currentRoom === 'decon_exit') {
+      const distToTerminal = Math.hypot(x - TERMINAL_WORLD_POS[0], z - TERMINAL_WORLD_POS[2])
+      if (distToTerminal <= TERMINAL_DISTANCE_THRESHOLD_G08 + 0.4) {
+        isNearTerminal = true
+      }
+    }
+
+    // 3. Check nearest comparison station (only if not standing on evidence, escape or terminal)
     let nearStation: ComparisonStation | null = null
-    if (!nearestEvidence) {
+    if (!nearestEvidence && !isNearEscape && !isNearTerminal) {
       for (const st of COMPARISON_STATIONS) {
         const dist = Math.hypot(x - st.position[0], z - st.position[2])
         if (dist <= st.radius) {
@@ -266,9 +312,9 @@ export const ward13Store = {
       }
     }
 
-    // 3. Check locked doors if no evidence or station nearby
+    // 4. Check locked doors if no evidence or station nearby
     let doorPrompt: string | null = null
-    if (!nearestEvidence && !nearStation) {
+    if (!nearestEvidence && !isNearEscape && !isNearTerminal && !nearStation) {
       for (const trigger of DOOR_TRIGGERS) {
         if (!currentState.unlockedRoomIds.includes(trigger.roomId)) {
           if (trigger.isNear(x, z)) {
@@ -284,7 +330,17 @@ export const ward13Store = {
     let promptText: string | null = null
     let stationName: string | null = null
 
-    if (nearestEvidence) {
+    if (isNearEscape) {
+      type = 'escape_exit'
+      promptText = `[E] ENTER MAINTENANCE SHAFT — ESCAPE WARD 13`
+    } else if (isNearTerminal) {
+      type = 'terminal'
+      if (isTerminalActive) {
+        promptText = `[E] ACCESS DIAGNOSTIC TERMINAL — VERIFY IDENTITY`
+      } else {
+        promptText = `[ACCESS RESTRICTED] CLEARANCE LEVEL 4 & IDENTITY SYNTHESIS REQUIRED`
+      }
+    } else if (nearestEvidence) {
       type = 'evidence'
       const isAlreadyCollected = currentState.collectedEvidenceIds.has(nearestEvidence.id)
       promptText = isAlreadyCollected
@@ -307,6 +363,7 @@ export const ward13Store = {
       prev.stationName !== stationName ||
       prev.promptText !== promptText ||
       currentState.currentRoomId !== currentRoom ||
+      currentState.isTerminalActive !== isTerminalActive ||
       Math.abs(currentState.playerPosition.x - x) > 0.05 ||
       Math.abs(currentState.playerPosition.z - z) > 0.05
 
@@ -314,6 +371,7 @@ export const ward13Store = {
       currentState = {
         ...currentState,
         currentRoomId: currentRoom,
+        isTerminalActive,
         playerPosition: { x, z },
         proximity: {
           type,
@@ -626,6 +684,140 @@ export const ward13Store = {
     emitChange()
   },
 
+  openTerminal: () => {
+    if (!currentState.isTerminalActive) return
+
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+
+    currentState = {
+      ...currentState,
+      status: 'terminal_input',
+      isTerminalOpen: true,
+    }
+    emitChange()
+  },
+
+  closeTerminal: () => {
+    currentState = {
+      ...currentState,
+      status: 'exploring',
+      isTerminalOpen: false,
+    }
+    emitChange()
+  },
+
+  submitDecision: (decision: TerminalDecisionOption) => {
+    if (currentState.status !== 'terminal_input') return
+
+    const isCorrect = validateFinalDecision(decision)
+
+    if (isCorrect) {
+      currentState = {
+        ...currentState,
+        status: 'terminal_transition',
+        selectedDecision: decision,
+        isTerminalOpen: false,
+      }
+      emitChange()
+
+      setTimeout(() => {
+        currentState = {
+          ...currentState,
+          status: 'victory_cinematic',
+        }
+        emitChange()
+      }, 1500)
+    } else {
+      currentState = {
+        ...currentState,
+        status: 'failure_cinematic',
+        selectedDecision: decision,
+        failedDecision: decision,
+        isTerminalOpen: false,
+        alarmsActive: true,
+      }
+      emitChange()
+    }
+  },
+
+  restartTrial: () => {
+    if (notificationTimer) {
+      clearTimeout(notificationTimer)
+      notificationTimer = null
+    }
+
+    currentState = {
+      ...currentState,
+      status: 'exploring',
+      currentRoomId: 'reception',
+      collectedEvidenceIds: new Set(),
+      activeEvidence: null,
+      currentClearanceLevel: 1,
+      unlockedRoomIds: ['reception'],
+      resolvedContradictionKeys: [],
+      proximity: initialProximity,
+      resetCounter: currentState.resetCounter + 1,
+      playerPosition: { x: 0, z: 11.5 },
+      selectedEvidenceA: null,
+      selectedEvidenceB: null,
+      comparisonResult: null,
+      activeRevelation: null,
+      recentUnlockNotification: null,
+      isTerminalOpen: false,
+      isTerminalActive: false,
+      selectedDecision: null,
+      failedDecision: null,
+      isEscapePassageOpen: false,
+      alarmsActive: false,
+    }
+    emitChange()
+
+    if (typeof document !== 'undefined') {
+      const canvasEl = document.querySelector('canvas')
+      if (canvasEl && canvasEl.requestPointerLock) {
+        try {
+          canvasEl.requestPointerLock()
+        } catch {
+          // Ignore
+        }
+      }
+    }
+  },
+
+  beginEscapePhase: () => {
+    currentState = {
+      ...currentState,
+      status: 'exploring',
+      isEscapePassageOpen: true,
+    }
+    emitChange()
+
+    if (typeof document !== 'undefined') {
+      const canvasEl = document.querySelector('canvas')
+      if (canvasEl && canvasEl.requestPointerLock) {
+        try {
+          canvasEl.requestPointerLock()
+        } catch {
+          // Ignore
+        }
+      }
+    }
+  },
+
+  triggerVictory: () => {
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+
+    currentState = {
+      ...currentState,
+      status: 'victory',
+    }
+    emitChange()
+  },
+
   interact: () => {
     if (currentState.status === 'examining') {
       ward13Store.closeExamination()
@@ -637,8 +829,17 @@ export const ward13Store = {
       return
     }
 
+    if (currentState.status === 'terminal_input') {
+      ward13Store.closeTerminal()
+      return
+    }
+
     if (currentState.status === 'exploring') {
-      if (currentState.proximity.type === 'evidence' && currentState.proximity.evidence) {
+      if (currentState.proximity.type === 'escape_exit') {
+        ward13Store.triggerVictory()
+      } else if (currentState.proximity.type === 'terminal' && currentState.isTerminalActive) {
+        ward13Store.openTerminal()
+      } else if (currentState.proximity.type === 'evidence' && currentState.proximity.evidence) {
         ward13Store.openExamination(currentState.proximity.evidence.id)
       } else if (currentState.proximity.type === 'comparison_station') {
         ward13Store.openComparisonBoard()

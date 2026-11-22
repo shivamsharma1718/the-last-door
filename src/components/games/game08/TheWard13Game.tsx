@@ -35,6 +35,9 @@ export const TheWard13Game: React.FC<TheWard13Props> = ({
     unlockedRoomIds,
     currentClearanceLevel,
     resetCounter,
+    isEscapePassageOpen,
+    isTerminalActive,
+    alarmsActive,
   } = useWard13Store()
 
   const statusRef = useRef(status)
@@ -42,6 +45,9 @@ export const TheWard13Game: React.FC<TheWard13Props> = ({
 
   const unlockedRoomIdsRef = useRef(unlockedRoomIds)
   unlockedRoomIdsRef.current = unlockedRoomIds
+
+  const isEscapePassageOpenRef = useRef(isEscapePassageOpen)
+  isEscapePassageOpenRef.current = isEscapePassageOpen
 
   // Position constraint blocking walls, furniture, and locked security doors
   const handleConstrainPosition = useCallback(
@@ -54,7 +60,8 @@ export const TheWard13Game: React.FC<TheWard13Props> = ({
         proposed,
         current,
         radius,
-        unlockedRoomIdsRef.current
+        unlockedRoomIdsRef.current,
+        isEscapePassageOpenRef.current
       )
     },
     []
@@ -109,6 +116,9 @@ export const TheWard13Game: React.FC<TheWard13Props> = ({
         if (statusRef.current === 'comparing_evidence') {
           e.preventDefault()
           ward13Store.closeComparisonBoard()
+        } else if (statusRef.current === 'terminal_input') {
+          e.preventDefault()
+          ward13Store.closeTerminal()
         }
       }
     }
@@ -124,6 +134,11 @@ export const TheWard13Game: React.FC<TheWard13Props> = ({
         x: camera.position.x,
         z: camera.position.z,
       })
+
+      // Check if player has stepped across threshold into the maintenance escape shaft
+      if (isEscapePassageOpenRef.current && camera.position.z <= -17.2) {
+        ward13Store.triggerVictory()
+      }
     }
   })
 
@@ -135,6 +150,9 @@ export const TheWard13Game: React.FC<TheWard13Props> = ({
         currentRoomId={currentRoomId}
         unlockedRoomIds={unlockedRoomIds}
         clearanceLevel={currentClearanceLevel}
+        isEscapePassageOpen={isEscapePassageOpen}
+        isTerminalActive={isTerminalActive}
+        alarmsActive={alarmsActive}
       />
 
       {/* 2. First-Person Player Navigation Controls */}

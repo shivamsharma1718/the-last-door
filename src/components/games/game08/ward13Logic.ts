@@ -801,6 +801,18 @@ export function getTerminalPrompt(): TerminalPromptState {
   return WARD13_TERMINAL_PROMPT
 }
 
+export function isTerminalReady(
+  collectedEvidenceCount: number,
+  resolvedContradictionsCount: number,
+  clearanceLevel: number
+): boolean {
+  return (
+    collectedEvidenceCount >= 12 &&
+    resolvedContradictionsCount >= 3 &&
+    clearanceLevel >= 4
+  )
+}
+
 export function validateFinalDecision(decision: TerminalDecisionOption): boolean {
   return decision === CORRECT_TERMINAL_DECISION
 }

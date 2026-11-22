@@ -21,6 +21,9 @@ import { Game08HUD } from './ui/Game08HUD'
 import { Game08Examination } from './ui/Game08Examination'
 import { Game08ContradictionBoard } from './ui/Game08ContradictionBoard'
 import { Game08Revelation } from './ui/Game08Revelation'
+import { Game08DiagnosticTerminal } from './ui/Game08DiagnosticTerminal'
+import { Game08Failure } from './ui/Game08Failure'
+import { Game08VictoryCinematic, Game08Victory } from './ui/Game08Victory'
 
 export const TheWard13UI: React.FC = () => {
   const state = useWard13Store()
@@ -101,6 +104,36 @@ export const TheWard13UI: React.FC = () => {
           isComplete={state.activeRevelation.isComplete}
           onAdvance={ward13Store.advanceRevelationStage}
           onComplete={ward13Store.completeRevelation}
+        />
+      )}
+
+      {/* 6. Master Diagnostic Identity Terminal */}
+      {state.status === 'terminal_input' && (
+        <Game08DiagnosticTerminal
+          onSubmit={ward13Store.submitDecision}
+          onClose={ward13Store.closeTerminal}
+        />
+      )}
+
+      {/* 7. Clinical Failure Cinematic & Restart Screen */}
+      {(state.status === 'failure_cinematic' || state.status === 'failed') && (
+        <Game08Failure
+          failedDecision={state.failedDecision}
+          onRestart={ward13Store.restartTrial}
+        />
+      )}
+
+      {/* 8. Victory Revelation Cinematic (Phases 1-3) */}
+      {state.status === 'victory_cinematic' && (
+        <Game08VictoryCinematic
+          onSequenceComplete={ward13Store.beginEscapePhase}
+        />
+      )}
+
+      {/* 9. Final Completion Screen (Phase 5) */}
+      {state.status === 'victory' && (
+        <Game08Victory
+          onContinue={ward13Store.triggerCompletion}
         />
       )}
     </>

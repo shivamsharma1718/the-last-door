@@ -96,7 +96,12 @@ const LOCKED_DOOR_BARRIERS: Partial<Record<Ward13RoomId, AABB>> = {
   decon_exit: { minX: -1.3, maxX: 1.3, minZ: -11.0, maxZ: -10.5 },
 }
 
-function isInsideAnyZone(x: number, z: number, radius: number): boolean {
+function isInsideAnyZone(
+  x: number,
+  z: number,
+  radius: number,
+  isEscapePassageOpen?: boolean
+): boolean {
   for (const zone of WALKABLE_ZONES) {
     if (
       x >= zone.minX + radius &&
@@ -107,6 +112,19 @@ function isInsideAnyZone(x: number, z: number, radius: number): boolean {
       return true
     }
   }
+
+  // Allow walking into the opened northern escape shaft beyond Z = -17.5
+  if (isEscapePassageOpen) {
+    if (
+      x >= -1.4 + radius &&
+      x <= 1.4 - radius &&
+      z >= -23.5 + radius &&
+      z <= -16.8 - radius
+    ) {
+      return true
+    }
+  }
+
   return false
 }
 
@@ -114,7 +132,8 @@ function isInsideAnyObstacle(
   x: number,
   z: number,
   radius: number,
-  unlockedRoomIds?: Ward13RoomId[]
+  unlockedRoomIds?: Ward13RoomId[],
+  _isEscapePassageOpen?: boolean
 ): boolean {
   for (const obs of SOLID_OBSTACLES) {
     if (
@@ -157,22 +176,32 @@ export function constrainWard13Position(
   proposed: { x: number; z: number },
   current: { x: number; z: number },
   radius: number = 0.35,
-  unlockedRoomIds?: Ward13RoomId[]
+  unlockedRoomIds?: Ward13RoomId[],
+  isEscapePassageOpen?: boolean
 ): { x: number; z: number } {
   let { x, z } = proposed
 
   // Test full move
-  if (isInsideAnyZone(x, z, radius) && !isInsideAnyObstacle(x, z, radius, unlockedRoomIds)) {
+  if (
+    isInsideAnyZone(x, z, radius, isEscapePassageOpen) &&
+    !isInsideAnyObstacle(x, z, radius, unlockedRoomIds, isEscapePassageOpen)
+  ) {
     return { x, z }
   }
 
   // Slide along X axis
-  if (isInsideAnyZone(x, current.z, radius) && !isInsideAnyObstacle(x, current.z, radius, unlockedRoomIds)) {
+  if (
+    isInsideAnyZone(x, current.z, radius, isEscapePassageOpen) &&
+    !isInsideAnyObstacle(x, current.z, radius, unlockedRoomIds, isEscapePassageOpen)
+  ) {
     return { x, z: current.z }
   }
 
   // Slide along Z axis
-  if (isInsideAnyZone(current.x, z, radius) && !isInsideAnyObstacle(current.x, z, radius, unlockedRoomIds)) {
+  if (
+    isInsideAnyZone(current.x, z, radius, isEscapePassageOpen) &&
+    !isInsideAnyObstacle(current.x, z, radius, unlockedRoomIds, isEscapePassageOpen)
+  ) {
     return { x: current.x, z }
   }
 
@@ -903,7 +932,29 @@ const MedicalRecordsArchiveArea: React.FC = () => {
 // 7. Area 6: Ward 13 Final Exit / Decontamination Airlock
 // ---------------------------------------------------------------------------
 
-const DecontaminationExitArea: React.FC = () => {
+interface DecontaminationExitAreaProps {
+  isEscapePassageOpen?: boolean
+  isTerminalActive?: boolean
+  alarmsActive?: boolean
+}
+
+const DecontaminationExitArea: React.FC<DecontaminationExitAreaProps> = ({
+  isEscapePassageOpen = false,
+  isTerminalActive = false,
+  alarmsActive = false,
+}) => {
+  const terminalScreenColor = alarmsActive
+    ? '#ef4444'
+    : isTerminalActive
+    ? '#22c55e'
+    : '#064e3b'
+
+  const terminalGlowColor = alarmsActive
+    ? '#ef4444'
+    : isTerminalActive
+    ? '#22c55e'
+    : '#047857'
+
   return (
     <group position={[0, 0, -14.5]}>
       {/* Airlock Floor (7m x 6m): Brushed Stainless Steel Grate */}
@@ -942,22 +993,94 @@ const DecontaminationExitArea: React.FC = () => {
         <meshStandardMaterial color="#334155" metalness={0.8} roughness={0.3} />
       </mesh>
 
-      {/* North Exterior Escape Bulkhead (Z = -3.0): Sealed Heavy Blast Door */}
-      <mesh position={[0, 1.9, -3.0]} receiveShadow castShadow>
-        <boxGeometry args={[7.0, 3.8, 0.4]} />
-        <meshStandardMaterial color="#1e293b" metalness={0.85} roughness={0.2} />
-      </mesh>
-      {/* Heavy Pneumatic Wheel Latch on Final Door */}
-      <group position={[0, 1.8, -2.75]}>
-        <mesh rotation={[0, 0, 0]}>
-          <torusGeometry args={[0.42, 0.05, 16, 24]} />
-          <meshStandardMaterial color="#f59e0b" metalness={0.8} />
-        </mesh>
-        <mesh rotation={[0, 0, Math.PI / 4]}>
-          <boxGeometry args={[0.9, 0.06, 0.04]} />
-          <meshStandardMaterial color="#f59e0b" metalness={0.8} />
-        </mesh>
-      </group>
+      {/* North Exterior Escape Bulkhead (Z = -3.0): Sealed Heavy Blast Door or Opened Corridor */}
+      {!isEscapePassageOpen ? (
+        <>
+          <mesh position={[0, 1.9, -3.0]} receiveShadow castShadow>
+            <boxGeometry args={[7.0, 3.8, 0.4]} />
+            <meshStandardMaterial color="#1e293b" metalness={0.85} roughness={0.2} />
+          </mesh>
+          {/* Heavy Pneumatic Wheel Latch on Final Door */}
+          <group position={[0, 1.8, -2.75]}>
+            <mesh rotation={[0, 0, 0]}>
+              <torusGeometry args={[0.42, 0.05, 16, 24]} />
+              <meshStandardMaterial color="#f59e0b" metalness={0.8} />
+            </mesh>
+            <mesh rotation={[0, 0, Math.PI / 4]}>
+              <boxGeometry args={[0.9, 0.06, 0.04]} />
+              <meshStandardMaterial color="#f59e0b" metalness={0.8} />
+            </mesh>
+          </group>
+        </>
+      ) : (
+        /* Retracted Blast Doors & Unsealed Exterior Maintenance Shaft */
+        <group position={[0, 0, -3.0]}>
+          {/* Left Retracted Bulkhead Plate */}
+          <mesh position={[-2.4, 1.9, 0]} receiveShadow castShadow>
+            <boxGeometry args={[2.2, 3.8, 0.4]} />
+            <meshStandardMaterial color="#334155" metalness={0.85} roughness={0.2} />
+          </mesh>
+          {/* Right Retracted Bulkhead Plate */}
+          <mesh position={[2.4, 1.9, 0]} receiveShadow castShadow>
+            <boxGeometry args={[2.2, 3.8, 0.4]} />
+            <meshStandardMaterial color="#334155" metalness={0.85} roughness={0.2} />
+          </mesh>
+          {/* Top Frame Lintel */}
+          <mesh position={[0, 3.3, 0]} receiveShadow castShadow>
+            <boxGeometry args={[2.6, 1.0, 0.4]} />
+            <meshStandardMaterial color="#1e293b" metalness={0.85} roughness={0.2} />
+          </mesh>
+
+          {/* Exterior Maintenance Escape Shaft (Extending 6m north) */}
+          <group position={[0, 0, -3.0]}>
+            {/* Shaft Floor */}
+            <mesh position={[0, 0.02, 0]} receiveShadow>
+              <planeGeometry args={[2.6, 6.0]} />
+              <meshStandardMaterial color="#1e293b" metalness={0.8} roughness={0.3} />
+            </mesh>
+            {/* Shaft Ceiling */}
+            <mesh position={[0, 3.8, 0]} rotation={[Math.PI, 0, 0]}>
+              <planeGeometry args={[2.6, 6.0]} />
+              <meshStandardMaterial color="#0f172a" roughness={0.7} />
+            </mesh>
+            {/* Shaft West Wall */}
+            <mesh position={[-1.3, 1.9, 0]} rotation={[0, Math.PI / 2, 0]}>
+              <planeGeometry args={[6.0, 3.8]} />
+              <meshStandardMaterial color="#334155" metalness={0.5} roughness={0.5} />
+            </mesh>
+            {/* Shaft East Wall */}
+            <mesh position={[1.3, 1.9, 0]} rotation={[0, -Math.PI / 2, 0]}>
+              <planeGeometry args={[6.0, 3.8]} />
+              <meshStandardMaterial color="#334155" metalness={0.5} roughness={0.5} />
+            </mesh>
+            {/* Shaft End Wall */}
+            <mesh position={[0, 1.9, -3.0]}>
+              <planeGeometry args={[2.6, 3.8]} />
+              <meshStandardMaterial color="#020617" roughness={0.9} />
+            </mesh>
+
+            {/* Cold Exterior White Light */}
+            <pointLight
+              position={[0, 2.5, -1.5]}
+              color="#f8fafc"
+              intensity={4.0}
+              distance={10.0}
+              decay={1.8}
+            />
+
+            {/* EXIT Sign above unsealed shaft */}
+            <Text
+              position={[0, 3.1, 2.75]}
+              fontSize={0.16}
+              color="#22c55e"
+              anchorX="center"
+              anchorY="middle"
+            >
+              EMERGENCY EXIT →
+            </Text>
+          </group>
+        </group>
+      )}
 
       {/* Central Diagnostic Terminal Pedestal */}
       <group position={[0, 0, 0.3]}>
@@ -971,26 +1094,38 @@ const DecontaminationExitArea: React.FC = () => {
           <boxGeometry args={[0.7, 0.5, 0.45]} />
           <meshStandardMaterial color="#0f172a" roughness={0.5} />
         </mesh>
-        {/* Glowing Green Master CRT Screen */}
+        {/* Master CRT Screen */}
         <mesh position={[0, 1.2, 0.22]} rotation={[-0.2, 0, 0]}>
           <planeGeometry args={[0.56, 0.38]} />
-          <meshBasicMaterial color="#22c55e" />
+          <meshBasicMaterial color={terminalScreenColor} />
         </mesh>
         {/* Terminal Screen Glow Light */}
         <pointLight
           position={[0, 1.3, 0.6]}
-          color="#22c55e"
-          intensity={2.8}
+          color={terminalGlowColor}
+          intensity={isTerminalActive || alarmsActive ? 3.5 : 0.8}
           distance={4.5}
           decay={2}
         />
+        {/* Terminal Text Indicator in 3D */}
+        <Text
+          position={[0, 1.6, 0.15]}
+          fontSize={0.08}
+          color={isTerminalActive ? '#4ade80' : '#94a3b8'}
+          anchorX="center"
+          anchorY="middle"
+        >
+          {isTerminalActive
+            ? '[E] DIAGNOSTIC TERMINAL — VERIFY IDENTITY'
+            : 'DIAGNOSTIC TERMINAL — RESTRICTED'}
+        </Text>
       </group>
 
-      {/* Emergency Amber Warning Beacons */}
+      {/* Emergency Warning Beacons */}
       <pointLight
         position={[0, 3.4, 0]}
-        color="#f59e0b"
-        intensity={2.2}
+        color={alarmsActive ? '#ef4444' : isEscapePassageOpen ? '#f8fafc' : '#f59e0b'}
+        intensity={alarmsActive ? 3.5 : 2.2}
         distance={8.0}
         decay={2}
       />
@@ -1367,11 +1502,18 @@ export interface TheWard13ArenaProps {
   currentRoomId?: Ward13RoomId
   unlockedRoomIds?: Ward13RoomId[]
   clearanceLevel?: number
+  isEscapePassageOpen?: boolean
+  isTerminalActive?: boolean
+  alarmsActive?: boolean
+  emergencyPowerActive?: boolean
 }
 
 export const TheWard13Arena: React.FC<TheWard13ArenaProps> = ({
   collectedEvidenceIds = [],
   unlockedRoomIds = ['reception'],
+  isEscapePassageOpen = false,
+  isTerminalActive = false,
+  alarmsActive = false,
 }) => {
   const collectedSet = useMemo(
     () => new Set(collectedEvidenceIds),
@@ -1385,7 +1527,7 @@ export const TheWard13Arena: React.FC<TheWard13ArenaProps> = ({
       <fog attach="fog" args={['#020408', 3.0, 22.0]} />
 
       {/* 2. Global Institutional Ambient Illumination */}
-      <ambientLight color="#0b1320" intensity={0.5} />
+      <ambientLight color={alarmsActive ? '#450a0a' : '#0b1320'} intensity={0.5} />
 
       {/* 3. Six Hospital Floor Rooms */}
       <HospitalReceptionArea />
@@ -1393,7 +1535,11 @@ export const TheWard13Arena: React.FC<TheWard13ArenaProps> = ({
       <IsolationRoomArea />
       <ObservationRoomArea />
       <MedicalRecordsArchiveArea />
-      <DecontaminationExitArea />
+      <DecontaminationExitArea
+        isEscapePassageOpen={isEscapePassageOpen}
+        isTerminalActive={isTerminalActive}
+        alarmsActive={alarmsActive}
+      />
 
       {/* 4. Interconnecting Security Corridors */}
       <ConnectingCorridors />

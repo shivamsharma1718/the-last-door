@@ -12,6 +12,7 @@ import { TheDrowningHallGame } from '../components/games/game05/TheDrowningHallG
 import { TheEndlessMazeGame } from '../components/games/game06'
 import { TheMirrorTrialGame } from '../components/games/game07'
 import { TheWard13Game } from '../components/games/game08'
+import { TheControlRoomGame } from '../components/games/game09'
 
 export interface SceneProps {
   isDoorOpen?: boolean
@@ -272,9 +273,9 @@ export const Scene: React.FC<SceneProps> = ({
     return <TheWard13Game onComplete={() => setStage('game09')} />
   }
 
-  // If in Game 09 transition destination (THE CONTROL ROOM)
+  // If in Game 09 arena (THE CONTROL ROOM)
   if (stage === 'game09') {
-    return <Game09Placeholder />
+    return <TheControlRoomGame onComplete={() => setStage('hallway')} />
   }
 
   return (

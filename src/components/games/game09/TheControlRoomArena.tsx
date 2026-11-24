@@ -19,6 +19,7 @@ import React from 'react'
 import { ControlRoomLighting } from './ControlRoomLighting'
 import { ControlRoomArchitecture } from './ControlRoomArchitecture'
 import { ControlRoomPropsEnvironment } from './ControlRoomProps'
+import { controlRoomStore } from './theControlRoomStore'
 
 // ---------------------------------------------------------------------------
 // Spatial Collision & Movement Constraints
@@ -80,6 +81,17 @@ const CONTROL_ROOM_OBSTACLES: AABB[] = [
 ]
 
 function isPointWalkable(x: number, z: number, radius: number): boolean {
+  const isBulkheadOpen = controlRoomStore.getSnapshot().isExitBulkheadOpen
+
+  // Check if player is entering or inside the Northern Exit Tunnel
+  if (isBulkheadOpen && z < -11.6) {
+    // Tunnel side walls at X = -1.8 and X = 1.8, tunnel end at Z = -15.5
+    if (x < -1.8 + radius || x > 1.8 - radius || z < -15.5 + radius) {
+      return false
+    }
+    return true
+  }
+
   // 1. Must be strictly within outer room boundaries
   if (
     x < ROOM_BOUNDS.minX + radius ||
@@ -92,6 +104,11 @@ function isPointWalkable(x: number, z: number, radius: number): boolean {
 
   // 2. Must not penetrate any solid obstacles
   for (const obs of CONTROL_ROOM_OBSTACLES) {
+    // If bulkhead is open, ignore the closed blast door obstacle in the center passage
+    if (isBulkheadOpen && obs.minZ <= -11.6 && Math.abs(x) < 1.8) {
+      continue
+    }
+
     if (
       x >= obs.minX - radius &&
       x <= obs.maxX + radius &&

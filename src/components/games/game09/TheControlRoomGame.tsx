@@ -121,13 +121,19 @@ export const TheControlRoomGame: React.FC<TheControlRoomProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  // Continuous frame loop for player proximity calculation
+  // Continuous frame loop for player proximity calculation & victory escape trigger
   useFrame(({ camera }) => {
     if (statusRef.current === 'exploring') {
       controlRoomStore.updatePlayerPosition({
         x: camera.position.x,
         z: camera.position.z,
       })
+
+      // Victory Escape Trigger: Player walks through open northern exit bulkhead
+      const snap = controlRoomStore.getSnapshot()
+      if (snap.isExitBulkheadOpen && camera.position.z <= -12.5) {
+        controlRoomStore.triggerVictory()
+      }
     }
   })
 

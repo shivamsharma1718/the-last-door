@@ -32,6 +32,41 @@ export type GameStage =
   | 'game07'
   | 'game08'
   | 'game09'
+  | 'game10'
+
+export const Game10Placeholder: React.FC = () => {
+  useEffect(() => {
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+  }, [])
+
+  return (
+    <div
+      className="game10-placeholder-overlay"
+      id="game10-placeholder-dom"
+      role="region"
+      aria-label="Game 10 Transition"
+    >
+      <div className="game10-placeholder-card">
+        <span className="game10-placeholder-tag">GAME 10</span>
+        <h1 className="game10-placeholder-title">THE FINAL CROSSING</h1>
+        <div className="game10-placeholder-divider" />
+        <div className="game10-placeholder-lore">
+          <p className="game10-placeholder-subtitle">“TRIAL 10 IS READY.”</p>
+          <p className="game10-placeholder-subtext">
+            You severed the Overseer Core and escaped through the northern hydraulic bulkhead.
+            Ahead lies the subterranean railway to the surface — or the final threshold of Morpheus.
+          </p>
+        </div>
+        <div className="game10-placeholder-status">
+          <span className="game10-status-dot" />
+          <span>FACILITY STATUS: OVERSEER CORE OFFLINE // ARCHIVES PRESERVED // TRANSIT ENERGIZED</span>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export const Game09Placeholder: React.FC = () => {
   useEffect(() => {
@@ -75,6 +110,7 @@ export const Scene: React.FC<SceneProps> = ({
     if (typeof window !== 'undefined') {
       const search = new URLSearchParams(window.location.search)
       const g = search.get('game') || search.get('stage')
+      if (g === 'game10' || g === '10' || g === 'crossing') return 'game10'
       if (g === 'game09' || g === '09' || g === 'control_room') return 'game09'
       if (g === 'game08' || g === '08' || g === 'ward13') return 'game08'
       if (g === 'game07' || g === '07') return 'game07'
@@ -275,7 +311,12 @@ export const Scene: React.FC<SceneProps> = ({
 
   // If in Game 09 arena (THE CONTROL ROOM)
   if (stage === 'game09') {
-    return <TheControlRoomGame onComplete={() => setStage('hallway')} />
+    return <TheControlRoomGame onComplete={() => setStage('game10')} />
+  }
+
+  // If in Game 10 arena (THE FINAL CROSSING - Staging Placeholder)
+  if (stage === 'game10') {
+    return <Game10Placeholder />
   }
 
   return (

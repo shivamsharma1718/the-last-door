@@ -9,6 +9,7 @@ import React, { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
 import * as THREE from 'three'
+import { useControlRoomStore } from './theControlRoomStore'
 
 // ---------------------------------------------------------------------------
 // 1. Interactive Evidence Stand & 3D Visual Identifier
@@ -518,12 +519,20 @@ const LogicVaultProps: React.FC = () => {
 // ---------------------------------------------------------------------------
 
 const SystemCoreProps: React.FC = () => {
+  const { coreState, isOpticalTrunkSevered } = useControlRoomStore()
   const coreOpticalRef = useRef<THREE.Mesh>(null!)
+  const couplerLedRef = useRef<THREE.Mesh>(null!)
 
   useFrame(({ clock }) => {
     if (coreOpticalRef.current) {
+      if (!isOpticalTrunkSevered) {
+        const t = clock.getElapsedTime()
+        coreOpticalRef.current.rotation.y = t * 0.4
+      }
+    }
+    if (couplerLedRef.current && coreState === 'sever_pending') {
       const t = clock.getElapsedTime()
-      coreOpticalRef.current.rotation.y = t * 0.4
+      couplerLedRef.current.scale.setScalar(1 + Math.sin(t * 8) * 0.25)
     }
   })
 
@@ -539,8 +548,8 @@ const SystemCoreProps: React.FC = () => {
       <mesh position={[0, 2.1, 0]}>
         <cylinderGeometry args={[1.3, 1.3, 3.2, 24]} />
         <meshPhysicalMaterial
-          color="#38bdf8"
-          transmission={0.85}
+          color={isOpticalTrunkSevered ? '#1e293b' : '#38bdf8'}
+          transmission={isOpticalTrunkSevered ? 0.3 : 0.85}
           opacity={0.35}
           transparent
           roughness={0.1}
@@ -552,13 +561,18 @@ const SystemCoreProps: React.FC = () => {
       {/* Rotating Optical Fiber AI Core Trunk */}
       <mesh ref={coreOpticalRef} position={[0, 2.1, 0]}>
         <cylinderGeometry args={[0.45, 0.45, 2.8, 16]} />
-        <meshBasicMaterial color="#00f5ff" wireframe />
+        <meshBasicMaterial
+          color={isOpticalTrunkSevered ? '#1e293b' : '#00f5ff'}
+          wireframe
+        />
       </mesh>
 
       {/* Inner Cognitive Light Core */}
       <mesh position={[0, 2.1, 0]}>
         <sphereGeometry args={[0.35, 16, 16]} />
-        <meshBasicMaterial color="#ffffff" />
+        <meshBasicMaterial
+          color={isOpticalTrunkSevered ? '#0f172a' : '#ffffff'}
+        />
       </mesh>
 
       {/* Flanking Server Racks (Left & Right) */}
@@ -571,11 +585,11 @@ const SystemCoreProps: React.FC = () => {
           {/* LED Arrays */}
           <mesh position={[xOffset > 0 ? -0.46 : 0.46, 0.4, 0]}>
             <planeGeometry args={[0.02, 1.6]} />
-            <meshBasicMaterial color="#10b981" />
+            <meshBasicMaterial color={isOpticalTrunkSevered ? '#334155' : '#10b981'} />
           </mesh>
           <mesh position={[xOffset > 0 ? -0.46 : 0.46, -0.6, 0]}>
             <planeGeometry args={[0.02, 0.8]} />
-            <meshBasicMaterial color="#f59e0b" />
+            <meshBasicMaterial color={isOpticalTrunkSevered ? '#1e293b' : '#f59e0b'} />
           </mesh>
         </group>
       ))}
@@ -593,17 +607,77 @@ const SystemCoreProps: React.FC = () => {
         </mesh>
         <mesh position={[0, 0.62, 0.22]} rotation={[-0.35, 0, 0]}>
           <planeGeometry args={[0.82, 0.48]} />
-          <meshBasicMaterial color="#0284c7" />
+          <meshBasicMaterial color={isOpticalTrunkSevered ? '#0f172a' : '#0284c7'} />
         </mesh>
         <Text
           position={[0, 0.68, 0.23]}
           rotation={[-0.35, 0, 0]}
           fontSize={0.045}
-          color="#38bdf8"
+          color={isOpticalTrunkSevered ? '#475569' : '#38bdf8'}
           anchorX="center"
         >
-          OVERSEER AUTONOMOUS CORE
+          {isOpticalTrunkSevered ? 'CORE TERMINATED // OFFLINE' : 'OVERSEER AUTONOMOUS CORE'}
         </Text>
+
+        {/* Optical Trunk Decoupling Coupler Assembly (at [0, 1.1, -7.2] in world) */}
+        <group position={[0, 0.58, -0.15]}>
+          {/* Heavy Junction Box */}
+          <mesh receiveShadow castShadow>
+            <boxGeometry args={[0.5, 0.14, 0.3]} />
+            <meshStandardMaterial color="#0f172a" metalness={0.85} roughness={0.3} />
+          </mesh>
+          {/* Twin Optical Fiber Conduit Sleeves */}
+          <mesh position={[-0.12, 0.08, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.3, 12]} />
+            <meshStandardMaterial
+              color={isOpticalTrunkSevered ? '#1e293b' : '#38bdf8'}
+              metalness={0.9}
+            />
+          </mesh>
+          <mesh position={[0.12, 0.08, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.3, 12]} />
+            <meshStandardMaterial
+              color={isOpticalTrunkSevered ? '#1e293b' : '#38bdf8'}
+              metalness={0.9}
+            />
+          </mesh>
+          {/* Quick-Release Mechanical Decoupling Handle */}
+          <group position={[0, 0.12, 0]} rotation={[isOpticalTrunkSevered ? 0.7 : 0, 0, 0]}>
+            <mesh>
+              <boxGeometry args={[0.22, 0.05, 0.08]} />
+              <meshStandardMaterial
+                color={coreState === 'sever_pending' ? '#ef4444' : '#b91c1c'}
+                metalness={0.6}
+              />
+            </mesh>
+          </group>
+          {/* Decoupling Indicator LED Beacon */}
+          <mesh ref={couplerLedRef} position={[0, 0.16, 0.08]}>
+            <sphereGeometry args={[0.025, 12, 12]} />
+            <meshBasicMaterial
+              color={
+                isOpticalTrunkSevered
+                  ? '#475569'
+                  : coreState === 'sever_pending'
+                  ? '#f59e0b'
+                  : '#10b981'
+              }
+            />
+          </mesh>
+          <Text
+            position={[0, 0.15, -0.1]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            fontSize={0.032}
+            color={coreState === 'sever_pending' ? '#f59e0b' : '#94a3b8'}
+            anchorX="center"
+          >
+            {isOpticalTrunkSevered
+              ? 'TRUNK #01: SEVERED'
+              : coreState === 'sever_pending'
+              ? 'PULL TO DECOUPLE [E]'
+              : 'OPTICAL TRUNK #01'}
+          </Text>
+        </group>
       </group>
     </group>
   )
@@ -614,26 +688,56 @@ const SystemCoreProps: React.FC = () => {
 // ---------------------------------------------------------------------------
 
 const ExitBulkheadProps: React.FC = () => {
+  const { isExitBulkheadOpen } = useControlRoomStore()
+  const leftDoorRef = useRef<THREE.Group>(null!)
+  const rightDoorRef = useRef<THREE.Group>(null!)
+
+  useFrame((_, delta) => {
+    if (leftDoorRef.current && rightDoorRef.current) {
+      const targetLeft = isExitBulkheadOpen ? -3.4 : -1.35
+      const targetRight = isExitBulkheadOpen ? 3.4 : 1.35
+      leftDoorRef.current.position.x = THREE.MathUtils.damp(
+        leftDoorRef.current.position.x,
+        targetLeft,
+        2.5,
+        delta
+      )
+      rightDoorRef.current.position.x = THREE.MathUtils.damp(
+        rightDoorRef.current.position.x,
+        targetRight,
+        2.5,
+        delta
+      )
+    }
+  })
+
   return (
     <group position={[0, 0, -11.8]}>
       {/* Massive Interlocking 2-Leaf Hydraulic Blast Doors */}
       <group position={[0, 1.9, 0]}>
         {/* Left Blast Door Leaf */}
-        <mesh position={[-1.35, 0, 0]} receiveShadow castShadow>
-          <boxGeometry args={[2.7, 3.8, 0.35]} />
-          <meshStandardMaterial color="#1e293b" metalness={0.85} roughness={0.3} />
-        </mesh>
-        {/* Right Blast Door Leaf */}
-        <mesh position={[1.35, 0, 0]} receiveShadow castShadow>
-          <boxGeometry args={[2.7, 3.8, 0.35]} />
-          <meshStandardMaterial color="#1e293b" metalness={0.85} roughness={0.3} />
-        </mesh>
+        <group ref={leftDoorRef} position={[-1.35, 0, 0]}>
+          <mesh receiveShadow castShadow>
+            <boxGeometry args={[2.7, 3.8, 0.35]} />
+            <meshStandardMaterial color="#1e293b" metalness={0.85} roughness={0.3} />
+          </mesh>
+          <mesh position={[0.6, 0, 0.19]}>
+            <boxGeometry args={[1.4, 0.3, 0.02]} />
+            <meshBasicMaterial color="#eab308" />
+          </mesh>
+        </group>
 
-        {/* Bold Diagonal Hazard Chevron Decal Stripe across the bulkhead */}
-        <mesh position={[0, 0, 0.19]}>
-          <boxGeometry args={[5.2, 0.3, 0.02]} />
-          <meshBasicMaterial color="#eab308" />
-        </mesh>
+        {/* Right Blast Door Leaf */}
+        <group ref={rightDoorRef} position={[1.35, 0, 0]}>
+          <mesh receiveShadow castShadow>
+            <boxGeometry args={[2.7, 3.8, 0.35]} />
+            <meshStandardMaterial color="#1e293b" metalness={0.85} roughness={0.3} />
+          </mesh>
+          <mesh position={[-0.6, 0, 0.19]}>
+            <boxGeometry args={[1.4, 0.3, 0.02]} />
+            <meshBasicMaterial color="#eab308" />
+          </mesh>
+        </group>
 
         {/* Twin Heavy Hydraulic Pistons (Thicker than tree trunks) */}
         {[-2.2, 2.2].map((xOffset, idx) => (
@@ -651,34 +755,80 @@ const ExitBulkheadProps: React.FC = () => {
           </group>
         ))}
 
-        {/* Central Heavy Manual Mechanical Override Wheel */}
-        <group position={[0, -0.2, 0.22]}>
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.32, 0.045, 12, 24]} />
-            <meshStandardMaterial color="#dc2626" metalness={0.8} roughness={0.4} />
-          </mesh>
-          {/* Wheel Cross Spokes */}
-          <mesh>
-            <cylinderGeometry args={[0.02, 0.02, 0.64, 8]} />
-            <meshStandardMaterial color="#dc2626" />
-          </mesh>
-          <mesh rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.02, 0.02, 0.64, 8]} />
-            <meshStandardMaterial color="#dc2626" />
-          </mesh>
-          {/* Padlock */}
-          <mesh position={[0, -0.15, 0.08]}>
-            <boxGeometry args={[0.08, 0.12, 0.04]} />
-            <meshStandardMaterial color="#f59e0b" metalness={0.9} />
-          </mesh>
-        </group>
+        {/* Central Manual Mechanical Override Wheel */}
+        {!isExitBulkheadOpen && (
+          <group position={[0, -0.2, 0.22]}>
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+              <torusGeometry args={[0.32, 0.045, 12, 24]} />
+              <meshStandardMaterial color="#dc2626" metalness={0.8} roughness={0.4} />
+            </mesh>
+            <mesh>
+              <cylinderGeometry args={[0.02, 0.02, 0.64, 8]} />
+              <meshStandardMaterial color="#dc2626" />
+            </mesh>
+            <mesh rotation={[0, 0, Math.PI / 2]}>
+              <cylinderGeometry args={[0.02, 0.02, 0.64, 8]} />
+              <meshStandardMaterial color="#dc2626" />
+            </mesh>
+            <mesh position={[0, -0.15, 0.08]}>
+              <boxGeometry args={[0.08, 0.12, 0.04]} />
+              <meshStandardMaterial color="#f59e0b" metalness={0.9} />
+            </mesh>
+          </group>
+        )}
       </group>
 
       {/* Overhead Warning Strobe Bar */}
       <mesh position={[0, 3.8, 0.15]}>
         <boxGeometry args={[5.4, 0.15, 0.1]} />
-        <meshBasicMaterial color="#dc2626" />
+        <meshBasicMaterial color={isExitBulkheadOpen ? '#22c55e' : '#dc2626'} />
       </mesh>
+
+      {/* Atmospheric Northern Transit Tunnel Extension (Z: -12.0 to -16.5) */}
+      <group position={[0, 0, -2.5]}>
+        {/* Concrete Tunnel Floor */}
+        <mesh position={[0, 0.0, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+          <planeGeometry args={[4.2, 5.0]} />
+          <meshStandardMaterial color="#0c1219" roughness={0.95} metalness={0.2} />
+        </mesh>
+        {/* Twin Sub-Transit Steel Railway Rails */}
+        <mesh position={[-0.75, 0.04, 0]}>
+          <boxGeometry args={[0.08, 0.06, 5.0]} />
+          <meshStandardMaterial color="#475569" metalness={0.95} roughness={0.2} />
+        </mesh>
+        <mesh position={[0.75, 0.04, 0]}>
+          <boxGeometry args={[0.08, 0.06, 5.0]} />
+          <meshStandardMaterial color="#475569" metalness={0.95} roughness={0.2} />
+        </mesh>
+        {/* Left Tunnel Wall */}
+        <mesh position={[-2.1, 1.9, 0]}>
+          <boxGeometry args={[0.3, 3.8, 5.0]} />
+          <meshStandardMaterial color="#111827" roughness={0.92} />
+        </mesh>
+        {/* Right Tunnel Wall */}
+        <mesh position={[2.1, 1.9, 0]}>
+          <boxGeometry args={[0.3, 3.8, 5.0]} />
+          <meshStandardMaterial color="#111827" roughness={0.92} />
+        </mesh>
+        {/* Tunnel Ceiling */}
+        <mesh position={[0, 3.8, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[4.2, 5.0]} />
+          <meshStandardMaterial color="#080e18" roughness={0.98} />
+        </mesh>
+        {/* Amber Tunnel Beacon Light at Z = -14.5 */}
+        <mesh position={[0, 3.5, -1.8]}>
+          <sphereGeometry args={[0.12, 12, 12]} />
+          <meshBasicMaterial color={isExitBulkheadOpen ? '#38bdf8' : '#eab308'} />
+        </mesh>
+        <Text
+          position={[0, 3.2, -1.8]}
+          fontSize={0.09}
+          color="#38bdf8"
+          anchorX="center"
+        >
+          SUBTERRANEAN TRANSIT // TO SURFACE
+        </Text>
+      </group>
     </group>
   )
 }

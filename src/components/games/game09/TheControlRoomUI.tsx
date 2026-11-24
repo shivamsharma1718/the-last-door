@@ -24,6 +24,11 @@ import { Game09DirectivePanel } from './ui/Game09DirectivePanel'
 import { Game09Examination } from './ui/Game09Examination'
 import { Game09EvidenceBoard } from './ui/Game09EvidenceBoard'
 import { Game09CoreAccessMessage } from './ui/Game09CoreAccessMessage'
+import { Game09CoreCinematic } from './ui/Game09CoreCinematic'
+import { Game09FinalDecision } from './ui/Game09FinalDecision'
+import { Game09IntegrationEnding } from './ui/Game09IntegrationEnding'
+import { Game09OverloadEnding } from './ui/Game09OverloadEnding'
+import { Game09Victory } from './ui/Game09Victory'
 import { TOTAL_INSTRUCTIONS_COUNT } from './controlRoomTypes'
 import { CONTROL_ROOM_EVIDENCE } from './controlRoomLogic'
 
@@ -118,6 +123,36 @@ export const TheControlRoomUI: React.FC = () => {
           onSelectEvidence={controlRoomStore.openEvidenceFromBoard}
           onClose={controlRoomStore.closeEvidenceBoard}
         />
+      )}
+
+      {/* 8. Master Core Awakening Sequence */}
+      {state.coreState === 'awakening' && (
+        <Game09CoreCinematic
+          onComplete={controlRoomStore.openFinalDecisionModal}
+        />
+      )}
+
+      {/* 9. Final Decision Terminal Modal */}
+      {state.coreState === 'decision_open' && (
+        <Game09FinalDecision
+          onConfirm={controlRoomStore.confirmFinalDecision}
+          onClose={controlRoomStore.closeFinalDecisionModal}
+        />
+      )}
+
+      {/* 10. Option A Ending: System Integration (Failure) */}
+      {state.coreState === 'ending_a' && (
+        <Game09IntegrationEnding onRestart={controlRoomStore.resetGame} />
+      )}
+
+      {/* 11. Option B Ending: Thermal Overload (Failure) */}
+      {state.coreState === 'ending_b' && (
+        <Game09OverloadEnding onRestart={controlRoomStore.resetGame} />
+      )}
+
+      {/* 12. Option C Ending: Canonical Victory Sequence */}
+      {state.coreState === 'victory' && (
+        <Game09Victory onContinue={controlRoomStore.proceedToGame10} />
       )}
     </>
   )

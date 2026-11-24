@@ -9068,3 +9068,1051 @@ body:has(#game09-placeholder-dom) #game08-hud-dom {
   to { transform: rotate(360deg); }
 }
 
+/* ==========================================================================
+   GAME 09: THE CONTROL ROOM - STEP 4 CORE, DECISION, ENDINGS & GAME 10
+   ========================================================================== */
+
+/* 1. Master Core Awakening Sequence */
+.game09-core-awakening-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 17, 0.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  cursor: pointer;
+}
+
+.game09-core-awakening-card {
+  position: relative;
+  width: 90%;
+  max-width: 820px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(3, 7, 18, 0.98) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-top: 3px solid #00f5ff;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 245, 255, 0.15);
+  padding: 2.2rem 2.8rem;
+  z-index: 20;
+  cursor: default;
+}
+
+.game09-core-awakening-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  margin-bottom: 1.8rem;
+}
+
+.game09-core-phase-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+.game09-core-security-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: #00f5ff;
+  background: rgba(0, 245, 255, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 245, 255, 0.3);
+}
+
+.game09-core-awakening-body {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.game09-core-step-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.24em;
+  color: #94a3b8;
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.game09-core-step-title {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #f8fafc;
+  margin: 0 0 1rem 0;
+  line-height: 1.3;
+}
+
+.game09-core-step-desc {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.game09-core-awakening-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.game09-core-meter {
+  flex: 1;
+  max-width: 260px;
+  height: 4px;
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.game09-core-meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0284c7, #00f5ff);
+  transition: width 0.4s ease-out;
+}
+
+.game09-core-proceed-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.18em;
+  color: #040711;
+  background: #00f5ff;
+  border: none;
+  padding: 0.65rem 1.4rem;
+  border-radius: 4px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.game09-core-proceed-btn:hover {
+  background: #38bdf8;
+  box-shadow: 0 0 16px rgba(0, 245, 255, 0.5);
+}
+
+/* 2. Final Decision Terminal Interface */
+.game09-final-decision-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.game09-final-decision-terminal {
+  position: relative;
+  width: 94%;
+  max-width: 1200px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: #070d18;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-top: 3px solid #38bdf8;
+  border-radius: 8px;
+  padding: 1.8rem 2.2rem;
+  z-index: 20;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.95), 0 0 35px rgba(56, 189, 248, 0.15);
+}
+
+.game09-terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+  margin-bottom: 1.2rem;
+}
+
+.game09-terminal-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.22em;
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.game09-terminal-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00f5ff;
+  box-shadow: 0 0 10px #00f5ff;
+  animation: game09Blink 1.4s infinite;
+}
+
+.game09-terminal-clearance {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+  padding: 0.2rem 0.6rem;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 4px;
+}
+
+.game09-terminal-prompt {
+  background: rgba(15, 23, 42, 0.6);
+  border-left: 3px solid #00f5ff;
+  padding: 1rem 1.4rem;
+  margin-bottom: 1.6rem;
+  border-radius: 0 4px 4px 0;
+}
+
+.game09-terminal-prompt-main {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  color: #f8fafc;
+  margin: 0 0 0.4rem 0;
+  font-weight: 700;
+}
+
+.game09-terminal-prompt-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.game09-terminal-options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+  margin-bottom: 1.6rem;
+}
+
+@media (max-width: 1024px) {
+  .game09-terminal-options-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.game09-decision-option {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 6px;
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.game09-decision-option:hover {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(56, 189, 248, 0.5);
+  transform: translateY(-2px);
+}
+
+.game09-decision-option.selected {
+  border-color: #00f5ff;
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.25);
+  background: rgba(8, 28, 54, 0.85);
+}
+
+.game09-decision-option.option-fatal.selected {
+  border-color: #ef4444;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.game09-decision-option.option-victory.selected {
+  border-color: #22c55e;
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.game09-decision-option-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.game09-decision-option-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #38bdf8;
+}
+
+.game09-decision-philosophy {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: #f59e0b;
+}
+
+.game09-decision-option-title {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: 0.96rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #f8fafc;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.game09-decision-option-subtext {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.game09-decision-option-voice {
+  background: rgba(3, 7, 18, 0.6);
+  border-left: 2px solid #38bdf8;
+  padding: 0.5rem 0.8rem;
+  border-radius: 0 3px 3px 0;
+}
+
+.game09-voice-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: #64748b;
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.game09-decision-option-voice p {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.74rem;
+  font-style: italic;
+  color: #7dd3fc;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.game09-decision-option-consequence {
+  background: rgba(3, 7, 18, 0.8);
+  border: 1px solid rgba(100, 116, 139, 0.2);
+  padding: 0.5rem 0.8rem;
+  border-radius: 3px;
+}
+
+.game09-consequence-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: #f59e0b;
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.game09-decision-option-consequence p {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.74rem;
+  color: #cbd5e1;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Confirmation Row */
+.game09-confirmation-banner {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 6px;
+  padding: 1rem 1.4rem;
+  margin-bottom: 1.2rem;
+}
+
+.game09-confirm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.game09-confirm-row.confirming {
+  border-left: 3px solid #ef4444;
+  padding-left: 0.8rem;
+}
+
+.game09-confirm-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.game09-confirm-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: #38bdf8;
+}
+
+.game09-confirm-warning-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.game09-confirm-title {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: 0.98rem;
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+.game09-confirm-stage1-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #040711;
+  background: #38bdf8;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.game09-confirm-stage1-btn:hover {
+  background: #00f5ff;
+  box-shadow: 0 0 14px rgba(0, 245, 255, 0.5);
+}
+
+.game09-confirm-buttons {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.game09-cancel-confirm-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  color: #94a3b8;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  padding: 0.55rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.game09-execute-directive-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #ffffff;
+  background: #dc2626;
+  border: none;
+  padding: 0.55rem 1.4rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.game09-execute-directive-btn:hover {
+  background: #ef4444;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+}
+
+.game09-terminal-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.game09-terminal-hint {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.76rem;
+  color: #64748b;
+  letter-spacing: 0.08em;
+}
+
+.game09-terminal-return-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.14em;
+  color: #94a3b8;
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  padding: 0.45rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.game09-terminal-return-btn:hover {
+  color: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.6);
+}
+
+/* 3. Option A & Option B Failure Screens & Sequences */
+.game09-ending-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.game09-ending-overlay.failure-integration {
+  background: radial-gradient(circle at center, rgba(8, 24, 48, 0.96) 0%, rgba(3, 7, 18, 0.98) 100%);
+}
+
+.game09-ending-overlay.failure-overload {
+  background: radial-gradient(circle at center, rgba(48, 12, 12, 0.96) 0%, rgba(3, 7, 18, 0.98) 100%);
+}
+
+.game09-ending-card {
+  position: relative;
+  width: 90%;
+  max-width: 680px;
+  background: rgba(10, 16, 28, 0.97);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-top: 3px solid #ef4444;
+  border-radius: 8px;
+  padding: 2.4rem 2.8rem;
+  z-index: 20;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(239, 68, 68, 0.2);
+}
+
+.game09-ending-tag-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-bottom: 0.8rem;
+}
+
+.game09-ending-tag.fatal {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.26em;
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.game09-ending-facility {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: #64748b;
+}
+
+.game09-ending-title.fatal-title {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #f8fafc;
+  margin: 0.4rem 0 0.8rem 0;
+}
+
+.game09-ending-divider.fatal-divider {
+  width: 70px;
+  height: 2px;
+  background: #ef4444;
+  margin: 0 auto 1.4rem auto;
+}
+
+.game09-ending-verdict-box {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 6px;
+  padding: 1.2rem 1.6rem;
+  margin-bottom: 1.4rem;
+}
+
+.game09-ending-quote {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: 0.96rem;
+  letter-spacing: 0.08em;
+  color: #fca5a5;
+  margin: 0 0 0.6rem 0;
+  font-weight: 700;
+}
+
+.game09-ending-narrative {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.game09-ending-lesson {
+  margin-bottom: 1.8rem;
+}
+
+.game09-ending-lesson span {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  color: #f59e0b;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.game09-ending-lesson p {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.game09-ending-restart-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.86rem;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  color: #ffffff;
+  background: #dc2626;
+  border: none;
+  padding: 0.75rem 2.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.game09-ending-restart-btn:hover {
+  background: #ef4444;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.7);
+}
+
+/* Cinematic Cards for Endings */
+.game09-ending-cinematic-card {
+  position: relative;
+  width: 90%;
+  max-width: 760px;
+  background: rgba(10, 16, 28, 0.98);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 8px;
+  padding: 2.2rem 2.8rem;
+  z-index: 20;
+}
+
+.game09-ending-cinematic-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+  margin-bottom: 1.8rem;
+}
+
+.game09-ending-phase-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.22em;
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.game09-ending-step-indicator {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  color: #64748b;
+  letter-spacing: 0.16em;
+}
+
+.game09-ending-cinematic-body {
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.game09-ending-step-headline {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #f8fafc;
+  margin: 0 0 0.8rem 0;
+}
+
+.game09-ending-step-desc {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.game09-ending-cinematic-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.8rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* 4. Victory Sequence & Final Card */
+.game09-victory-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(6, 32, 54, 0.96) 0%, rgba(3, 7, 18, 0.98) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.game09-victory-cinematic-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  cursor: pointer;
+}
+
+.game09-victory-card {
+  position: relative;
+  width: 90%;
+  max-width: 720px;
+  background: rgba(10, 20, 36, 0.98);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-top: 3px solid #00f5ff;
+  border-radius: 8px;
+  padding: 2.4rem 3rem;
+  z-index: 20;
+  text-align: center;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.95), 0 0 45px rgba(0, 245, 255, 0.2);
+}
+
+.game09-victory-tag-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-bottom: 0.6rem;
+}
+
+.game09-victory-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.26em;
+  color: #00f5ff;
+  font-weight: 700;
+}
+
+.game09-victory-facility {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: #64748b;
+}
+
+.game09-victory-title {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #f8fafc;
+  margin: 0.3rem 0 0.8rem 0;
+}
+
+.game09-victory-divider {
+  width: 70px;
+  height: 2px;
+  background: #00f5ff;
+  margin: 0 auto 1.4rem auto;
+}
+
+.game09-victory-verdict-box {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 6px;
+  padding: 1.2rem 1.6rem;
+  margin-bottom: 1.4rem;
+}
+
+.game09-victory-verdict-main {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  color: #38bdf8;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.game09-victory-verdict-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.game09-victory-stats-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.4rem;
+}
+
+.game09-stat-pill {
+  background: rgba(3, 7, 18, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 4px;
+  padding: 0.5rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.game09-stat-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: #64748b;
+}
+
+.game09-stat-value {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.game09-stat-value.success {
+  color: #22c55e;
+}
+
+.game09-stat-value.warning {
+  color: #f59e0b;
+}
+
+.game09-victory-notice {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin: 0 0 1.8rem 0;
+  font-style: italic;
+}
+
+.game09-victory-continue-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.92rem;
+  letter-spacing: 0.26em;
+  font-weight: 700;
+  color: #040711;
+  background: #00f5ff;
+  border: none;
+  padding: 0.8rem 2.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.game09-victory-continue-btn:hover {
+  background: #38bdf8;
+  box-shadow: 0 0 24px rgba(0, 245, 255, 0.7);
+  transform: translateY(-1px);
+}
+
+/* Victory Cinematic Card */
+.game09-victory-cinematic-card {
+  position: relative;
+  width: 90%;
+  max-width: 780px;
+  background: rgba(8, 18, 32, 0.98);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-top: 3px solid #00f5ff;
+  border-radius: 8px;
+  padding: 2.2rem 2.8rem;
+  z-index: 20;
+}
+
+.game09-victory-cinematic-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+  margin-bottom: 1.8rem;
+}
+
+.game09-victory-phase-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.22em;
+  color: #00f5ff;
+  font-weight: 700;
+}
+
+.game09-victory-phase-name {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  letter-spacing: 0.14em;
+}
+
+.game09-victory-content {
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.game09-victory-phase-title {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.8rem 0;
+}
+
+.game09-victory-line {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: #f8fafc;
+  margin: 0 0 0.4rem 0;
+}
+
+.game09-victory-subtext {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.game09-victory-cinematic-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.game09-victory-meter {
+  flex: 1;
+  max-width: 260px;
+  height: 4px;
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.game09-victory-meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0284c7, #00f5ff);
+  transition: width 0.4s ease-out;
+}
+
+/* 5. Game 10 Transition Staging Placeholder Overlay */
+.game10-placeholder-overlay {
+  position: fixed;
+  top: 3.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  pointer-events: none;
+  animation: fadeIn 1.2s ease-out;
+  font-family: 'Cinzel Decorative', 'Cinzel', serif, Georgia;
+}
+
+.game10-placeholder-card {
+  background: rgba(8, 14, 24, 0.94);
+  border: 1px solid rgba(0, 245, 255, 0.4);
+  border-top: 3px solid #00f5ff;
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.95), 0 0 30px rgba(0, 245, 255, 0.2);
+  padding: 1.8rem 2.8rem;
+  text-align: center;
+  backdrop-filter: blur(12px);
+}
+
+.game10-placeholder-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  color: #00f5ff;
+  text-transform: uppercase;
+}
+
+.game10-placeholder-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #f8fafc;
+  margin: 0.4rem 0 0.8rem;
+}
+
+.game10-placeholder-divider {
+  width: 60px;
+  height: 2px;
+  background: #00f5ff;
+  margin: 0 auto 0.9rem;
+  opacity: 0.7;
+}
+
+.game10-placeholder-lore {
+  margin-bottom: 1.2rem;
+}
+
+.game10-placeholder-subtitle {
+  font-size: 0.95rem;
+  letter-spacing: 0.16em;
+  color: #38bdf8;
+  margin: 0 0 0.4rem 0;
+  font-weight: 700;
+}
+
+.game10-placeholder-subtext {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 480px;
+}
+
+.game10-placeholder-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: #22c55e;
+}
+
+.game10-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+  animation: game09Blink 1.4s infinite;
+}
+

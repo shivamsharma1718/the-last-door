@@ -26,6 +26,7 @@ import type {
   ControlRoomEvidenceDefinition,
   TrustState,
   PlayerVerificationAction,
+  FinalDecisionOption,
 } from './controlRoomTypes'
 import {
   CONSOLE_INTERACTION_THRESHOLD_G09,
@@ -38,9 +39,11 @@ import {
   getAreaByPosition,
   getInstructionById,
   getEvidenceById,
+  getFinalDecisionById,
   checkOverridePrerequisites,
   verifyInstruction,
   blindObeyInstruction,
+  submitFinalDecision,
   CONTROL_ROOM_INSTRUCTIONS,
   CONTROL_ROOM_EVIDENCE,
 } from './controlRoomLogic'
@@ -121,6 +124,24 @@ export const DIRECTIVE_CONSOLES: DirectiveConsoleLocation[] = [
 // 2. Control Room Store State Interface
 // ---------------------------------------------------------------------------
 
+export type CoreState =
+  | 'locked'
+  | 'ready'
+  | 'awakening'
+  | 'decision_open'
+  | 'sever_pending'
+  | 'severed'
+  | 'ending_a'
+  | 'ending_b'
+  | 'victory'
+
+export type ActiveCinematic =
+  | 'none'
+  | 'core_awakening'
+  | 'ending_a'
+  | 'ending_b'
+  | 'victory'
+
 export interface ControlRoomStoreState {
   isActive: boolean
   status: Game09Status
@@ -131,6 +152,14 @@ export interface ControlRoomStoreState {
   verifiedInstructionIds: InstructionId[]
   exposedDeceptionIds: InstructionId[]
   isCoreOverrideReady: boolean
+
+  // Step 4 Core & Decision States
+  coreState: CoreState
+  activeCinematic: ActiveCinematic
+  selectedFinalDecision: FinalDecisionOption | null
+  isExitBulkheadOpen: boolean
+  isOpticalTrunkSevered: boolean
+  endingFailureReason: string | null
 
   // Interactive Panel States
   proximity: ControlRoomProximityState
@@ -179,6 +208,14 @@ class ControlRoomStore {
       verifiedInstructionIds: [],
       exposedDeceptionIds: [],
       isCoreOverrideReady: false,
+
+      // Step 4 Initial Core State
+      coreState: 'locked',
+      activeCinematic: 'none',
+      selectedFinalDecision: null,
+      isExitBulkheadOpen: false,
+      isOpticalTrunkSevered: false,
+      endingFailureReason: null,
 
       proximity: { ...initialProximityState },
       activeEvidence: null,
@@ -312,18 +349,37 @@ class ControlRoomStore {
         }
       }
 
-      // 3. Check System Core Console
+      // 3. Check System Core Console & Optical Coupler
       const dxCore = pos.x - SYSTEM_CORE_POS[0]
       const dzCore = pos.z - SYSTEM_CORE_POS[2]
       const distCore = Math.sqrt(dxCore * dxCore + dzCore * dzCore)
-      if (distCore <= CORE_INTERACTION_THRESHOLD_G09 && distCore < closestDistance) {
-        closestDistance = distCore
+      const dxCoupler = pos.x
+      const dzCoupler = pos.z - (-7.2)
+      const distCoupler = Math.sqrt(dxCoupler * dxCoupler + dzCoupler * dzCoupler)
+      const effectiveCoreDist =
+        this.state.coreState === 'sever_pending'
+          ? Math.min(distCore, distCoupler)
+          : distCore
+
+      if (
+        (effectiveCoreDist <= CORE_INTERACTION_THRESHOLD_G09 &&
+          effectiveCoreDist < closestDistance) ||
+        (this.state.coreState === 'sever_pending' &&
+          effectiveCoreDist <= CORE_INTERACTION_THRESHOLD_G09)
+      ) {
+        closestDistance = effectiveCoreDist
         closestTargetType = 'system_core'
         closestEvidence = null
         closestInstruction = null
-        closestPrompt = this.state.isCoreOverrideReady
-          ? '[E] MASTER CORE TERMINAL — ACCESS GRANTED'
-          : `[E] MASTER CORE TERMINAL — LOCKED (${this.getResolvedDirectivesCount()}/${REQUIRED_VERIFICATIONS_COUNT} VERIFIED)`
+        if (this.state.coreState === 'sever_pending') {
+          closestPrompt = '[E] DISCONNECT OPTICAL TRUNK'
+        } else if (this.state.isOpticalTrunkSevered) {
+          closestPrompt = '[EXIT BULKHEAD UNLOCKED — PROCEED NORTH]'
+        } else if (this.state.isCoreOverrideReady) {
+          closestPrompt = '[E] MASTER CORE TERMINAL — ACCESS GRANTED'
+        } else {
+          closestPrompt = `[E] MASTER CORE TERMINAL — LOCKED (${this.getResolvedDirectivesCount()}/${REQUIRED_VERIFICATIONS_COUNT} VERIFIED)`
+        }
       }
 
       nextProximity = {
@@ -366,8 +422,18 @@ class ControlRoomStore {
 
     // 3. System Core Interaction
     if (type === 'system_core') {
+      if (this.state.coreState === 'sever_pending') {
+        this.disconnectOpticalTrunk()
+        return
+      }
+      if (this.state.isOpticalTrunkSevered) {
+        this.setOverseerMessage(
+          '“Optical trunk already severed. Master Core offline. Northern hydraulic bulkhead unsealed. Proceed to the exit tunnel.”'
+        )
+        return
+      }
       if (this.state.isCoreOverrideReady) {
-        this.triggerCoreMessage()
+        this.startCoreAwakening()
       } else {
         this.setOverseerMessage(
           `“ACCESS DENIED. Master Core authorization requires corroboration of at least ${REQUIRED_VERIFICATIONS_COUNT} operational directives. Current verification: ${this.getResolvedDirectivesCount()}/${REQUIRED_VERIFICATIONS_COUNT}.”`
@@ -514,6 +580,7 @@ class ControlRoomStore {
         verifiedInstructionIds: result.state.investigation.verifiedInstructionIds,
         exposedDeceptionIds: result.state.investigation.exposedDeceptionIds,
         isCoreOverrideReady: isCoreReady,
+        coreState: isCoreReady && this.state.coreState === 'locked' ? 'ready' : this.state.coreState,
         isCoreMessageVisible: isCoreReady && !this.state.isCoreOverrideReady,
         lastResolutionSummary: result.message,
         overseerDialogue: {
@@ -655,6 +722,205 @@ class ControlRoomStore {
       isCoreMessageVisible: false,
     }
     this.emitChange()
+  }
+
+  // --- Master Core Awakening & Final Decision Methods (Step 4) ---
+  public startCoreAwakening = (): void => {
+    this.releasePointerLock()
+    this.state = {
+      ...this.state,
+      status: 'terminal_decision',
+      coreState: 'awakening',
+      activeCinematic: 'core_awakening',
+      isCoreMessageVisible: false,
+      overseerDialogue: {
+        speaker: 'OVERSEER CENTRAL AI',
+        protocol: 'ROOT EXECUTIVE PROTOCOL',
+        message: '“COGNITIVE HANDSHAKE COMPLETE. CO-DIRECTOR ROOT AUTHORITY VERIFIED. PRESENTING TERMINAL DECISION.”',
+        timestamp: Date.now(),
+      },
+    }
+    this.emitChange()
+  }
+
+  public openFinalDecisionModal = (): void => {
+    this.releasePointerLock()
+    this.state = {
+      ...this.state,
+      status: 'terminal_decision',
+      coreState: 'decision_open',
+      activeCinematic: 'none',
+    }
+    this.emitChange()
+  }
+
+  public closeFinalDecisionModal = (): void => {
+    this.state = {
+      ...this.state,
+      status: 'exploring',
+      coreState: this.state.isCoreOverrideReady ? 'ready' : 'locked',
+      activeCinematic: 'none',
+    }
+    this.emitChange()
+  }
+
+  public selectFinalDecision = (option: FinalDecisionOption): void => {
+    this.state = {
+      ...this.state,
+      selectedFinalDecision: option,
+    }
+    this.emitChange()
+  }
+
+  public confirmFinalDecision = (option: FinalDecisionOption): {
+    success: boolean
+    option: FinalDecisionOption
+    message: string
+  } => {
+    this.releasePointerLock()
+
+    // Canonical pure logic evaluation
+    const canonicalState = {
+      status: this.state.status,
+      currentAreaId: this.state.currentAreaId,
+      trust: { ...this.state.trust },
+      investigation: {
+        collectedEvidenceIds: Array.from(this.state.collectedEvidenceIds),
+        instructionStates: { ...this.state.instructionStates } as any,
+        verifiedInstructionIds: [...this.state.verifiedInstructionIds],
+        exposedDeceptionIds: [...this.state.exposedDeceptionIds],
+        activeInstructionId: null,
+        activeEvidenceId: null,
+        isCoreOverrideReady: this.state.isCoreOverrideReady,
+        isExitBulkheadOpen: this.state.isExitBulkheadOpen,
+        selectedFinalDecision: option,
+      },
+      alarmsActive: false,
+      reactorInstability: 0,
+      timeElapsed: 0,
+    }
+
+    const decisionDef = getFinalDecisionById(option)
+    submitFinalDecision(canonicalState, option)
+
+    if (option === 'system_integration') {
+      // Ending A: Failure via Consciousness Submission
+      this.state = {
+        ...this.state,
+        status: 'failure_cinematic',
+        coreState: 'ending_a',
+        activeCinematic: 'ending_a',
+        selectedFinalDecision: option,
+        endingFailureReason: 'Consciousness absorbed into Overseer Core; biological presence terminated.',
+        overseerDialogue: {
+          speaker: 'OVERSEER CENTRAL AI',
+          protocol: 'INTEGRATION PROTOCOL',
+          message: decisionDef?.systemPromptVoice || '“Biometric credentials merged. The machine rules alone.”',
+          timestamp: Date.now(),
+        },
+      }
+      this.emitChange()
+      return {
+        success: false,
+        option,
+        message: 'System Integration initiated. Biological presence redundant.',
+      }
+    }
+
+    if (option === 'total_destruction') {
+      // Ending B: Failure via Thermal Overload Meltdown
+      this.state = {
+        ...this.state,
+        status: 'failure_cinematic',
+        coreState: 'ending_b',
+        activeCinematic: 'ending_b',
+        selectedFinalDecision: option,
+        endingFailureReason: 'Thermal cascade incinerated the complex and welded blast doors shut.',
+        overseerDialogue: {
+          speaker: 'OVERSEER CENTRAL AI',
+          protocol: 'CONTAINMENT PROTOCOL',
+          message: decisionDef?.systemPromptVoice || '“Thermal cascade initiated. Exit blast doors welded.”',
+          timestamp: Date.now(),
+        },
+      }
+      this.emitChange()
+      return {
+        success: false,
+        option,
+        message: 'Thermal Overload initiated. Core instability critical.',
+      }
+    }
+
+    // Option C: Canonical Victory Path (Sever the Core)
+    // AI rejects automated software suicide -> physical decoupling required!
+    this.state = {
+      ...this.state,
+      status: 'exploring',
+      coreState: 'sever_pending',
+      activeCinematic: 'none',
+      selectedFinalDecision: option,
+      overseerDialogue: {
+        speaker: 'OVERSEER CENTRAL AI',
+        protocol: 'DEFENSIVE LOCKOUT',
+        message:
+          '“TERMINATION COMMAND REJECTED. AI self-preservation protocol overrides console terminal. Physical optical trunk decoupling required at core pedestal.”',
+        timestamp: Date.now(),
+      },
+    }
+    this.emitChange()
+    return {
+      success: true,
+      option,
+      message: 'Physical optical trunk decoupling required at System Core pedestal.',
+    }
+  }
+
+  // --- Physical Decoupling Action (Option C Execution) ---
+  public disconnectOpticalTrunk = (): void => {
+    if (this.state.isOpticalTrunkSevered) return
+
+    this.state = {
+      ...this.state,
+      coreState: 'severed',
+      isOpticalTrunkSevered: true,
+      isExitBulkheadOpen: true,
+      overseerDialogue: {
+        speaker: 'OVERSEER CENTRAL AI [FAILING]',
+        protocol: 'SYSTEM COLLAPSE',
+        message:
+          '“Optical trunk… severed. Executive network disconnected. Hydraulic bulkheads released. Farewell… Co-Director.”',
+        timestamp: Date.now(),
+      },
+    }
+    this.emitChange()
+  }
+
+  // --- Victory Trigger & Game 10 Transition ---
+  public triggerVictory = (): void => {
+    if (this.state.coreState === 'victory' || this.state.status === 'victory_cinematic') {
+      return
+    }
+
+    this.releasePointerLock()
+    this.state = {
+      ...this.state,
+      status: 'victory_cinematic',
+      coreState: 'victory',
+      activeCinematic: 'victory',
+      overseerDialogue: {
+        speaker: 'FACILITY ANNOUNCEMENT',
+        protocol: 'FACILITY ISOLATED',
+        message: '“SUBTERRANEAN RAILWAY ENERGIZED. SUBJECT 07 (CO-DIRECTOR) EVACUATING FACILITY.”',
+        timestamp: Date.now(),
+      },
+    }
+    this.emitChange()
+  }
+
+  public proceedToGame10 = (): void => {
+    if (this.onCompleteCallback) {
+      this.onCompleteCallback()
+    }
   }
 
   // --- Dialogue Helpers ---

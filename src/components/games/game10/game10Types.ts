@@ -157,3 +157,79 @@ export const TOTAL_MEMORIES = 3
 export const REQUIRED_EVIDENCE_PER_MEMORY = 2
 
 export const CORRECT_FINAL_DECISION: FinalDecisionChoice = 'remember'
+
+// ---------------------------------------------------------------------------
+// 9. 3D Spatial Environment Types & Canonical Coordinates (Step 2.1)
+// ---------------------------------------------------------------------------
+
+export type Game10AreaId =
+  | 'hall_of_mirrors'        // Starting Corridor (Z = -4.0 to 22.0)
+  | 'wing_01_first_rule'     // Memory Wing 01: Observation Sector (Game 01 reference, West)
+  | 'wing_02_forgotten_name'  // Memory Wing 02: Hospital Registry Sector (Game 02 reference, East)
+  | 'wing_03_command_verdict' // Memory Wing 03: Industrial Core Relay Sector (Game 09 reference, West)
+  | 'memory_core_chamber'    // Terminal Grand Chamber: The Suspended Core (North, Z <= -4.0)
+
+export interface Game10AreaDefinition {
+  id: Game10AreaId
+  title: string
+  subtitle: string
+  themeReference: string
+  bounds: {
+    minX: number
+    maxX: number
+    minZ: number
+    maxZ: number
+  }
+  waypoint: [number, number] // Walkable navigation center [X, Z]
+}
+
+export const INITIAL_GAME10_POS: [number, number, number] = [0, 1.65, 18.0]
+export const INITIAL_GAME10_LOOK: [number, number, number] = [0, 1.65, 0.0]
+
+export const GAME10_TOTAL_WIDTH = 46.0  // X spans from -23.0 to 23.0
+export const GAME10_TOTAL_DEPTH = 52.0  // Z spans from -29.0 to 23.0
+export const GAME10_CEILING_HEIGHT_HALL = 4.5
+export const GAME10_CEILING_HEIGHT_CORE = 6.5
+
+export const GAME10_AREAS: readonly Game10AreaDefinition[] = [
+  {
+    id: 'hall_of_mirrors',
+    title: 'THE HALL OF DISTORTED MIRRORS',
+    subtitle: 'Brutalist Entry Gallery & Reflection Corridor',
+    themeReference: 'Starting Zone — Memory Distortion',
+    bounds: { minX: -3.0, maxX: 3.0, minZ: -4.0, maxZ: 22.0 },
+    waypoint: [0, 12.0],
+  },
+  {
+    id: 'wing_01_first_rule',
+    title: 'WING 01: THE FIRST RULE',
+    subtitle: 'Observation Gallery & Doppler Telemetry Sector',
+    themeReference: 'Game 01: Red Light, Black Silence',
+    bounds: { minX: -18.0, maxX: -3.0, minZ: 6.0, maxZ: 14.0 },
+    waypoint: [-14.0, 10.0],
+  },
+  {
+    id: 'wing_02_forgotten_name',
+    title: 'WING 02: THE FORGOTTEN NAME',
+    subtitle: 'Clinical Admissions Archive & Identity Registry',
+    themeReference: 'Game 02: The Room of Names',
+    bounds: { minX: 3.0, maxX: 18.0, minZ: -2.0, maxZ: 6.0 },
+    waypoint: [14.0, 2.0],
+  },
+  {
+    id: 'wing_03_command_verdict',
+    title: 'WING 03: THE COMMAND VERDICT',
+    subtitle: 'Industrial Optical Trunk Relay & Hydraulic Vault',
+    themeReference: 'Game 09: The Control Room',
+    bounds: { minX: -18.0, maxX: -3.0, minZ: -4.0, maxZ: 4.0 },
+    waypoint: [-14.0, 0.0],
+  },
+  {
+    id: 'memory_core_chamber',
+    title: 'THE MEMORY CORE CHAMBER',
+    subtitle: 'Terminal Sanctuary of the Suspended Memory Matrix',
+    themeReference: 'The Final Judgment Core',
+    bounds: { minX: -10.0, maxX: 10.0, minZ: -28.0, maxZ: -4.0 },
+    waypoint: [0, -10.0],
+  },
+] as const

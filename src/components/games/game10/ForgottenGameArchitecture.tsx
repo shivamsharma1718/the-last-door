@@ -118,6 +118,15 @@ export const ForgottenGameArchitecture: React.FC = () => {
         <boxGeometry args={[0.4, 1.3, 3.0]} />
         <meshStandardMaterial color="#131822" roughness={0.9} metalness={0.15} />
       </mesh>
+      {/* Wing 02 Architectural Portal Threshold Plate & Sector Indicator */}
+      <mesh position={[3.0, 0.01, 2.0]} receiveShadow>
+        <boxGeometry args={[0.3, 0.015, 3.0]} />
+        <meshStandardMaterial color="#0b111a" metalness={0.8} roughness={0.3} />
+      </mesh>
+      <mesh position={[2.95, 3.25, 2.0]}>
+        <boxGeometry args={[0.02, 0.1, 2.0]} />
+        <meshBasicMaterial color="#38bdf8" />
+      </mesh>
 
       {/* West Wall of Hall of Mirrors (X = -3.0, with openings for Wing 01 and Wing 03) */}
       {/* South Segment: Z in [11.5, 22.0] (length 10.5m) */}
@@ -140,10 +149,29 @@ export const ForgottenGameArchitecture: React.FC = () => {
         <boxGeometry args={[0.4, 1.3, 3.0]} />
         <meshStandardMaterial color="#131822" roughness={0.9} metalness={0.15} />
       </mesh>
+      {/* Wing 01 Architectural Portal Threshold Plate & Sector Indicator */}
+      <mesh position={[-3.0, 0.01, 10.0]} receiveShadow>
+        <boxGeometry args={[0.3, 0.015, 3.0]} />
+        <meshStandardMaterial color="#0b111a" metalness={0.8} roughness={0.3} />
+      </mesh>
+      <mesh position={[-2.95, 3.25, 10.0]}>
+        <boxGeometry args={[0.02, 0.1, 2.0]} />
+        <meshBasicMaterial color="#10b981" />
+      </mesh>
+
       {/* Transom lintel over Wing 03 doorway (Z in [-1.5, 1.5], Y in [3.2, 4.5]) */}
       <mesh position={[-3.0, 3.85, 0.0]} receiveShadow castShadow>
         <boxGeometry args={[0.4, 1.3, 3.0]} />
         <meshStandardMaterial color="#131822" roughness={0.9} metalness={0.15} />
+      </mesh>
+      {/* Wing 03 Architectural Portal Threshold Plate & Sector Indicator */}
+      <mesh position={[-3.0, 0.01, 0.0]} receiveShadow>
+        <boxGeometry args={[0.3, 0.015, 3.0]} />
+        <meshStandardMaterial color="#0b111a" metalness={0.8} roughness={0.3} />
+      </mesh>
+      <mesh position={[-2.95, 3.25, 0.0]}>
+        <boxGeometry args={[0.02, 0.1, 2.0]} />
+        <meshBasicMaterial color="#f59e0b" />
       </mesh>
 
       {/* Ceiling of Hall of Mirrors (4.5m height) */}
@@ -523,6 +551,15 @@ export const ForgottenGameArchitecture: React.FC = () => {
         <mesh position={[0, 5.5, -4.0]} receiveShadow castShadow>
           <boxGeometry args={[6.0, 2.0, 0.5]} />
           <meshStandardMaterial color="#0e131b" roughness={0.92} metalness={0.15} />
+        </mesh>
+        {/* Core Chamber Grand Architectural Portal Threshold Plate & Sector Indicator */}
+        <mesh position={[0, 0.01, -4.0]} receiveShadow>
+          <boxGeometry args={[6.0, 0.015, 0.4]} />
+          <meshStandardMaterial color="#090e17" metalness={0.85} roughness={0.25} />
+        </mesh>
+        <mesh position={[0, 4.45, -3.95]}>
+          <boxGeometry args={[5.0, 0.08, 0.02]} />
+          <meshBasicMaterial color="#06b6d4" />
         </mesh>
 
         {/* Grand High Brutalist Ceiling (Y = 6.5m) */}

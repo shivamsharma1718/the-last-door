@@ -20,7 +20,10 @@ import type {
   FinalDecisionChoice,
   Game10Ending,
   Game10State,
+  Game10AreaId,
 } from './game10Types'
+import { INITIAL_GAME10_POS } from './game10Types'
+import { getForgottenGameArea } from './TheForgottenGameArena'
 import {
   createInitialGame10State,
   discoverEvidence,
@@ -41,6 +44,8 @@ import {
 export interface ForgottenGameStoreState extends Game10State {
   isActive: boolean
   lastMessage: string | null
+  currentAreaId: Game10AreaId
+  playerPosition: { x: number; z: number }
 }
 
 // ---------------------------------------------------------------------------
@@ -62,6 +67,8 @@ class ForgottenGameStore {
       ...base,
       isActive: false,
       lastMessage: null,
+      currentAreaId: 'hall_of_mirrors',
+      playerPosition: { x: INITIAL_GAME10_POS[0], z: INITIAL_GAME10_POS[2] },
     }
   }
 
@@ -98,6 +105,26 @@ class ForgottenGameStore {
     this.state = {
       ...base,
       isActive: true,
+      currentAreaId: 'hall_of_mirrors',
+      playerPosition: { x: INITIAL_GAME10_POS[0], z: INITIAL_GAME10_POS[2] },
+    }
+    this.emitChange()
+  }
+
+  // --- Spatial Navigation & Area Classification ---
+  public updatePlayerPosition(pos: { x: number; z: number }): void {
+    const area = getForgottenGameArea(pos.x, pos.z)
+    if (
+      this.state.playerPosition.x === pos.x &&
+      this.state.playerPosition.z === pos.z &&
+      this.state.currentAreaId === area
+    ) {
+      return
+    }
+    this.state = {
+      ...this.state,
+      playerPosition: pos,
+      currentAreaId: area,
     }
     this.emitChange()
   }
@@ -243,6 +270,8 @@ class ForgottenGameStore {
       ...base,
       isActive: true,
       lastMessage: null,
+      currentAreaId: 'hall_of_mirrors',
+      playerPosition: { x: INITIAL_GAME10_POS[0], z: INITIAL_GAME10_POS[2] },
     }
     this.emitChange()
   }

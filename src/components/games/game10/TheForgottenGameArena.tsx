@@ -31,8 +31,8 @@ export interface AABB {
 
 // Walkable Zones
 export const FORGOTTEN_GAME_ZONES: Record<string, AABB> = {
-  // Main Corridor (Z = -4.5 to 21.8)
-  hall_of_mirrors: { minX: -2.8, maxX: 2.8, minZ: -4.5, maxZ: 21.8 },
+  // Main Corridor (Z = -4.8 to 21.8, overlapping Core portal Z in [-4.8, -4.35])
+  hall_of_mirrors: { minX: -2.8, maxX: 2.8, minZ: -4.8, maxZ: 21.8 },
 
   // Wing 01: The First Rule (West)
   wing_01_connector: { minX: -10.5, maxX: -2.0, minZ: 8.8, maxZ: 11.2 },
@@ -46,8 +46,8 @@ export const FORGOTTEN_GAME_ZONES: Record<string, AABB> = {
   wing_03_connector: { minX: -10.5, maxX: -2.0, minZ: -1.2, maxZ: 1.2 },
   wing_03_chamber: { minX: -17.6, maxX: -9.5, minZ: -3.6, maxZ: 3.6 },
 
-  // Memory Core Chamber (North)
-  memory_core_chamber: { minX: -9.6, maxX: 9.6, minZ: -27.6, maxZ: -3.5 },
+  // Memory Core Chamber (North, maxZ = -4.35 blocks movement into solid south wall outside portal)
+  memory_core_chamber: { minX: -9.6, maxX: 9.6, minZ: -27.6, maxZ: -4.35 },
 }
 
 // Solid Physical Obstacles
@@ -70,6 +70,12 @@ export const FORGOTTEN_GAME_OBSTACLES: AABB[] = [
 
   // Wing 03 Server Rack & Relay Monolith
   { minX: -17.8, maxX: -16.8, minZ: -1.7, maxZ: 1.7 }, // Server rack
+
+  // Core Chamber South Wall West Segment (Blocks moving south into solid wall outside central portal)
+  { minX: -10.0, maxX: -2.8, minZ: -4.3, maxZ: -3.7 },
+
+  // Core Chamber South Wall East Segment (Blocks moving south into solid wall outside central portal)
+  { minX: 2.8, maxX: 10.0, minZ: -4.3, maxZ: -3.7 },
 ]
 
 // ---------------------------------------------------------------------------
@@ -78,25 +84,38 @@ export const FORGOTTEN_GAME_OBSTACLES: AABB[] = [
 
 /**
  * Determines which canonical Game 10 facility area contains the given coordinates.
+ * Strictly bounded by actual physical room geometry:
+ * 1. Memory Core Chamber: Strictly bounded within X in [-10.0, 10.0], Z in [-28.5, -4.0].
+ *    Prevents exterior coordinates or adjacent wings from resolving to the Core.
+ * 2. Memory Wing 01: West observation sector, X in [-18.5, -2.8], Z in [5.0, 15.0].
+ * 3. Memory Wing 03: West relay sector, X in [-18.5, -2.8], Z in [-4.0, 5.0].
+ *    Doorway centered at Z = 0.0 directly off the Hall of Mirrors.
+ * 4. Memory Wing 02: East clinical registry sector, X in [2.8, 18.5], Z in [-2.5, 6.5].
+ * 5. Hall of Distorted Mirrors: Central corridor and default facility baseline.
  */
 export function getForgottenGameArea(x: number, z: number): Game10AreaId {
-  // Wing 01: West, Z in [6.0, 14.0]
-  if (x <= -2.8 && z >= 4.0) {
-    return 'wing_01_first_rule'
-  }
-  // Wing 03: West, Z in [-4.0, 4.0]
-  if (x <= -2.8 && z < 4.0 && z >= -4.2) {
-    return 'wing_03_command_verdict'
-  }
-  // Wing 02: East, Z in [-2.5, 6.0]
-  if (x >= 2.8 && z <= 6.0 && z >= -2.5) {
-    return 'wing_02_forgotten_name'
-  }
-  // Memory Core Chamber: North, Z <= -4.0
-  if (z <= -4.0) {
+  // 1. Memory Core Chamber (Grand Sanctuary, North):
+  // Strictly bounded within Core Chamber physical perimeter (X in [-10.0, 10.0], Z in [-28.5, -4.0])
+  if (z <= -4.0 && z >= -28.5 && x >= -10.0 && x <= 10.0) {
     return 'memory_core_chamber'
   }
-  // Main Corridor
+
+  // 2. Memory Wing 01: The First Rule (West, Observation, Z in [5.0, 15.0])
+  if (x <= -2.8 && x >= -18.5 && z >= 5.0 && z <= 15.0) {
+    return 'wing_01_first_rule'
+  }
+
+  // 3. Memory Wing 03: The Command Verdict (West, Relay, Z in [-4.0, 5.0])
+  if (x <= -2.8 && x >= -18.5 && z >= -4.0 && z < 5.0) {
+    return 'wing_03_command_verdict'
+  }
+
+  // 4. Memory Wing 02: The Forgotten Name (East, Clinical Registry, Z in [-2.5, 6.5])
+  if (x >= 2.8 && x <= 18.5 && z <= 6.5 && z >= -2.5) {
+    return 'wing_02_forgotten_name'
+  }
+
+  // 5. Default Facility Zone (Hall of Distorted Mirrors & baseline complex)
   return 'hall_of_mirrors'
 }
 

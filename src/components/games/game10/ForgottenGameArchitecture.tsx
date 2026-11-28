@@ -367,6 +367,45 @@ export const ForgottenGameArchitecture: React.FC = () => {
           <boxGeometry args={[3.6, 0.9, 1.2]} />
           <meshStandardMaterial color="#1b2430" roughness={0.7} metalness={0.3} />
         </mesh>
+
+        {/* Physical Investigation Object: Observation Log Terminal (obj_w01_observation_log) */}
+        <group position={[-16.0, 0, 10.0]} name="obj_w01_observation_log">
+          {/* Heavy brutalist pedestal */}
+          <mesh position={[0, 0.45, 0]} receiveShadow castShadow>
+            <boxGeometry args={[0.8, 0.9, 0.8]} />
+            <meshStandardMaterial color="#1b222d" roughness={0.85} metalness={0.2} />
+          </mesh>
+          {/* Pedestal footing trim */}
+          <mesh position={[0, 0.05, 0]} receiveShadow>
+            <boxGeometry args={[0.9, 0.1, 0.9]} />
+            <meshStandardMaterial color="#0f151e" roughness={0.9} metalness={0.4} />
+          </mesh>
+          {/* CRT Terminal Housing */}
+          <mesh position={[0, 1.1, 0]} receiveShadow castShadow>
+            <boxGeometry args={[0.65, 0.45, 0.55]} />
+            <meshStandardMaterial color="#263140" roughness={0.7} metalness={0.35} />
+          </mesh>
+          {/* Green CRT Phosphor Screen (Facing East toward chamber center) */}
+          <mesh position={[0.33, 1.15, 0]}>
+            <boxGeometry args={[0.02, 0.32, 0.42]} />
+            <meshStandardMaterial
+              color="#059669"
+              emissive="#10b981"
+              emissiveIntensity={0.65}
+              roughness={0.2}
+            />
+          </mesh>
+          {/* Status Indicator LED */}
+          <mesh position={[0.33, 1.34, -0.15]}>
+            <boxGeometry args={[0.02, 0.04, 0.04]} />
+            <meshBasicMaterial color="#22c55e" />
+          </mesh>
+          {/* Cable Conduit Bundle */}
+          <mesh position={[-0.25, 0.45, 0]}>
+            <cylinderGeometry args={[0.04, 0.04, 0.9, 8]} />
+            <meshStandardMaterial color="#0f172a" roughness={0.6} metalness={0.5} />
+          </mesh>
+        </group>
         {/* Ceiling of Wing 01 Chamber */}
         <mesh position={[-14.0, 4.2, 10.0]} rotation={[Math.PI / 2, 0, 0]}>
           <planeGeometry args={[8.0, 8.0]} />
@@ -432,6 +471,40 @@ export const ForgottenGameArchitecture: React.FC = () => {
           <boxGeometry args={[3.6, 0.9, 1.2]} />
           <meshStandardMaterial color="#222c3c" roughness={0.65} metalness={0.35} />
         </mesh>
+
+        {/* Physical Investigation Object: Admissions Registry Ledger (obj_w02_admissions_ledger) */}
+        <group position={[14.0, 0, -0.8]} name="obj_w02_admissions_ledger">
+          {/* Steel mounting bracket atop counter */}
+          <mesh position={[0, 0.95, 0]} receiveShadow castShadow>
+            <boxGeometry args={[0.7, 0.1, 0.5]} />
+            <meshStandardMaterial color="#334155" roughness={0.6} metalness={0.5} />
+          </mesh>
+          {/* Microfiche Reader / Registry Monitor Housing */}
+          <mesh position={[0, 1.18, 0]} rotation={[-0.1, 0, 0]} receiveShadow castShadow>
+            <boxGeometry args={[0.55, 0.36, 0.38]} />
+            <meshStandardMaterial color="#1e293b" roughness={0.65} metalness={0.4} />
+          </mesh>
+          {/* Pale Cyan Clinical CRT Screen (Facing North toward chamber center) */}
+          <mesh position={[0, 1.2, 0.2]} rotation={[-0.1, 0, 0]}>
+            <boxGeometry args={[0.44, 0.26, 0.02]} />
+            <meshStandardMaterial
+              color="#0284c7"
+              emissive="#38bdf8"
+              emissiveIntensity={0.6}
+              roughness={0.25}
+            />
+          </mesh>
+          {/* Bound Metal Admissions Ledger beside reader */}
+          <mesh position={[-0.55, 0.96, 0]} rotation={[0, 0.15, 0]} receiveShadow castShadow>
+            <boxGeometry args={[0.32, 0.06, 0.44]} />
+            <meshStandardMaterial color="#64748b" roughness={0.5} metalness={0.6} />
+          </mesh>
+          {/* Medical Index Label Strip */}
+          <mesh position={[0, 0.96, 0.26]}>
+            <boxGeometry args={[0.3, 0.02, 0.04]} />
+            <meshBasicMaterial color="#0284c7" />
+          </mesh>
+        </group>
         {/* Sterile White/Cyan Light Strip in Wing 02 */}
         <mesh position={[14.0, 4.15, 2.0]}>
           <boxGeometry args={[5.0, 0.04, 0.08]} />
@@ -507,6 +580,45 @@ export const ForgottenGameArchitecture: React.FC = () => {
           <boxGeometry args={[0.02, 0.08, 0.4]} />
           <meshBasicMaterial color="#06b6d4" />
         </mesh>
+
+        {/* Physical Investigation Object: Decoupled Optical Relay (obj_w03_optical_relay) */}
+        <group position={[-16.0, 0, 0.0]} name="obj_w03_optical_relay">
+          {/* Heavy industrial pedestal */}
+          <mesh position={[0, 0.45, 0]} receiveShadow castShadow>
+            <boxGeometry args={[0.85, 0.9, 0.75]} />
+            <meshStandardMaterial color="#1a202c" roughness={0.8} metalness={0.3} />
+          </mesh>
+          {/* Footing plate */}
+          <mesh position={[0, 0.05, 0]} receiveShadow>
+            <boxGeometry args={[0.95, 0.1, 0.85]} />
+            <meshStandardMaterial color="#0f172a" roughness={0.7} metalness={0.5} />
+          </mesh>
+          {/* Relay Diagnostic Head Housing */}
+          <mesh position={[0, 1.12, 0]} receiveShadow castShadow>
+            <boxGeometry args={[0.7, 0.45, 0.6]} />
+            <meshStandardMaterial color="#2d3748" roughness={0.65} metalness={0.4} />
+          </mesh>
+          {/* Amber Diagnostic CRT Screen (Facing East toward chamber center) */}
+          <mesh position={[0.36, 1.18, 0]}>
+            <boxGeometry args={[0.02, 0.28, 0.46]} />
+            <meshStandardMaterial
+              color="#b45309"
+              emissive="#f59e0b"
+              emissiveIntensity={0.65}
+              roughness={0.2}
+            />
+          </mesh>
+          {/* Optical fiber junction gland */}
+          <mesh position={[-0.2, 1.38, 0]}>
+            <cylinderGeometry args={[0.06, 0.06, 0.12, 12]} />
+            <meshStandardMaterial color="#06b6d4" emissive="#0891b2" emissiveIntensity={0.4} />
+          </mesh>
+          {/* Industrial Warning Label */}
+          <mesh position={[0.36, 0.85, 0]}>
+            <boxGeometry args={[0.01, 0.08, 0.35]} />
+            <meshBasicMaterial color="#eab308" />
+          </mesh>
+        </group>
         {/* Industrial Yellow/Black Hazard Border Line */}
         <mesh position={[-14.0, 0.012, -3.0]}>
           <boxGeometry args={[6.0, 0.01, 0.12]} />

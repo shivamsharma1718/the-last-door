@@ -233,3 +233,29 @@ export const GAME10_AREAS: readonly Game10AreaDefinition[] = [
     waypoint: [0, -10.0],
   },
 ] as const
+
+// ---------------------------------------------------------------------------
+// 10. Investigation Objects & Proximity Interaction Types (Step 2.3)
+// ---------------------------------------------------------------------------
+
+export interface Game10InteractableObject {
+  id: string
+  name: string
+  areaId: Game10AreaId
+  worldPosition: [number, number, number]
+  interactionRadius: number
+  isInteractable: boolean
+  title: string
+  description: string
+  hint?: string
+}
+
+export interface Game10ProximityState {
+  targetId: string | null
+  targetName: string | null
+  distance: number
+  promptText: string | null
+  activeObject: Game10InteractableObject | null
+}
+
+export type Game10InteractionStatus = 'exploring' | 'inspecting'

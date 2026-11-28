@@ -33,7 +33,7 @@ export interface TheForgottenGameProps {
 export const TheForgottenGame: React.FC<TheForgottenGameProps> = ({
   onComplete,
 }) => {
-  const { resetCounter } = useForgottenGameStore()
+  const { resetCounter, interactionStatus, proximity } = useForgottenGameStore()
 
   // Activate Game 10 store on mount and clean up on unmount
   useEffect(() => {
@@ -45,6 +45,27 @@ export const TheForgottenGame: React.FC<TheForgottenGameProps> = ({
       forgottenGameStore.setActive(false)
     }
   }, [onComplete])
+
+  // Keyboard interaction handler (KeyE to investigate, Escape to close inspection)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'KeyE') {
+        if (interactionStatus === 'exploring' && proximity.promptText) {
+          if (typeof document !== 'undefined' && document.pointerLockElement) {
+            document.exitPointerLock?.()
+          }
+          forgottenGameStore.interact()
+        }
+      } else if (e.code === 'Escape') {
+        if (interactionStatus === 'inspecting') {
+          forgottenGameStore.closeInspection()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [interactionStatus, proximity.promptText])
 
   // Sliding AABB collision constraint preventing player from clipping walls or obstacles
   const handleConstrainPosition = useCallback(
@@ -58,12 +79,14 @@ export const TheForgottenGame: React.FC<TheForgottenGameProps> = ({
     []
   )
 
-  // Continuous frame loop for player position and area tracking
+  // Continuous frame loop for player position and area tracking (active during exploration)
   useFrame(({ camera }) => {
-    forgottenGameStore.updatePlayerPosition({
-      x: camera.position.x,
-      z: camera.position.z,
-    })
+    if (interactionStatus === 'exploring') {
+      forgottenGameStore.updatePlayerPosition({
+        x: camera.position.x,
+        z: camera.position.z,
+      })
+    }
   })
 
   return (
@@ -78,8 +101,8 @@ export const TheForgottenGame: React.FC<TheForgottenGameProps> = ({
         initialPosition={INITIAL_GAME10_POS}
         initialLookAt={INITIAL_GAME10_LOOK}
         playerRadius={0.35}
-        enabled={true}
-        movementEnabled={true}
+        enabled={interactionStatus === 'exploring'}
+        movementEnabled={interactionStatus === 'exploring'}
         constrainPosition={handleConstrainPosition}
         resetTrigger={resetCounter}
       />

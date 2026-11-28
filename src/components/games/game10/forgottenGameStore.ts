@@ -21,9 +21,13 @@ import type {
   Game10Ending,
   Game10State,
   Game10AreaId,
+  Game10InteractableObject,
+  Game10ProximityState,
+  Game10InteractionStatus,
 } from './game10Types'
 import { INITIAL_GAME10_POS } from './game10Types'
 import { getForgottenGameArea } from './TheForgottenGameArena'
+import { findNearestInteractable } from './interactions/game10InteractionRegistry'
 import {
   createInitialGame10State,
   discoverEvidence,
@@ -46,6 +50,9 @@ export interface ForgottenGameStoreState extends Game10State {
   lastMessage: string | null
   currentAreaId: Game10AreaId
   playerPosition: { x: number; z: number }
+  interactionStatus: Game10InteractionStatus
+  proximity: Game10ProximityState
+  inspectingObject: Game10InteractableObject | null
 }
 
 // ---------------------------------------------------------------------------
@@ -69,6 +76,15 @@ class ForgottenGameStore {
       lastMessage: null,
       currentAreaId: 'hall_of_mirrors',
       playerPosition: { x: INITIAL_GAME10_POS[0], z: INITIAL_GAME10_POS[2] },
+      interactionStatus: 'exploring',
+      proximity: {
+        targetId: null,
+        targetName: null,
+        distance: Infinity,
+        promptText: null,
+        activeObject: null,
+      },
+      inspectingObject: null,
     }
   }
 
@@ -107,24 +123,68 @@ class ForgottenGameStore {
       isActive: true,
       currentAreaId: 'hall_of_mirrors',
       playerPosition: { x: INITIAL_GAME10_POS[0], z: INITIAL_GAME10_POS[2] },
+      interactionStatus: 'exploring',
+      proximity: {
+        targetId: null,
+        targetName: null,
+        distance: Infinity,
+        promptText: null,
+        activeObject: null,
+      },
+      inspectingObject: null,
     }
     this.emitChange()
   }
 
-  // --- Spatial Navigation & Area Classification ---
+  // --- Spatial Navigation, Area Classification & Proximity ---
   public updatePlayerPosition(pos: { x: number; z: number }): void {
     const area = getForgottenGameArea(pos.x, pos.z)
-    if (
-      this.state.playerPosition.x === pos.x &&
-      this.state.playerPosition.z === pos.z &&
-      this.state.currentAreaId === area
-    ) {
+    const posChanged =
+      this.state.playerPosition.x !== pos.x || this.state.playerPosition.z !== pos.z
+    const areaChanged = this.state.currentAreaId !== area
+
+    let proximityChanged = false
+    let nextProximity = this.state.proximity
+
+    if (this.state.interactionStatus === 'exploring') {
+      const { nearest, distance } = findNearestInteractable(pos)
+      if (nearest) {
+        if (
+          this.state.proximity.targetId !== nearest.id ||
+          Math.abs(this.state.proximity.distance - distance) > 0.001
+        ) {
+          nextProximity = {
+            targetId: nearest.id,
+            targetName: nearest.name,
+            distance,
+            promptText: `[E] Investigate — ${nearest.name}`,
+            activeObject: nearest,
+          }
+          proximityChanged = true
+        }
+      } else {
+        if (this.state.proximity.targetId !== null) {
+          nextProximity = {
+            targetId: null,
+            targetName: null,
+            distance: Infinity,
+            promptText: null,
+            activeObject: null,
+          }
+          proximityChanged = true
+        }
+      }
+    }
+
+    if (!posChanged && !areaChanged && !proximityChanged) {
       return
     }
+
     this.state = {
       ...this.state,
       playerPosition: pos,
       currentAreaId: area,
+      proximity: nextProximity,
     }
     this.emitChange()
   }
@@ -256,6 +316,53 @@ class ForgottenGameStore {
     }
   }
 
+  // --- Investigation & Interactions (Step 2.3) ---
+  public interact(): boolean {
+    if (this.state.interactionStatus !== 'exploring' || !this.state.proximity.activeObject) {
+      return false
+    }
+
+    this.state = {
+      ...this.state,
+      interactionStatus: 'inspecting',
+      inspectingObject: this.state.proximity.activeObject,
+    }
+    this.emitChange()
+    return true
+  }
+
+  public closeInspection(): boolean {
+    if (this.state.interactionStatus !== 'inspecting') {
+      return false
+    }
+
+    const { nearest, distance } = findNearestInteractable(this.state.playerPosition)
+    const nextProximity: Game10ProximityState = nearest
+      ? {
+          targetId: nearest.id,
+          targetName: nearest.name,
+          distance,
+          promptText: `[E] Investigate — ${nearest.name}`,
+          activeObject: nearest,
+        }
+      : {
+          targetId: null,
+          targetName: null,
+          distance: Infinity,
+          promptText: null,
+          activeObject: null,
+        }
+
+    this.state = {
+      ...this.state,
+      interactionStatus: 'exploring',
+      inspectingObject: null,
+      proximity: nextProximity,
+    }
+    this.emitChange()
+    return true
+  }
+
   // --- Progression to Game 11 ---
   public proceedToGame11 = (): void => {
     if (this.onCompleteCallback) {
@@ -272,6 +379,15 @@ class ForgottenGameStore {
       lastMessage: null,
       currentAreaId: 'hall_of_mirrors',
       playerPosition: { x: INITIAL_GAME10_POS[0], z: INITIAL_GAME10_POS[2] },
+      interactionStatus: 'exploring',
+      proximity: {
+        targetId: null,
+        targetName: null,
+        distance: Infinity,
+        promptText: null,
+        activeObject: null,
+      },
+      inspectingObject: null,
     }
     this.emitChange()
   }
